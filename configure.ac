@@ -3,7 +3,7 @@ dnl Created by Anjuta application wizard.
 
 AC_INIT(asterix_bazar, 0.1)
 
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
+AM_INIT_AUTOMAKE(asterix_bazar, 0.1)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
@@ -21,6 +21,10 @@ AC_HEADER_STDC
 
 
 
+
+PKG_CHECK_MODULES(PACKAGE, libxml-2.0 libxml++-2.6 glibmm-2.4)
+AC_SUBST(PACKAGE_CFLAGS)
+AC_SUBST(PACKAGE_LIBS)
 
 AC_OUTPUT([
 Makefile
