@@ -16,7 +16,11 @@ bin_PROGRAMS = asterix_bazar
 asterix_bazar_SOURCES = \
 	main.cpp
 
+asterix_bazar_CXXFLAGS = \
+	$(PACKAGE_CFLAGS)
+
 asterix_bazar_LDFLAGS = 
 
-asterix_bazar_LDADD = 
+asterix_bazar_LDADD = \
+	$(PACKAGE_LIBS)
 
