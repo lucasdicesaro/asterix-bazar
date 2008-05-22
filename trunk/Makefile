@@ -78,11 +78,11 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run aclocal-1.10
-AMTAR = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run tar
-AUTOCONF = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run automake-1.10
+ACLOCAL = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run aclocal-1.10
+AMTAR = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run tar
+AUTOCONF = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run automake-1.10
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -110,8 +110,8 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAINT = #
-MAKEINFO = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run makeinfo
+MAINT = 
+MAKEINFO = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = asterix_bazar
@@ -128,10 +128,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 0.1
-abs_builddir = /home/administrador/Projects/asterix-bazar
-abs_srcdir = /home/administrador/Projects/asterix-bazar
-abs_top_builddir = /home/administrador/Projects/asterix-bazar
-abs_top_srcdir = /home/administrador/Projects/asterix-bazar
+abs_builddir = /home/lucas/bazar/asterix-bazar
+abs_srcdir = /home/lucas/bazar/asterix-bazar
+abs_top_builddir = /home/lucas/bazar/asterix-bazar
+abs_top_srcdir = /home/lucas/bazar/asterix-bazar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -151,7 +151,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/administrador/Projects/asterix-bazar/install-sh
+install_sh = $(SHELL) /home/lucas/bazar/asterix-bazar/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -187,7 +187,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -214,9 +214,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 
-$(top_srcdir)/configure: # $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(srcdir) && $(AUTOCONF)
-$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
@@ -228,7 +228,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.h.in: # $(am__configure_deps) 
+$(srcdir)/config.h.in:  $(am__configure_deps) 
 	cd $(top_srcdir) && $(AUTOHEADER)
 	rm -f stamp-h1
 	touch $@
