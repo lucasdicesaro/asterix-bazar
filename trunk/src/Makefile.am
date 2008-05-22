@@ -14,7 +14,16 @@ AM_CFLAGS =\
 bin_PROGRAMS = asterix_bazar
 
 asterix_bazar_SOURCES = \
-	main.cpp
+	main.cpp       \
+	runner.cpp       \
+	runner.h       \
+	tools.cpp       \
+	tools.h       \
+	types.h       \
+	buy.msg       \
+	lista_participante.conf       \
+	lookup.msg       \
+	reply.msg
 
 asterix_bazar_CXXFLAGS = \
 	$(PACKAGE_CFLAGS)

@@ -43,7 +43,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_asterix_bazar_OBJECTS = asterix_bazar-main.$(OBJEXT)
+am_asterix_bazar_OBJECTS = asterix_bazar-main.$(OBJEXT) \
+	asterix_bazar-runner.$(OBJEXT) asterix_bazar-tools.$(OBJEXT)
 asterix_bazar_OBJECTS = $(am_asterix_bazar_OBJECTS)
 am__DEPENDENCIES_1 =
 asterix_bazar_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -57,16 +58,20 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(asterix_bazar_SOURCES)
 DIST_SOURCES = $(asterix_bazar_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run aclocal-1.10
-AMTAR = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run tar
-AUTOCONF = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run automake-1.10
+ACLOCAL = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run aclocal-1.10
+AMTAR = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run tar
+AUTOCONF = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run automake-1.10
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -94,8 +99,8 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAINT = #
-MAKEINFO = ${SHELL} /home/administrador/Projects/asterix-bazar/missing --run makeinfo
+MAINT = 
+MAKEINFO = ${SHELL} /home/lucas/bazar/asterix-bazar/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = asterix_bazar
@@ -112,10 +117,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 0.1
-abs_builddir = /home/administrador/Projects/asterix-bazar/src
-abs_srcdir = /home/administrador/Projects/asterix-bazar/src
-abs_top_builddir = /home/administrador/Projects/asterix-bazar
-abs_top_srcdir = /home/administrador/Projects/asterix-bazar
+abs_builddir = /home/lucas/bazar/asterix-bazar/src
+abs_srcdir = /home/lucas/bazar/asterix-bazar/src
+abs_top_builddir = /home/lucas/bazar/asterix-bazar
+abs_top_srcdir = /home/lucas/bazar/asterix-bazar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -135,7 +140,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/administrador/Projects/asterix-bazar/install-sh
+install_sh = $(SHELL) /home/lucas/bazar/asterix-bazar/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -164,7 +169,16 @@ AM_CFLAGS = \
 	 -g
 
 asterix_bazar_SOURCES = \
-	main.cpp
+	main.cpp       \
+	runner.cpp       \
+	runner.h       \
+	tools.cpp       \
+	tools.h       \
+	types.h       \
+	buy.msg       \
+	lista_participante.conf       \
+	lookup.msg       \
+	reply.msg
 
 asterix_bazar_CXXFLAGS = \
 	$(PACKAGE_CFLAGS)
@@ -177,7 +191,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cpp .o .obj
-$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -202,9 +216,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure: # $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
@@ -240,6 +254,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/asterix_bazar-main.Po
+include ./$(DEPDIR)/asterix_bazar-runner.Po
+include ./$(DEPDIR)/asterix_bazar-tools.Po
 
 .cpp.o:
 	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -268,6 +284,34 @@ asterix_bazar-main.obj: main.cpp
 #	source='main.cpp' object='asterix_bazar-main.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -c -o asterix_bazar-main.obj `if test -f 'main.cpp'; then $(CYGPATH_W) 'main.cpp'; else $(CYGPATH_W) '$(srcdir)/main.cpp'; fi`
+
+asterix_bazar-runner.o: runner.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -MT asterix_bazar-runner.o -MD -MP -MF $(DEPDIR)/asterix_bazar-runner.Tpo -c -o asterix_bazar-runner.o `test -f 'runner.cpp' || echo '$(srcdir)/'`runner.cpp
+	mv -f $(DEPDIR)/asterix_bazar-runner.Tpo $(DEPDIR)/asterix_bazar-runner.Po
+#	source='runner.cpp' object='asterix_bazar-runner.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -c -o asterix_bazar-runner.o `test -f 'runner.cpp' || echo '$(srcdir)/'`runner.cpp
+
+asterix_bazar-runner.obj: runner.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -MT asterix_bazar-runner.obj -MD -MP -MF $(DEPDIR)/asterix_bazar-runner.Tpo -c -o asterix_bazar-runner.obj `if test -f 'runner.cpp'; then $(CYGPATH_W) 'runner.cpp'; else $(CYGPATH_W) '$(srcdir)/runner.cpp'; fi`
+	mv -f $(DEPDIR)/asterix_bazar-runner.Tpo $(DEPDIR)/asterix_bazar-runner.Po
+#	source='runner.cpp' object='asterix_bazar-runner.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -c -o asterix_bazar-runner.obj `if test -f 'runner.cpp'; then $(CYGPATH_W) 'runner.cpp'; else $(CYGPATH_W) '$(srcdir)/runner.cpp'; fi`
+
+asterix_bazar-tools.o: tools.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -MT asterix_bazar-tools.o -MD -MP -MF $(DEPDIR)/asterix_bazar-tools.Tpo -c -o asterix_bazar-tools.o `test -f 'tools.cpp' || echo '$(srcdir)/'`tools.cpp
+	mv -f $(DEPDIR)/asterix_bazar-tools.Tpo $(DEPDIR)/asterix_bazar-tools.Po
+#	source='tools.cpp' object='asterix_bazar-tools.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -c -o asterix_bazar-tools.o `test -f 'tools.cpp' || echo '$(srcdir)/'`tools.cpp
+
+asterix_bazar-tools.obj: tools.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -MT asterix_bazar-tools.obj -MD -MP -MF $(DEPDIR)/asterix_bazar-tools.Tpo -c -o asterix_bazar-tools.obj `if test -f 'tools.cpp'; then $(CYGPATH_W) 'tools.cpp'; else $(CYGPATH_W) '$(srcdir)/tools.cpp'; fi`
+	mv -f $(DEPDIR)/asterix_bazar-tools.Tpo $(DEPDIR)/asterix_bazar-tools.Po
+#	source='tools.cpp' object='asterix_bazar-tools.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(asterix_bazar_CXXFLAGS) $(CXXFLAGS) -c -o asterix_bazar-tools.obj `if test -f 'tools.cpp'; then $(CYGPATH_W) 'tools.cpp'; else $(CYGPATH_W) '$(srcdir)/tools.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
