@@ -19,11 +19,7 @@ asterix_bazar_SOURCES = \
 	runner.h       \
 	tools.cpp       \
 	tools.h       \
-	types.h       \
-	buy.msg       \
-	lista_participante.conf       \
-	lookup.msg       \
-	reply.msg
+	types.h       
 
 asterix_bazar_CXXFLAGS = \
 	$(PACKAGE_CFLAGS)
