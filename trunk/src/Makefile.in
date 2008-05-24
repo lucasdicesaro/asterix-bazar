@@ -170,7 +170,9 @@ asterix_bazar_SOURCES = \
 	vendedor.h       \
 	vendedor.cpp
 
-asterix_bazar_LDFLAGS = 
+asterix_bazar_LDFLAGS = \
+	-pthread
+
 asterix_bazar_LDADD = \
 	$(PACKAGE_LIBS) \
 	../common/libasterix_bazar.a
