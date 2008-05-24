@@ -12,9 +12,8 @@ asterix_bazar_SOURCES = \
 	main.cpp       \
 	comprador.cpp       \
 	comprador.h       \
-	vendedor.h
-
-asterix_bazar_LDFLAGS = 
+	vendedor.h       \
+	vendedor.cpp
 
 asterix_bazar_LDADD = \
 	$(PACKAGE_LIBS) \
