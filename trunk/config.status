@@ -301,7 +301,7 @@ on `(hostname || uname -n) 2>/dev/null | sed 1q`
 "
 
 # Files that config.status was made for.
-config_files=" Makefile src/Makefile"
+config_files=" Makefile common/Makefile src/Makefile"
 config_headers=" config.h"
 config_commands=" depfiles"
 
@@ -438,6 +438,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "common/Makefile") CONFIG_FILES="$CONFIG_FILES common/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -583,6 +584,7 @@ s,@am__fastdepCXX_FALSE@,|#_!!_#|#,g
 s,@CPP@,|#_!!_#|gcc -E,g
 s,@GREP@,|#_!!_#|/bin/grep,g
 s,@EGREP@,|#_!!_#|/bin/grep -E,g
+s,@RANLIB@,|#_!!_#|ranlib,g
 s,@PKG_CONFIG@,|#_!!_#|/usr/bin/pkg-config,g
 s,@PACKAGE_CFLAGS@,|#_!!_#|-I/usr/include/libxml2 -I/usr/include/libxml++-2.6 -I/usr/lib/libxml++-2.6/include -I/usr/include/glibmm-2.4 -I/usr/lib/glibmm-2.4/include -I/usr/include/sigc++-2.0 -I/usr/lib/sigc++-2.0/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include  ,g
 s,@PACKAGE_LIBS@,|#_!!_#|-lxml++-2.6 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lsigc-2.0 -lglib-2.0  ,g
