@@ -43,7 +43,10 @@ typedef enum
 	BD_KILL_ALL,
 	LS_LISTEN,
 	LS_CLOSE_CONNECTIONS,
-	SND_BLOCKED
+	SND_BLOCKED,
+	LOOKUP,
+	REPLAY,
+	BUY
 } EventID;
 
 typedef struct
