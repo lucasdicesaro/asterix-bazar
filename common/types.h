@@ -46,7 +46,9 @@ typedef enum
 	SND_BLOCKED,
 	LOOKUP,
 	REPLAY,
-	BUY
+	BUY,
+	TURNO_COMPRADOR,
+	TURNO_VENDEDOR
 } EventID;
 
 typedef struct
