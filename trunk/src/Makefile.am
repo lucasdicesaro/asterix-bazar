@@ -10,16 +10,16 @@ bin_PROGRAMS = asterix_bazar
 
 asterix_bazar_SOURCES = \
 	main.cpp       \
-	runner.cpp       \
-	runner.h       \
-	tools.cpp       \
-	tools.h       \
-	types.h       
+	comprador.cpp       \
+	comprador.h       \
+	vendedor.h       \
+	vendedor.cpp
 
 asterix_bazar_LDFLAGS = 
 
 asterix_bazar_LDADD = \
-	$(PACKAGE_LIBS)
+	$(PACKAGE_LIBS) \
+	../common/libasterix_bazar.a
 
 INCLUDES = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
