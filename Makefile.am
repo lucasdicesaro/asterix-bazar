@@ -1,7 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 ## Created by Anjuta
 
-SUBDIRS = src 
+SUBDIRS = \
+	common \
+	src 
 
 asterix_bazardocdir = ${prefix}/doc/asterix_bazar
 asterix_bazardoc_DATA = \

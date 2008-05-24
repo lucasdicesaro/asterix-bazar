@@ -11,7 +11,7 @@ AC_ISC_POSIX
 AC_PROG_CXX
 AM_PROG_CC_STDC
 AC_HEADER_STDC
-
+AC_PROG_RANLIB=libasterix_bazar.a
 
 
 
@@ -28,6 +28,6 @@ AC_SUBST(PACKAGE_LIBS)
 
 AC_OUTPUT([
 Makefile
+common/Makefile
 src/Makefile
-
 ])

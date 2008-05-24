@@ -124,6 +124,7 @@ PACKAGE_TARNAME = asterix_bazar
 PACKAGE_VERSION = 0.1
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
+RANLIB = ranlib
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = 
@@ -170,7 +171,10 @@ sysconfdir = ${prefix}/etc
 target_alias = 
 top_builddir = .
 top_srcdir = .
-SUBDIRS = src 
+SUBDIRS = \
+	common \
+	src 
+
 asterix_bazardocdir = ${prefix}/doc/asterix_bazar
 asterix_bazardoc_DATA = \
 	README\
