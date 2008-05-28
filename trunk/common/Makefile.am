@@ -13,7 +13,9 @@ libasterix_bazar_a_SOURCES = \
 	runner.h          \
 	tools.cpp          \
 	tools.h          \
-	types.h
+	types.h          \
+	socket_util.h          \
+	socket_util.cpp
 
 ## File created by the gnome-build tools
 

@@ -32,6 +32,8 @@ class Tools
 		Obtengo un participante
 		*/
 		char *get_IP_De_Participante(const char *nombre);
+		
+		ConfigDS *get_info_nodo(const char *nombre);
 
 		/**
 		CreateTCPServerSocket
@@ -54,13 +56,16 @@ class Tools
 		Retorna el valor del atributo o un string vacio si no existe:
 		*/
 		std::string get_attr_value(xmlpp::Element* el, const char* attr_name);
+		
+		char *get_nombre_nodo();
+		int get_listener_port();
 
 		/**
 		Log rutines:
 		*/
 		int Open_Log (char* FileName);
 		void Write_Log (char* strData);
-		void Close_Log ();
+		void Close_Log ();	
 		
 	protected:
 		/**
@@ -68,6 +73,8 @@ class Tools
 		*/
 		FILE* LOG_FILE;
 		ListaConfig listaConfig;
+		char *nombre_nodo;
+		int listener_port;
 };
 
 #endif //_TOOLS_H_
