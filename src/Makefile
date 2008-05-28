@@ -44,7 +44,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_asterix_bazar_OBJECTS = main.$(OBJEXT) comprador.$(OBJEXT) \
-	vendedor.$(OBJEXT)
+	vendedor.$(OBJEXT) router.$(OBJEXT)
 asterix_bazar_OBJECTS = $(am_asterix_bazar_OBJECTS)
 am__DEPENDENCIES_1 =
 asterix_bazar_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -168,7 +168,9 @@ asterix_bazar_SOURCES = \
 	comprador.cpp       \
 	comprador.h       \
 	vendedor.h       \
-	vendedor.cpp
+	vendedor.cpp       \
+	router.cpp       \
+	router.h
 
 asterix_bazar_LDFLAGS = \
 	-pthread
@@ -251,6 +253,7 @@ distclean-compile:
 
 include ./$(DEPDIR)/comprador.Po
 include ./$(DEPDIR)/main.Po
+include ./$(DEPDIR)/router.Po
 include ./$(DEPDIR)/vendedor.Po
 
 .cpp.o:

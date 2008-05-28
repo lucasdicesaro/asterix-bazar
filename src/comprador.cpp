@@ -1,8 +1,9 @@
 
 #include "comprador.h" 
-#include "vendedor.h"  // Quitar esto despues de las pruebas
+#include "vendedor.h"
 #include "common/tools.h"
 #include <iostream>
+#include <unistd.h> //sleep
 
 
 Comprador* Comprador::single_instance = NULL;
@@ -34,6 +35,9 @@ void Comprador::on_event(const Event& ev)
 			procesar_init(ev.tag);
 			break;
 			
+		case TURNO_COMPRADOR:
+			Tools::debug("Comprador: on_event: TURNO_COMPRADOR:");
+			break;							
 			
 		// El cliente no recibe nunca LOOKUP
 		//case LOOKUP:
