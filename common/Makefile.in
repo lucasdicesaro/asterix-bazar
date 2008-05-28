@@ -52,7 +52,8 @@ AR = ar
 ARFLAGS = cru
 libasterix_bazar_a_AR = $(AR) $(ARFLAGS)
 libasterix_bazar_a_LIBADD =
-am_libasterix_bazar_a_OBJECTS = runner.$(OBJEXT) tools.$(OBJEXT)
+am_libasterix_bazar_a_OBJECTS = runner.$(OBJEXT) tools.$(OBJEXT) \
+	socket_util.$(OBJEXT)
 libasterix_bazar_a_OBJECTS = $(am_libasterix_bazar_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -178,7 +179,9 @@ libasterix_bazar_a_SOURCES = \
 	runner.h          \
 	tools.cpp          \
 	tools.h          \
-	types.h
+	types.h          \
+	socket_util.h          \
+	socket_util.cpp
 
 all: all-am
 
@@ -254,6 +257,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/runner.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tools.Po@am__quote@
 
 .cpp.o:

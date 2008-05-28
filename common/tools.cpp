@@ -111,7 +111,11 @@ int Tools::Config_Parser (const char* FileName)
 	char* Param;
 	char* Value;
 	char* nombre;
-	char* ip;	
+	char* ip_port;
+	char* ip;
+	int port;
+	char* vecino1;	
+	char* vecino2;
 
 
 	/* abro archivo 
@@ -143,11 +147,26 @@ int Tools::Config_Parser (const char* FileName)
 	while (!feof(CONFIG_FILE))
 	{
 		Param = strtok(Line, "=");
-		//debug(Param);
+		//printf ("Line: %s\n", Line);
 		Value  = strtok(NULL , "=");
 		
+		//printf ("Param: %s - Value: %s\n", Param, Value);
+		
+		if (strcmp(Param, "nombre_nodo") == 0)
+		{
+			nombre_nodo = new char[NOMBRE_NODO_SIZE];
+			memset(nombre_nodo, 0, NOMBRE_NODO_SIZE);
+			strcpy(nombre_nodo,  Value);
+		}
+
+		if  (strcmp(Param, "listener_port") == 0)
+		{
+			listener_port = atoi(Value);
+		}
+		
+		/*
 		// PARAMETROS CHAR //
-		/*if  (strcmp(Param, "param_1") == 0)
+		if  (strcmp(Param, "param_1") == 0)
 			 strcpy(conf->param_1,  Value);
 			 
 		// PARAMETROS INT //
@@ -156,11 +175,20 @@ int Tools::Config_Parser (const char* FileName)
 		
 		if  (strcmp(Param, "participante") == 0) {
 			nombre = strtok(Value, ",");
-			//debug(nombre);
-			ip  = strtok(NULL , ",");
+			ip_port = strtok(NULL , ",");						
+			vecino1 = strtok(NULL , ",");
+			vecino2 = strtok(NULL , ",");
+
+			ip = strtok(ip_port, ":");
+			port = atoi(strtok(NULL , ":"));
+			//printf ("ip: %s - port: %d\n", ip, port);
+						
 			strcpy(conf.nombre, nombre);
-			strcpy(conf.ip, ip);
-			listaConfig.push_back(conf);
+			strcpy(conf.ip, ip);			
+			conf.port = port;
+			strcpy(conf.vecino1, vecino1);
+			strcpy(conf.vecino2, vecino2);
+			listaConfig.push_back(conf);			
 		}
 		
 		/*	Leo la siguiente linea 
@@ -178,15 +206,54 @@ int Tools::Config_Parser (const char* FileName)
 
 char *Tools::get_IP_De_Participante(const char *nombre) {
 	
+	char *key = duplicate(nombre);
 	ConfigDS* elementoConfig = NULL;
 	for (ListaConfig::iterator it = listaConfig.begin(); it != listaConfig.end() && elementoConfig == NULL; it++)
 	{
 		ConfigDS tmp = *it;
-		if (strcmp(tmp.nombre, nombre) == 0) {
+		if (strcmp(tmp.nombre, key) == 0) {
 			elementoConfig = &tmp;
 		}
 	}	
 	return duplicate (elementoConfig->ip);
+}
+
+ConfigDS *Tools::get_info_nodo(const char *nombre) {
+	
+	char *key = duplicate(nombre);
+	//memset(key, 0, NOMBRE_NODO_SIZE);
+	//strcpy(key, nombre);
+	
+	ConfigDS* elementoConfig = NULL;
+	for (ListaConfig::iterator it = listaConfig.begin(); it != listaConfig.end() && elementoConfig == NULL; it++)
+	{
+		ConfigDS tmp = *it;
+		//printf("tmp.nombre: {%s} - key: {%s} - strcm %d\n", tmp.nombre, key, strcmp(tmp.nombre, key));
+		if (strcmp(tmp.nombre, key) == 0) {
+			//printf("-> tmp.nombre: {%s}\n", tmp.nombre);			
+			//elementoConfig->nombre = new char[]
+			//memset(elementoConfig->nombre, 0, NOMBRE_NODO_SIZE);
+			elementoConfig = new ConfigDS();
+			strcpy(elementoConfig->nombre, tmp.nombre);
+			strcpy(elementoConfig->ip, tmp.ip);
+			elementoConfig->port = tmp.port;
+			strcpy(elementoConfig->vecino1, tmp.vecino1);
+			strcpy(elementoConfig->vecino2, tmp.vecino2);
+			//elementoConfig = &tmp;
+			//strcpy(elementoConfig->nombre, tmp.nombre);
+			//strcpy(elementoConfig->ip, tmp.ip);
+			//elementoConfig->port = tmp.port;
+										   
+			//strcpy(elementoConfig->ip = &(tmp.ip));			
+			//printf("-> elementoConfig->nombre: {%s}\n", elementoConfig->nombre);
+		}
+	}	
+	//printf("elementoConfig: nombre: [%s], ip: [%s], puerto: [%d]\n", elementoConfig->nombre, elementoConfig->ip, elementoConfig->port);
+	//char*nombre_nodo = duplicate (elementoConfig->nombre);
+	//printf("nombre_nodo: [%s] \n",nombre_nodo);
+	//strcpy(elementoConfig->nombre, nombre_nodo);
+	//printf("elementoConfig->nombre: [%s] \n",elementoConfig->nombre);	
+	return elementoConfig;
 }
 
 
@@ -244,3 +311,13 @@ void Tools::Close_Log ()
 
 	return;
 }
+
+char * Tools::get_nombre_nodo() 
+{
+	return nombre_nodo;
+}
+int Tools::get_listener_port()
+{
+	return listener_port;
+}
+

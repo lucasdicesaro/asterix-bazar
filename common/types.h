@@ -8,11 +8,15 @@
 #define PORT_TCP (2552)
 #define PORT_UDP (2551)
 
-#define MAX_CONNECTED (4)
+#define MAX_CONNECTED (10)
 
-#define SERVER_DESERTION ("blood_bath")
-#define CLIENT_DESERTION ("death_chain")
+#define BUFFER_SIZE 100
 
+#define NOMBRE_NODO_SIZE (30)
+
+#define SOCK_ERRONEO (-1)
+
+typedef std::basic_string<char> bstring;
 
 typedef struct
 {
@@ -48,7 +52,9 @@ typedef enum
 	REPLAY,
 	BUY,
 	TURNO_COMPRADOR,
-	TURNO_VENDEDOR
+	TURNO_VENDEDOR,
+	//START_CONNECTION,
+	WAIT_CONNECTIONS
 } EventID;
 
 typedef struct
@@ -59,8 +65,11 @@ typedef struct
 
 typedef struct
 {
-        char 		  nombre[20];
+        char 		  nombre[NOMBRE_NODO_SIZE];
         char		  ip[30];
+        int			  port;
+        char		  vecino1[NOMBRE_NODO_SIZE];
+        char		  vecino2[NOMBRE_NODO_SIZE];
         unsigned int  param_3;
         unsigned int  param_4;
 }ConfigDS;

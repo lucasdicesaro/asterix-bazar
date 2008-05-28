@@ -13,10 +13,8 @@ libasterix_bazar_a_SOURCES = \
 	runner.h          \
 	tools.cpp          \
 	tools.h          \
-	types.h
-
-libasterix_bazar_a_LDADD = \
-	$(PACKAGE_LIBS)
+	types.h          \
+	socket_util.h
 
 ## File created by the gnome-build tools
 
