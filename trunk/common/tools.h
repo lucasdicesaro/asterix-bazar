@@ -28,7 +28,7 @@ class Tools
 		void static debug_label_value(std::string label, int value);
 		void static info_label_value(std::string label, int value);		
 
-		char* duplicate(const std::string& str);
+		char static *duplicate(const std::string& str);
 
 		/**
 		Parsea el archivo de configuracion dado y
@@ -63,7 +63,7 @@ class Tools
 		/**
 		Retorna el valor del atributo o un string vacio si no existe:
 		*/
-		std::string get_attr_value(xmlpp::Element* el, const char* attr_name);
+		std::string static get_attr_value(xmlpp::Element* el, const char* attr_name);
 		
 		char *get_nombre_nodo();
 		int get_listener_port();
