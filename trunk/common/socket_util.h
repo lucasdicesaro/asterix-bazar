@@ -19,6 +19,8 @@ class SocketUtil
 		 * Abre un socket TCP con un servidor  
 		 */
 		int static cliente_abrir_conexion_tcp (const char *server_ip, int serverPort);
+		
+		char static *recibir_mensaje(int socket);
 
 		/**
 		 * Abre un socket UDP con un servidor  
