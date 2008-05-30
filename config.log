@@ -40,145 +40,145 @@ PATH: /usr/games
 ## Core tests. ##
 ## ----------- ##
 
-configure:1762: checking for a BSD-compatible install
-configure:1818: result: /usr/bin/install -c
-configure:1829: checking whether build environment is sane
-configure:1872: result: yes
-configure:1900: checking for a thread-safe mkdir -p
-configure:1939: result: /bin/mkdir -p
-configure:1952: checking for gawk
-configure:1982: result: no
-configure:1952: checking for mawk
-configure:1968: found /usr/bin/mawk
-configure:1979: result: mawk
-configure:1990: checking whether make sets $(MAKE)
-configure:2011: result: yes
-configure:2201: checking whether to enable maintainer-specific portions of Makefiles
-configure:2210: result: no
-configure:2236: checking for style of include used by make
-configure:2264: result: GNU
-configure:2334: checking for gcc
-configure:2350: found /usr/bin/gcc
-configure:2361: result: gcc
-configure:2599: checking for C compiler version
-configure:2606: gcc --version >&5
+configure:1766: checking for a BSD-compatible install
+configure:1822: result: /usr/bin/install -c
+configure:1833: checking whether build environment is sane
+configure:1876: result: yes
+configure:1904: checking for a thread-safe mkdir -p
+configure:1943: result: /bin/mkdir -p
+configure:1956: checking for gawk
+configure:1986: result: no
+configure:1956: checking for mawk
+configure:1972: found /usr/bin/mawk
+configure:1983: result: mawk
+configure:1994: checking whether make sets $(MAKE)
+configure:2015: result: yes
+configure:2205: checking whether to enable maintainer-specific portions of Makefiles
+configure:2214: result: no
+configure:2240: checking for style of include used by make
+configure:2268: result: GNU
+configure:2338: checking for gcc
+configure:2354: found /usr/bin/gcc
+configure:2365: result: gcc
+configure:2603: checking for C compiler version
+configure:2610: gcc --version >&5
 gcc (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
 Copyright (C) 2007 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-configure:2609: $? = 0
-configure:2616: gcc -v >&5
+configure:2613: $? = 0
+configure:2620: gcc -v >&5
 Using built-in specs.
 Target: i486-linux-gnu
 Configured with: ../src/configure -v --enable-languages=c,c++,fortran,objc,obj-c++,treelang --prefix=/usr --enable-shared --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --enable-nls --with-gxx-include-dir=/usr/include/c++/4.2 --program-suffix=-4.2 --enable-clocale=gnu --enable-libstdcxx-debug --enable-objc-gc --enable-mpfr --enable-targets=all --enable-checking=release --build=i486-linux-gnu --host=i486-linux-gnu --target=i486-linux-gnu
 Thread model: posix
 gcc version 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
-configure:2619: $? = 0
-configure:2626: gcc -V >&5
+configure:2623: $? = 0
+configure:2630: gcc -V >&5
 gcc: '-V' option must have argument
-configure:2629: $? = 1
-configure:2652: checking for C compiler default output file name
-configure:2679: gcc    conftest.c  >&5
-configure:2682: $? = 0
-configure:2720: result: a.out
-configure:2737: checking whether the C compiler works
-configure:2747: ./a.out
-configure:2750: $? = 0
-configure:2767: result: yes
-configure:2774: checking whether we are cross compiling
-configure:2776: result: no
-configure:2779: checking for suffix of executables
-configure:2786: gcc -o conftest    conftest.c  >&5
-configure:2789: $? = 0
-configure:2813: result: 
-configure:2819: checking for suffix of object files
-configure:2845: gcc -c   conftest.c >&5
-configure:2848: $? = 0
-configure:2871: result: o
-configure:2875: checking whether we are using the GNU C compiler
-configure:2904: gcc -c   conftest.c >&5
-configure:2910: $? = 0
-configure:2927: result: yes
-configure:2932: checking whether gcc accepts -g
-configure:2962: gcc -c -g  conftest.c >&5
-configure:2968: $? = 0
-configure:3067: result: yes
-configure:3084: checking for gcc option to accept ISO C89
-configure:3158: gcc  -c -g -O2  conftest.c >&5
-configure:3164: $? = 0
-configure:3187: result: none needed
-configure:3207: checking dependency style of gcc
-configure:3298: result: gcc3
-configure:3314: checking for library containing strerror
-configure:3355: gcc -o conftest -g -O2   conftest.c  >&5
-configure:3361: $? = 0
-configure:3389: result: none required
-configure:3455: checking for g++
-configure:3471: found /usr/bin/g++
-configure:3482: result: g++
-configure:3513: checking for C++ compiler version
-configure:3520: g++ --version >&5
+configure:2633: $? = 1
+configure:2656: checking for C compiler default output file name
+configure:2683: gcc    conftest.c  >&5
+configure:2686: $? = 0
+configure:2724: result: a.out
+configure:2741: checking whether the C compiler works
+configure:2751: ./a.out
+configure:2754: $? = 0
+configure:2771: result: yes
+configure:2778: checking whether we are cross compiling
+configure:2780: result: no
+configure:2783: checking for suffix of executables
+configure:2790: gcc -o conftest    conftest.c  >&5
+configure:2793: $? = 0
+configure:2817: result: 
+configure:2823: checking for suffix of object files
+configure:2849: gcc -c   conftest.c >&5
+configure:2852: $? = 0
+configure:2875: result: o
+configure:2879: checking whether we are using the GNU C compiler
+configure:2908: gcc -c   conftest.c >&5
+configure:2914: $? = 0
+configure:2931: result: yes
+configure:2936: checking whether gcc accepts -g
+configure:2966: gcc -c -g  conftest.c >&5
+configure:2972: $? = 0
+configure:3071: result: yes
+configure:3088: checking for gcc option to accept ISO C89
+configure:3162: gcc  -c -g -O2  conftest.c >&5
+configure:3168: $? = 0
+configure:3191: result: none needed
+configure:3211: checking dependency style of gcc
+configure:3302: result: gcc3
+configure:3318: checking for library containing strerror
+configure:3359: gcc -o conftest -g -O2   conftest.c  >&5
+configure:3365: $? = 0
+configure:3393: result: none required
+configure:3459: checking for g++
+configure:3475: found /usr/bin/g++
+configure:3486: result: g++
+configure:3517: checking for C++ compiler version
+configure:3524: g++ --version >&5
 g++ (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
 Copyright (C) 2007 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-configure:3523: $? = 0
-configure:3530: g++ -v >&5
+configure:3527: $? = 0
+configure:3534: g++ -v >&5
 Using built-in specs.
 Target: i486-linux-gnu
 Configured with: ../src/configure -v --enable-languages=c,c++,fortran,objc,obj-c++,treelang --prefix=/usr --enable-shared --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --enable-nls --with-gxx-include-dir=/usr/include/c++/4.2 --program-suffix=-4.2 --enable-clocale=gnu --enable-libstdcxx-debug --enable-objc-gc --enable-mpfr --enable-targets=all --enable-checking=release --build=i486-linux-gnu --host=i486-linux-gnu --target=i486-linux-gnu
 Thread model: posix
 gcc version 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
-configure:3533: $? = 0
-configure:3540: g++ -V >&5
+configure:3537: $? = 0
+configure:3544: g++ -V >&5
 g++: '-V' option must have argument
-configure:3543: $? = 1
-configure:3546: checking whether we are using the GNU C++ compiler
-configure:3575: g++ -c   conftest.cpp >&5
-configure:3581: $? = 0
-configure:3598: result: yes
-configure:3603: checking whether g++ accepts -g
-configure:3633: g++ -c -g  conftest.cpp >&5
-configure:3639: $? = 0
-configure:3738: result: yes
-configure:3763: checking dependency style of g++
-configure:3854: result: gcc3
-configure:3917: checking for gcc
-configure:3944: result: gcc
-configure:4182: checking for C compiler version
-configure:4189: gcc --version >&5
+configure:3547: $? = 1
+configure:3550: checking whether we are using the GNU C++ compiler
+configure:3579: g++ -c   conftest.cpp >&5
+configure:3585: $? = 0
+configure:3602: result: yes
+configure:3607: checking whether g++ accepts -g
+configure:3637: g++ -c -g  conftest.cpp >&5
+configure:3643: $? = 0
+configure:3742: result: yes
+configure:3767: checking dependency style of g++
+configure:3858: result: gcc3
+configure:3921: checking for gcc
+configure:3948: result: gcc
+configure:4186: checking for C compiler version
+configure:4193: gcc --version >&5
 gcc (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
 Copyright (C) 2007 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-configure:4192: $? = 0
-configure:4199: gcc -v >&5
+configure:4196: $? = 0
+configure:4203: gcc -v >&5
 Using built-in specs.
 Target: i486-linux-gnu
 Configured with: ../src/configure -v --enable-languages=c,c++,fortran,objc,obj-c++,treelang --prefix=/usr --enable-shared --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --enable-nls --with-gxx-include-dir=/usr/include/c++/4.2 --program-suffix=-4.2 --enable-clocale=gnu --enable-libstdcxx-debug --enable-objc-gc --enable-mpfr --enable-targets=all --enable-checking=release --build=i486-linux-gnu --host=i486-linux-gnu --target=i486-linux-gnu
 Thread model: posix
 gcc version 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
-configure:4202: $? = 0
-configure:4209: gcc -V >&5
+configure:4206: $? = 0
+configure:4213: gcc -V >&5
 gcc: '-V' option must have argument
-configure:4212: $? = 1
-configure:4215: checking whether we are using the GNU C compiler
-configure:4267: result: yes
-configure:4272: checking whether gcc accepts -g
-configure:4407: result: yes
-configure:4424: checking for gcc option to accept ISO C89
-configure:4527: result: none needed
-configure:4547: checking dependency style of gcc
-configure:4638: result: gcc3
-configure:4661: checking how to run the C preprocessor
-configure:4701: gcc -E  conftest.c
-configure:4707: $? = 0
-configure:4738: gcc -E  conftest.c
+configure:4216: $? = 1
+configure:4219: checking whether we are using the GNU C compiler
+configure:4271: result: yes
+configure:4276: checking whether gcc accepts -g
+configure:4411: result: yes
+configure:4428: checking for gcc option to accept ISO C89
+configure:4531: result: none needed
+configure:4551: checking dependency style of gcc
+configure:4642: result: gcc3
+configure:4665: checking how to run the C preprocessor
+configure:4705: gcc -E  conftest.c
+configure:4711: $? = 0
+configure:4742: gcc -E  conftest.c
 conftest.c:10:28: error: ac_nonexistent.h: No such file or directory
-configure:4744: $? = 1
+configure:4748: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
 | #define PACKAGE_NAME "asterix_bazar"
@@ -190,12 +190,12 @@ configure: failed program was:
 | #define VERSION "0.1"
 | /* end confdefs.h.  */
 | #include <ac_nonexistent.h>
-configure:4777: result: gcc -E
-configure:4806: gcc -E  conftest.c
-configure:4812: $? = 0
-configure:4843: gcc -E  conftest.c
+configure:4781: result: gcc -E
+configure:4810: gcc -E  conftest.c
+configure:4816: $? = 0
+configure:4847: gcc -E  conftest.c
 conftest.c:10:28: error: ac_nonexistent.h: No such file or directory
-configure:4849: $? = 1
+configure:4853: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
 | #define PACKAGE_NAME "asterix_bazar"
@@ -207,33 +207,33 @@ configure: failed program was:
 | #define VERSION "0.1"
 | /* end confdefs.h.  */
 | #include <ac_nonexistent.h>
-configure:4887: checking for grep that handles long lines and -e
-configure:4961: result: /bin/grep
-configure:4966: checking for egrep
-configure:5044: result: /bin/grep -E
-configure:5049: checking for ANSI C header files
-configure:5079: gcc -c -g -O2  conftest.c >&5
-configure:5085: $? = 0
-configure:5184: gcc -o conftest -g -O2   conftest.c  >&5
-configure:5187: $? = 0
-configure:5193: ./conftest
-configure:5196: $? = 0
-configure:5213: result: yes
-configure:5266: checking for ranlib
-configure:5282: found /usr/bin/ranlib
-configure:5293: result: ranlib
-configure:5378: checking for pkg-config
-configure:5396: found /usr/bin/pkg-config
-configure:5408: result: /usr/bin/pkg-config
-configure:5437: checking pkg-config is at least version 0.9.0
-configure:5440: result: yes
-configure:5451: checking for PACKAGE
-configure:5459: $PKG_CONFIG --exists --print-errors "libxml-2.0 libxml++-2.6 glibmm-2.4"
-configure:5462: $? = 0
-configure:5477: $PKG_CONFIG --exists --print-errors "libxml-2.0 libxml++-2.6 glibmm-2.4"
-configure:5480: $? = 0
-configure:5556: result: yes
-configure:5700: creating ./config.status
+configure:4891: checking for grep that handles long lines and -e
+configure:4965: result: /bin/grep
+configure:4970: checking for egrep
+configure:5048: result: /bin/grep -E
+configure:5053: checking for ANSI C header files
+configure:5083: gcc -c -g -O2  conftest.c >&5
+configure:5089: $? = 0
+configure:5188: gcc -o conftest -g -O2   conftest.c  >&5
+configure:5191: $? = 0
+configure:5197: ./conftest
+configure:5200: $? = 0
+configure:5217: result: yes
+configure:5270: checking for ranlib
+configure:5286: found /usr/bin/ranlib
+configure:5297: result: ranlib
+configure:5382: checking for pkg-config
+configure:5400: found /usr/bin/pkg-config
+configure:5412: result: /usr/bin/pkg-config
+configure:5441: checking pkg-config is at least version 0.9.0
+configure:5444: result: yes
+configure:5455: checking for PACKAGE
+configure:5463: $PKG_CONFIG --exists --print-errors "libxml-2.0 libxml++-2.6 glibmm-2.4"
+configure:5466: $? = 0
+configure:5481: $PKG_CONFIG --exists --print-errors "libxml-2.0 libxml++-2.6 glibmm-2.4"
+configure:5484: $? = 0
+configure:5560: result: yes
+configure:5704: creating ./config.status
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -250,12 +250,12 @@ generated by GNU Autoconf 2.61.  Invocation command line was
 
 on lks-desktop
 
-config.status:650: creating Makefile
-config.status:650: creating common/Makefile
-config.status:650: creating src/Makefile
-config.status:650: creating config.h
-config.status:867: config.h is unchanged
-config.status:914: executing depfiles commands
+config.status:651: creating Makefile
+config.status:651: creating common/Makefile
+config.status:651: creating src/Makefile
+config.status:651: creating config.h
+config.status:868: config.h is unchanged
+config.status:915: executing depfiles commands
 
 ## ---------------- ##
 ## Cache variables. ##
@@ -413,6 +413,7 @@ sbindir='${exec_prefix}/sbin'
 sharedstatedir='${prefix}/com'
 sysconfdir='${prefix}/etc'
 target_alias=''
+zsxc='jghj'
 
 ## ----------- ##
 ## confdefs.h. ##

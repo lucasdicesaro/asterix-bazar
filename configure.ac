@@ -3,6 +3,9 @@ dnl Created by Anjuta application wizard.
 
 AC_INIT(asterix_bazar, 0.1)
 
+zsxc=jghj
+AC_SUBST(zsxc)
+
 AM_INIT_AUTOMAKE(asterix_bazar, 0.1)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE

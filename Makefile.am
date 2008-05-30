@@ -14,7 +14,8 @@ asterix_bazardoc_DATA = \
 	INSTALL\
 	NEWS
 
-EXTRA_DIST = $(asterix_bazardoc_DATA)
+EXTRA_DIST = $(asterix_bazardoc_DATA) \
+	src/lista_participante.conf
 
 # Copy all the spec files. Of cource, only one is actually used.
 dist-hook:
