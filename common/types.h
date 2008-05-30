@@ -18,6 +18,13 @@
 #define INTENTOS_RECONEXION (3)
 #define DELAY_RECONEXION (20)
 
+#define DEBUG_LEVEL "DEBUG "
+#define INFO_LEVEL "INFO "
+#define ERROR_LEVEL "ERROR "
+
+#define XML_WELCOME_ROOT_ELEMENT "event"
+#define XML_WELCOME_FIRST_ELEMENT "ticket"
+
 typedef std::basic_string<char> bstring;
 
 typedef struct

@@ -22,7 +22,11 @@ class Tools
 		/**
 		Imprimi una linea de debug
 		*/
-		void static debug(const char* );
+		void static debug(const char* msg);
+		void static info(std::string msg);
+		void static error(std::string msg);
+		void static debug_label_value(std::string label, int value);
+		void static info_label_value(std::string label, int value);		
 
 		char* duplicate(const std::string& str);
 

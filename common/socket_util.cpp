@@ -6,11 +6,13 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 #include <unistd.h>
 //#include <errno.h>
 
 #include "socket_util.h"
 #include "types.h"
+#include "tools.h"
 
 /*
 * Conecta con un servidor remoto a traves de socket TCP
@@ -20,11 +22,12 @@ int SocketUtil::cliente_abrir_conexion_tcp (const char *server_ip, int serverPor
 	int sock;
 	const char *serverIP = (server_ip != NULL)? server_ip : "127.0.0.1";
 	//int serverPort = PORT_TCP;			
-	struct sockaddr_in serverAddr;
+	struct sockaddr_in serverAddr;	
+	char *logBuffer = new char[BUFFER_SIZE];
 
 	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 	{
-		perror("socket() failed");
+		perror("SocketUtil: socket() failed");
 		exit(1);
 	}
 
@@ -35,7 +38,9 @@ int SocketUtil::cliente_abrir_conexion_tcp (const char *server_ip, int serverPor
 
 	if (connect(sock, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
 	{
-		printf("No se pudo conectar a la ip [%s] con puerto %d\n", serverIP, serverPort);
+		sprintf(logBuffer, "SocketUtil: No se pudo conectar a la ip [%s] con puerto %d", serverIP, serverPort);
+		Tools::info(logBuffer);	
+		
 		//perror("connect() failed");
 		close (sock);
 		//exit(1);
@@ -43,6 +48,22 @@ int SocketUtil::cliente_abrir_conexion_tcp (const char *server_ip, int serverPor
 	}
 
 	return sock;
+}
+
+char *SocketUtil::recibir_mensaje(int socket)
+{
+	char *echoBuffer = new char[BUFFER_SIZE];		// Buffer for echo string	
+	int bytesRcvd;						// Bytes read in single recv()
+	
+	memset(echoBuffer, 0, sizeof(echoBuffer));
+	if ((bytesRcvd = recv(socket, echoBuffer, BUFFER_SIZE, 0)) < 0)
+	{
+		//perror("SocketUtil: recv() failed or connection closed prematurely");			
+		Tools::error("SocketUtil: recv() failed or connection closed prematurely");
+		raise(SIGTERM);
+	}
+	
+	return echoBuffer;
 }
 
 
@@ -58,7 +79,7 @@ int SocketUtil::cliente_abrir_conexion_udp (struct sockaddr_in *localAddr)
 
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 	{
-		perror("socket() failed");
+		perror("SocketUtil: socket() failed");
 	}
 
 	memset(localAddr, 0, sizeof(struct sockaddr_in));
@@ -85,7 +106,7 @@ int SocketUtil::servidor_aceptar_conexion_cliente(int sock)
 	clienteLen = sizeof (remoteaddr);
 	if ((sockCliente = accept (sock, &remoteaddr, &clienteLen)) < 0)
 	{
-		perror("accept() failed");
+		perror("SocketUtil: accept() failed");
 		//exit(1);
 	}
 
@@ -106,14 +127,14 @@ int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
 
     // get the servSock
     if ((servSock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("Listener: socket");
+        perror("SocketUtil: socket");
         exit(1);
     }
 
     // lose the pesky "address already in use" error message
     if (setsockopt(servSock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 		close (servSock);
-        perror("Listener: setsockopt");
+		perror("SocketUtil: setsockopt");
         exit(1);
     }
 
@@ -125,14 +146,14 @@ int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
     memset(&(myaddr.sin_zero), '\0', 8);
     if (bind(servSock, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
 		close (servSock);
-        perror("Listener: bind");
+		perror("SocketUtil: bind");
         exit(1);
     }
 
     // listen
     if (listen(servSock, 10) == -1) {
 		close (servSock);
-        perror("Listener: listen");
+		perror("SocketUtil: listen");
         exit(1);
     }
 
@@ -150,7 +171,7 @@ int SocketUtil::servidor_abrir_conexion_udp(struct sockaddr_in *localAddr)
 
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        perror("socket() failed");
+        perror("SocketUtil: socket() failed");
 		exit(1);
     }
 
@@ -162,7 +183,7 @@ int SocketUtil::servidor_abrir_conexion_udp(struct sockaddr_in *localAddr)
     if (bind(sock, (struct sockaddr *) localAddr, sizeof(struct sockaddr_in)) < 0)
     {
 		close (sock);
-		perror("bind() failed");
+		perror("SocketUtil: bind() failed");
 		exit(1);
     }
 	
@@ -181,7 +202,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	/* Acepta la conexión con el cliente, guardándola en el array */
 	if ((clientes[*nClientes] = servidor_aceptar_conexion_cliente(sockServidor)) < 0)
 	{
-		printf ("No se puede abrir socket de cliente\n");
+		printf ("SocketUtil: No se puede abrir socket de cliente\n");
 		exit (-1);
 	}
 
@@ -191,7 +212,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	 * se deja todo como estaba y se vuelve. */
 	if ((*nClientes) >= MAX_CONNECTED)
 	{
-		printf("Se supero el tope de clientes. Se rechaza el pedido\n");
+		printf("SocketUtil: Se supero el tope de clientes. Se rechaza el pedido\n");
 		close (clientes[(*nClientes) -1]);
 		(*nClientes)--;
 		return;
@@ -201,7 +222,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	//escribir_socket_tcp(clientes[(*nClientes)-1], (char *)nClientes);
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
-	printf("Se acepto al cliente %d\n", *nClientes);
+	printf("SocketUtil: Se acepto al cliente %d\n", *nClientes);
 	return;
 }
 
@@ -250,8 +271,8 @@ void SocketUtil::limpiar_tabla_clientes(int *tabla, int *n)
 			j++;
 		}
 	}
-	
 	*n = j;
 }
+
 
 
