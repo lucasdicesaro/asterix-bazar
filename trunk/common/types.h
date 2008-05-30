@@ -15,6 +15,8 @@
 #define NOMBRE_NODO_SIZE (30)
 
 #define SOCK_ERRONEO (-1)
+#define INTENTOS_RECONEXION (3)
+#define DELAY_RECONEXION (20)
 
 typedef std::basic_string<char> bstring;
 
@@ -50,11 +52,7 @@ typedef enum
 	SND_BLOCKED,
 	LOOKUP,
 	REPLAY,
-	BUY,
-	TURNO_COMPRADOR,
-	TURNO_VENDEDOR,
-	//START_CONNECTION,
-	WAIT_CONNECTIONS
+	BUY
 } EventID;
 
 typedef struct
