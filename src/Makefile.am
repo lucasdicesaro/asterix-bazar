@@ -15,7 +15,10 @@ asterix_bazar_SOURCES = \
 	vendedor.h       \
 	vendedor.cpp       \
 	router.cpp       \
-	router.h
+	router.h       \
+	listener.cpp       \
+	listener.h       \
+	lista_participante.conf
 
 asterix_bazar_LDFLAGS = \
 	-pthread

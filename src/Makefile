@@ -44,7 +44,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_asterix_bazar_OBJECTS = main.$(OBJEXT) comprador.$(OBJEXT) \
-	vendedor.$(OBJEXT) router.$(OBJEXT)
+	vendedor.$(OBJEXT) router.$(OBJEXT) listener.$(OBJEXT)
 asterix_bazar_OBJECTS = $(am_asterix_bazar_OBJECTS)
 am__DEPENDENCIES_1 =
 asterix_bazar_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -161,6 +161,7 @@ sysconfdir = ${prefix}/etc
 target_alias = 
 top_builddir = ..
 top_srcdir = ..
+zsxc = jghj
 AM_CPPFLAGS = 
 AM_CFLAGS = 
 asterix_bazar_SOURCES = \
@@ -170,7 +171,9 @@ asterix_bazar_SOURCES = \
 	vendedor.h       \
 	vendedor.cpp       \
 	router.cpp       \
-	router.h
+	router.h       \
+	listener.cpp       \
+	listener.h
 
 asterix_bazar_LDFLAGS = \
 	-pthread
@@ -252,6 +255,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/comprador.Po
+include ./$(DEPDIR)/listener.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/router.Po
 include ./$(DEPDIR)/vendedor.Po
