@@ -171,6 +171,7 @@ sysconfdir = ${prefix}/etc
 target_alias = 
 top_builddir = .
 top_srcdir = .
+zsxc = jghj
 SUBDIRS = \
 	common \
 	src 
@@ -184,7 +185,9 @@ asterix_bazardoc_DATA = \
 	INSTALL\
 	NEWS
 
-EXTRA_DIST = $(asterix_bazardoc_DATA)
+EXTRA_DIST = $(asterix_bazardoc_DATA) \
+	src/lista_participante.conf
+
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

@@ -534,6 +534,7 @@ s,@LIBS@,|#_!!_#|,g
 s,@build_alias@,|#_!!_#|,g
 s,@host_alias@,|#_!!_#|,g
 s,@target_alias@,|#_!!_#|,g
+s,@zsxc@,|#_!!_#|jghj,g
 s,@INSTALL_PROGRAM@,|#_!!_#|${INSTALL},g
 s,@INSTALL_SCRIPT@,|#_!!_#|${INSTALL},g
 s,@INSTALL_DATA@,|#_!!_#|${INSTALL} -m 644,g
