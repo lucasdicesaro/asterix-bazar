@@ -1,18 +1,17 @@
 
-#include "comprador.h"
-#include "vendedor.h"
 #include "router.h"
 #include "listener.h"
+#include "logic.h"
 #include "common/tools.h"
 #include <iostream>
 #include <pthread.h>
 #include <signal.h>
 
 void sig_handler(int id);
-void* proc_comprador(void* param);
-void* proc_vendedor(void* param);
 void* proc_router(void* param);
 void* proc_listener(void* param);
+void* proc_logic(void* param);
+
 //using namespace std;
 
 char *nombre_nodo;
@@ -26,11 +25,7 @@ int main()
 	Tools* tools = Tools::instance();
 	tools->Config_Parser("lista_participante.conf");
 	
-//	Tools::debug("ElTano");
-//	Tools::debug(tools.get_IP_De_Participante("ElTano"));
-	
 	nombre_nodo = new char[NOMBRE_NODO_SIZE];
-	//memset(nombre_nodo, 0, NOMBRE_NODO_SIZE);	
 	nombre_nodo = tools->get_nombre_nodo();
 	std::string nombre_nodo_str = nombre_nodo;
 	Tools::info("Main: nombre_nodo [" + nombre_nodo_str + "]");	
@@ -40,34 +35,18 @@ int main()
 	
 	
 	Router* router = Router::instance();
-	Listener* listener = Listener::instance();	
+	Listener* listener = Listener::instance();		
+	Logic* logic = Logic::instance();
 	
-	//Comprador* comprador = Comprador::instance();
-	//Vendedor* vendedor = Vendedor::instance();
-	
-	pthread_t 
-		//thr_comprador, 
-		//thr_vendedor, 
-		thr_router, thr_listener;
+	pthread_t thr_logic, thr_router, thr_listener;
 	pthread_create(&thr_router, NULL, proc_router, router);
 	pthread_create(&thr_listener, NULL, proc_listener, listener);
+	pthread_create(&thr_logic, NULL, proc_logic, logic);
 
-	/*
-	int rubro = TURNO_COMPRADOR;
-	if (rubro == TURNO_COMPRADOR) 
-	{
-		pthread_create(&thr_comprador, NULL, proc_comprador, comprador);
-		pthread_join(thr_comprador, NULL);
-	}
-	else if (rubro == TURNO_VENDEDOR) 
-	{
-		pthread_create(&thr_vendedor, NULL, proc_vendedor, vendedor);
-		pthread_join(thr_vendedor, NULL);
-	}
-	*/
 	
 	pthread_join(thr_router, NULL);
 	pthread_join(thr_listener, NULL);
+	pthread_join(thr_logic, NULL);	
 	Tools::debug("Main: Finished");
 }
 
@@ -94,40 +73,21 @@ void sig_handler(int id)
 	
 }
 
-void* proc_comprador(void* param)
+void* proc_logic(void* param)
 {
-	Tools::debug("Main: proc_comprador: enter.");
+	Tools::debug("Main: proc_logic: enter.");
 
 	try
 	{	
-		Comprador* comprador = (Comprador*) param;
-		comprador->run();
+		Logic* logic = (Logic*) param;
+		logic->run();
 	} catch (...)
 	{
-		printf("Main: Exception on comprador\n");
+		printf("Main: Exception on logic\n");
 		exit(2);
 	}
 
-	Tools::debug("Main: proc_comprador: leave.");
-	return NULL;
-}
-
-
-void* proc_vendedor(void* param)
-{
-	Tools::debug("Main: proc_vendedor: enter.");
-
-	try
-	{	
-		Vendedor* vendedor = (Vendedor*) param;
-		vendedor->run();
-	} catch (...)
-	{
-		printf("Main: Exception on vendedor\n");
-		exit(2);
-	}
-
-	Tools::debug("Main: proc_vendedor: leave.");
+	Tools::debug("Main: proc_logic: leave.");
 	return NULL;
 }
 

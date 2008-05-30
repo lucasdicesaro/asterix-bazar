@@ -43,8 +43,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_asterix_bazar_OBJECTS = main.$(OBJEXT) comprador.$(OBJEXT) \
-	vendedor.$(OBJEXT) router.$(OBJEXT) listener.$(OBJEXT)
+am_asterix_bazar_OBJECTS = main.$(OBJEXT) router.$(OBJEXT) \
+	listener.$(OBJEXT) logic.$(OBJEXT)
 asterix_bazar_OBJECTS = $(am_asterix_bazar_OBJECTS)
 am__DEPENDENCIES_1 =
 asterix_bazar_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -166,15 +166,13 @@ AM_CPPFLAGS =
 AM_CFLAGS = 
 asterix_bazar_SOURCES = \
 	main.cpp       \
-	comprador.cpp       \
-	comprador.h       \
-	vendedor.h       \
-	vendedor.cpp       \
 	router.cpp       \
 	router.h       \
 	listener.cpp       \
 	listener.h       \
-	lista_participante.conf
+	lista_participante.conf       \
+	logic.cpp       \
+	logic.h
 
 asterix_bazar_LDFLAGS = \
 	-pthread
@@ -255,11 +253,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/comprador.Po
 include ./$(DEPDIR)/listener.Po
+include ./$(DEPDIR)/logic.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/router.Po
-include ./$(DEPDIR)/vendedor.Po
 
 .cpp.o:
 	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -10,15 +10,13 @@ bin_PROGRAMS = asterix_bazar
 
 asterix_bazar_SOURCES = \
 	main.cpp       \
-	comprador.cpp       \
-	comprador.h       \
-	vendedor.h       \
-	vendedor.cpp       \
 	router.cpp       \
 	router.h       \
 	listener.cpp       \
 	listener.h       \
-	lista_participante.conf
+	lista_participante.conf       \
+	logic.cpp       \
+	logic.h
 
 asterix_bazar_LDFLAGS = \
 	-pthread

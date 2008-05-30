@@ -22,6 +22,7 @@ class Router : public Runner
 		//void procesar_look_up(const void *event_tag);
 		//void procesar_buy(const void *event_tag);
 		void decode_mesage(char * buffer);
+		void send_message(const void* msg);
 	
 	protected:
 		Router();
