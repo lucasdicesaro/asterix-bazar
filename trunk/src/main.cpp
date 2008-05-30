@@ -2,6 +2,7 @@
 #include "comprador.h"
 #include "vendedor.h"
 #include "router.h"
+#include "listener.h"
 #include "common/tools.h"
 #include <iostream>
 #include <pthread.h>
@@ -11,6 +12,7 @@ void sig_handler(int id);
 void* proc_comprador(void* param);
 void* proc_vendedor(void* param);
 void* proc_router(void* param);
+void* proc_listener(void* param);
 //using namespace std;
 
 char *nombre_nodo;
@@ -21,27 +23,29 @@ int main()
 	signal(SIGTERM, sig_handler);
 	signal(SIGINT, sig_handler);
 	
-	Tools tools;
-	tools.Config_Parser("lista_participante.conf");
+	Tools* tools = Tools::instance();
+	tools->Config_Parser("lista_participante.conf");
 //	Tools::debug("ElTano");
 //	Tools::debug(tools.get_IP_De_Participante("ElTano"));
 	nombre_nodo = new char[NOMBRE_NODO_SIZE];
 	memset(nombre_nodo, 0, NOMBRE_NODO_SIZE);
-	nombre_nodo = tools.get_nombre_nodo();
+	nombre_nodo = tools->get_nombre_nodo();
 	//Tools::debug("nombre_nodo");
 	//Tools::debug(nombre_nodo);
-	listener_port = tools.get_listener_port();
+	listener_port = tools->get_listener_port();
 	//Tools::debug("listener_port");
 	//Tools::debug(listener_port);
 	
 	
 	Router* router = Router::instance();
+	Listener* listener = Listener::instance();	
 	
 	//Comprador* comprador = Comprador::instance();
 	//Vendedor* vendedor = Vendedor::instance();
 	
-	pthread_t thr_comprador, thr_vendedor, thr_router;
+	pthread_t thr_comprador, thr_vendedor, thr_router, thr_listener;
 	pthread_create(&thr_router, NULL, proc_router, router);
+	pthread_create(&thr_listener, NULL, proc_listener, listener);
 
 	/*
 	int rubro = TURNO_COMPRADOR;
@@ -58,6 +62,7 @@ int main()
 	*/
 	
 	pthread_join(thr_router, NULL);
+	pthread_join(thr_listener, NULL);
 	Tools::debug("main. Finished");
 }
 
@@ -68,12 +73,21 @@ void sig_handler(int id)
 		Tools::debug("Se recibio la señal SIGINT");
 	}
 	
+	
 	Tools::debug("Termination Signal arrived");
 	Event ev;
+	ev.id = PRE_QUIT;
+	//Comprador::instance()->post_event(ev, true);
+	//Vendedor::instance()->post_event(ev, true);
+	Router::instance()->post_event(ev, true);
+	Listener::instance()->post_event(ev, true);
+	
+	ev;
 	ev.id = QUIT;
 	//Comprador::instance()->post_event(ev, true);
 	//Vendedor::instance()->post_event(ev, true);
 	Router::instance()->post_event(ev, true);
+	Listener::instance()->post_event(ev, true);	
 }
 
 void* proc_comprador(void* param)
@@ -132,6 +146,24 @@ void* proc_router(void* param)
 	return NULL;
 }
 
+
+void* proc_listener(void* param)
+{
+	Tools::debug("proc_listener: enter.");
+
+	try
+	{	
+		Listener* listener = (Listener*) param;
+		listener->run();
+	} catch (...)
+	{
+		printf("Exception on listener\n");
+		exit(2);
+	}
+
+	Tools::debug("proc_listener: leave.");
+	return NULL;
+}
 
 
 

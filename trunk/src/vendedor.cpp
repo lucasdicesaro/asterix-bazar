@@ -31,11 +31,7 @@ void Vendedor::on_event(const Event& ev)
 		case INIT:
 			Tools::debug("Vendedor: on_event: INIT:");
 			break;
-			
-		case TURNO_VENDEDOR:
-			Tools::debug("Vendedor: on_event: TURNO_VENDEDOR:");
-			break;				
-			
+
 		case LOOKUP:
 			Tools::debug("Vendedor: on_event: LOOKUP:");
 			procesar_look_up(ev.tag);

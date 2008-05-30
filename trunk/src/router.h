@@ -3,12 +3,10 @@
 
 #include "common/runner.h"
 #include "common/types.h"
-#include <map>
 
 class Router : public Runner
 {
 	public:
-		typedef std::map<int, std::string> IpMapping;
 		/**
 		Singleton
 		*/
@@ -17,16 +15,12 @@ class Router : public Runner
 		* Implementacion requerida por Runner
 		*/
 		virtual void on_event(const Event& ev);
-		
-		void procesar_init(const void *event_tag);
+
 		void procesar_start_connection(const void *event_tag);
-		void procesar_wait_connections(const void *event_tag);
 		void procesar_pre_quit(const void *event_tag);
 		//void procesar_look_up(const void *event_tag);
 		//void procesar_buy(const void *event_tag);
 		void decode_mesage(char* buffer);
-		std::string get_connect_msg();
-
 	
 	protected:
 		Router();
@@ -36,8 +30,11 @@ class Router : public Runner
 		char *vecino2;
 		int sock_vecino1;
 		int sock_vecino2;
-		int servSock;
-		IpMapping socket_ip_map;
+		
+		int sock;
+		const char* serverIP;				// Server IP address (dotted quad)
+		unsigned short serverPort;	// Server port
+		std::string playerId;		
 };
 
 #endif //_ROUTER_H_

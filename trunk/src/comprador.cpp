@@ -34,17 +34,12 @@ void Comprador::on_event(const Event& ev)
 			Tools::debug("Comprador: on_event: INIT:");
 			procesar_init(ev.tag);
 			break;
-			
-		case TURNO_COMPRADOR:
-			Tools::debug("Comprador: on_event: TURNO_COMPRADOR:");
-			break;							
-			
+		
 		// El cliente no recibe nunca LOOKUP
 		//case LOOKUP:
 		//	Tools::debug("Comprador: on_event: LOOKUP:");
 		//	// Inicia la rutina de pedido de compra
 		//	break;
-			
 			
 		case REPLAY:
 			Tools::debug("Comprador: on_event: REPLAY:");
