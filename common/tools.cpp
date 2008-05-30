@@ -3,6 +3,26 @@
 #include <assert.h>
 #include <string.h>
 #include <algorithm>  // For find
+Tools* Tools::single_instance = NULL;
+
+/**
+* Constructors
+*/
+Tools::Tools()
+{
+}
+
+Tools::~Tools()
+{
+}
+
+Tools* Tools::instance()
+{
+	if (!single_instance)
+		single_instance = new Tools;
+	return single_instance;
+}
+
 /**
 Debug
 */

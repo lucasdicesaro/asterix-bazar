@@ -14,6 +14,10 @@ class Tools
 {
 	public:
 		typedef std::list<ConfigDS> ListaConfig;
+		/**
+		Singleton
+		*/
+		static Tools* instance();
 		
 		/**
 		Imprimi una linea de debug
@@ -68,6 +72,9 @@ class Tools
 		void Close_Log ();	
 		
 	protected:
+		Tools();
+		~Tools();
+		static Tools* single_instance;
 		/**
 		Log rutines:
 		*/
