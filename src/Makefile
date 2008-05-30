@@ -173,7 +173,8 @@ asterix_bazar_SOURCES = \
 	router.cpp       \
 	router.h       \
 	listener.cpp       \
-	listener.h
+	listener.h       \
+	lista_participante.conf
 
 asterix_bazar_LDFLAGS = \
 	-pthread

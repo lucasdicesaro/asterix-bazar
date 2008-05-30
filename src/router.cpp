@@ -7,6 +7,7 @@
 #include <iostream>
 #include <assert.h>
 #include <unistd.h>
+#include <signal.h>
 
 Router* Router::single_instance = NULL;
 
@@ -56,8 +57,8 @@ void Router::on_event(const Event& ev)
 			break;	
 			
 		case PRE_QUIT:
-			Tools::debug("Router: on_event: QUIT:");
-			procesar_pre_quit(ev.tag);
+			Tools::debug("Router: on_event: PRE_QUIT:");
+			//procesar_pre_quit(ev.tag);
 			break;	
 			
 		default:
@@ -68,59 +69,52 @@ void Router::on_event(const Event& ev)
 
 void Router::procesar_start_connection(const void *event_tag) 
 {	
-	char echoBuffer[BUFFER_SIZE];		// Buffer for echo string 
-    int bytesRcvd;						// Bytes read in single recv() 	
+	char logBuffer[BUFFER_SIZE];		// Buffer for log
+	char *echoBuffer = new char[BUFFER_SIZE];		// Buffer for echo string     
 	
 	Tools* tools = Tools::instance();
 	//tools->Config_Parser("lista_participante.conf");
-	Tools::debug (nombre_nodo);
+	//Tools::debug (nombre_nodo);
 	ConfigDS* my_config = tools->get_info_nodo(nombre_nodo);
 	//printf("my_config: nombre: [%s], ip: [%s], puerto: [%d]\n", my_config->nombre, my_config->ip, my_config->port);		
 	ConfigDS* vecino1_config = tools->get_info_nodo(my_config->vecino1);	
 	//printf("vecino1_config: nombre: [%s], ip: [%s], puerto: [%d]\n", vecino1_config->nombre, vecino1_config->ip, vecino1_config->port);
 	if (vecino1_config == NULL) 
 	{
-		printf("El nodo %s, no existe en el archivo de configuracion\n", my_config->vecino1);
+		sprintf(logBuffer, "Router: El nombre de nodo %s, no existe en el archivo de configuracion", my_config->vecino1);
+		Tools::info(logBuffer);
 		exit(1);
 	}
 	
 	ConfigDS* vecino2_config = tools->get_info_nodo(my_config->vecino2);
 	if (vecino2_config == NULL) 
 	{
-		printf("El nombre de nodo %s, no existe en el archivo de configuracion\n", my_config->vecino2);
+		sprintf(logBuffer, "Router: El nombre de nodo %s, no existe en el archivo de configuracion", my_config->vecino2);
+		Tools::info(logBuffer);
 		exit(1);
 	}
 	
 	sock_vecino1 = SocketUtil::cliente_abrir_conexion_tcp (vecino1_config->ip, vecino1_config->port);
 	if (sock_vecino1 != SOCK_ERRONEO)
-	{	
-		memset(echoBuffer, 0, sizeof(echoBuffer));
-		if ((bytesRcvd = recv(sock_vecino1, echoBuffer, BUFFER_SIZE, 0)) < 0)
-		{
-			perror("recv() failed or connection closed prematurely: vecino1");
-			close(sock_vecino1);
-			exit(1);
-		}
+	{			
+		echoBuffer = SocketUtil::recibir_mensaje(sock_vecino1);
 		decode_mesage(echoBuffer);
 	}
 	
 	sock_vecino2 = SocketUtil::cliente_abrir_conexion_tcp (vecino2_config->ip, vecino2_config->port);	
 	if (sock_vecino2 != SOCK_ERRONEO)
 	{		
-		memset(echoBuffer, 0, sizeof(echoBuffer));
-		if ((bytesRcvd = recv(sock_vecino2, echoBuffer, BUFFER_SIZE, 0)) < 0)
-		{
-			perror("recv() failed or connection closed prematurely: vecino2\n");
-			close(sock_vecino2);
-			exit(1);
-		}
+		echoBuffer = SocketUtil::recibir_mensaje(sock_vecino2);
 		decode_mesage(echoBuffer);
 	}
 	
-	if (intentos_reconexion > 0 && (sock_vecino1 == SOCK_ERRONEO || sock_vecino1 == SOCK_ERRONEO)) 
+	bool conexiones_incompletas = (sock_vecino1 == SOCK_ERRONEO || sock_vecino1 == SOCK_ERRONEO);
+	if (intentos_reconexion > 0 && conexiones_incompletas)
 	{
-		printf("No se pudo lograr la comunicacion con al menos uno de los dos vecinos\n");
-		printf("Intengo de reconexion nro %d. Se espera un delay de %d\n", intentos_reconexion, delay_reconexion);
+		//Tools::info("Router: No se pudo lograr la comunicacion con al menos uno de los dos vecinos");
+		sprintf(logBuffer, "Router: Intento de reconexion nro %d. Se espera un delay de %d", intentos_reconexion, delay_reconexion);
+		Tools::info(logBuffer);
+		
 		intentos_reconexion--;
 		sleep(delay_reconexion);
 		
@@ -130,6 +124,14 @@ void Router::procesar_start_connection(const void *event_tag)
 	}
 	else 	// Cuando se agotan los intentos de reconexion o ambos sockets hayan logrado conectarse	
 	{
+		if (intentos_reconexion == 0)
+		{
+			Tools::info("Router: Se agotaron los intentos de reconexion");		
+		}
+		if (!conexiones_incompletas) 
+		{
+			Tools::info("Router: Se logro completar las conexiones");
+		}
 		// Comenzar a Comprar / Vender
 		//Event ev;
 		//ev.id = INIT;		
@@ -140,11 +142,13 @@ void Router::procesar_start_connection(const void *event_tag)
 
 void Router::decode_mesage(char* buffer)
 {
-	//<event client="player0" timestamp="12341234" />
-	//using namespace xmlpp;
-	printf("buffer: {%s}\n", buffer);
-	/*Tools::debug("> Router::decode_mesage");		
-	time_t last_tms = 0;
+	char logBuffer[BUFFER_SIZE];		// Buffer for log
+	//<event ticket="socket_id" timestamp="12341234" />
+	using namespace xmlpp;
+	sprintf(logBuffer, "Router: Decodificando handshake del server [%s]", buffer);
+	Tools::info(logBuffer);
+	
+	//time_t last_tms = 0;
 		
 	DomParser parser;
 	parser.parse_memory(buffer);
@@ -153,7 +157,10 @@ void Router::decode_mesage(char* buffer)
 	Element* root = doc->get_root_node();
 	assert(root);
 	
-	NodeSet nodes = root->find("/event");
+	std::string bar("/");
+	std::string root_element(XML_WELCOME_ROOT_ELEMENT);
+	NodeSet nodes = root->find(bar + root_element);
+	//NodeSet nodes = root->find("/event");
 	assert(!nodes.empty());
 	Node* node = nodes[0];
 
@@ -163,20 +170,21 @@ void Router::decode_mesage(char* buffer)
 	elem->get_child_text();
 	
 	Attribute* attr = NULL;
-	attr = elem->get_attribute("client");
-	const char * client = attr->get_value().c_str();
+	//attr = elem->get_attribute("client");
+	attr = elem->get_attribute(XML_WELCOME_FIRST_ELEMENT);
+	const char * sockectId = attr->get_value().c_str();	
+	std::string sockectId_str = sockectId;
+	Tools::info("Router: El connect retorno [" + sockectId_str + "]");
 	
-	Tools::debug("El connect retorno el siguiente client");
-	Tools::debug(client);	
-	attr = elem->get_attribute("timestamp");
-	time_t tms = atoi(attr->get_value().c_str());
+	//attr = elem->get_attribute("timestamp");
+	//time_t tms = atoi(attr->get_value().c_str());
 	
 	//Sender::instance()->playerId = client;
 	//Receptor::instance()->tms = tms;
-	Tools::debug("< Router: decode_mesage");*/
+	//Tools::debug("< Router: decode_mesage");
 }
 
-void Router::procesar_pre_quit(const void *event_tag) 
+void Router::close_TCP_connections()
 {
 	// Inicia la rutina de salida
 	close(sock_vecino1);

@@ -22,6 +22,7 @@ class Listener : public Runner
 		*/
 		virtual void on_event(const Event& ev);
 
+		void close_TCP_connections();
 
 	protected:
 	
@@ -30,8 +31,8 @@ class Listener : public Runner
 		* Se espera por conexiones, se abren y cierran los sockets TCP con los clientes dependiendo del evento ocurrido
 		*/	
 		void client_connections_admin();
-				
-		void procesar_pre_quit(const void *event_tag);
+		std::string get_connect_msg(int socketId);
+		
 	
 	protected:
 		Listener();
