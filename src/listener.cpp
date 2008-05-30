@@ -4,6 +4,7 @@
 #include "common/types.h"
 //#include "common/socket_util.h"
 #include "listener.h"
+#include "logic.h"
 #include <iostream>
 #include <assert.h>
 #include <stdio.h>
@@ -48,25 +49,11 @@ void Listener::on_event(const Event& ev)
 		case INIT:
 			Tools::debug("Listener: on_event: INIT:");
 			client_connections_admin();
-			break;			
+			break;				
 			
-		case LOOKUP:
-			Tools::debug("Listener: on_event: LOOKUP:");
-			//procesar_look_up(ev.tag);
-			break;
-			
-		case REPLAY:
-			Tools::debug("Listener: on_event: REPLAY:");
-			break;
-						
-		case BUY:
-			Tools::debug("Listener: on_event: BUY:");
-			//procesar_buy(ev.tag);			
-			break;	
-			
-		case PRE_QUIT:
-			Tools::debug("Listener: on_event: QUIT:");			
-			break;	
+		//case PRE_QUIT:
+		//	Tools::debug("Listener: on_event: QUIT:");			
+		//	break;	
 			
 		default:
 			Tools::debug("Listener: on event: *UNKNOWN*.");
@@ -269,10 +256,10 @@ void Listener::client_connections_admin()
 						sprintf(logBuffer, "Listener: Paquete recibido del socker %d: [%s]", i, echoBuffer);
 						Tools::info(logBuffer);
 												
-//				    	Event ev;
-//				    	ev.id = CLIENT_MSG;
-//				    	ev.tag = duplicate(echoBuffer);
-//				    	Logic::instance()->post_event(ev, true);                        
+				    	Event ev;
+				    	ev.id = CLIENT_MSG;
+						ev.tag = Tools::duplicate(echoBuffer);
+				    	Logic::instance()->post_event(ev, true);                        
                     }
                 }
             }

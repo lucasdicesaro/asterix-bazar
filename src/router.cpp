@@ -40,25 +40,11 @@ void Router::on_event(const Event& ev)
 		case INIT:
 			Tools::debug("Router: on_event: INIT:");			
 			procesar_start_connection(ev.tag);
-			break;				
-			
-		case LOOKUP:
-			Tools::debug("Router: on_event: LOOKUP:");
-			//procesar_look_up(ev.tag);
 			break;
 			
-		case REPLAY:
-			Tools::debug("Router: on_event: REPLAY:");
-			break;
-						
-		case BUY:
-			Tools::debug("Router: on_event: BUY:");
-			//procesar_buy(ev.tag);			
-			break;	
-			
-		case PRE_QUIT:
-			Tools::debug("Router: on_event: PRE_QUIT:");
-			//procesar_pre_quit(ev.tag);
+		case SEND_MSG:
+			Tools::debug("Router: on_event: SEND_MSG:");
+			send_message(ev.tag);
 			break;	
 			
 		default:
@@ -182,6 +168,25 @@ void Router::decode_mesage(char* buffer)
 	//Sender::instance()->playerId = client;
 	//Receptor::instance()->tms = tms;
 	//Tools::debug("< Router: decode_mesage");
+}
+
+
+void Router::send_message(const void* msg)
+{
+	char logBuffer[BUFFER_SIZE];		// Buffer for log
+	const char * mensaje = (const char*)msg;
+	
+	sprintf(logBuffer, "Router: Se va a enviar el mensaje [%s]", mensaje);
+	Tools::info(logBuffer);	
+
+	// TODO Hay que saber a que VECINO se lo mando 
+
+	unsigned int mensajeLen = strlen(mensaje)+1;
+	if (send(sock_vecino1, mensaje, mensajeLen, 0) != mensajeLen)
+	{
+		Tools::error("send() sent a different number of bytes than expected");
+		throw "";
+	}
 }
 
 void Router::close_TCP_connections()
