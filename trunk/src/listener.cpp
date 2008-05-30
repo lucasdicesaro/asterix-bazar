@@ -15,6 +15,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 //#include <pthread.h>
+#include <sstream>
+#include <string>
 
 extern char *nombre_nodo;
 extern int listener_port;
@@ -63,8 +65,7 @@ void Listener::on_event(const Event& ev)
 			break;	
 			
 		case PRE_QUIT:
-			Tools::debug("Listener: on_event: QUIT:");
-			procesar_pre_quit(ev.tag);
+			Tools::debug("Listener: on_event: QUIT:");			
 			break;	
 			
 		default:
@@ -73,27 +74,31 @@ void Listener::on_event(const Event& ev)
 	}
 }
 
-std::string get_connect_msg()
+std::string Listener::get_connect_msg(int socketId)
 {
-	/*using namespace xmlpp;
+	//Tools::debug("Listener: armando mensaje de bienvenida al cliente");
+	using namespace xmlpp;
+	using namespace std;
 	Document doc;
 	Element* node = NULL;
-	Element* root = doc.create_root_node("event");
+	Element* root = doc.create_root_node(XML_WELCOME_ROOT_ELEMENT);
 
+	// TODO sacar este hardcode
 //	std::string id = Logic::instance()->add_client();
-	std::string id = "Lucas";
-	root->set_attribute("client", id);
 	
-	char buffer[64];
-	time_t t = time(NULL);
-	memset(buffer, 0, sizeof(buffer));
-	sprintf(buffer, "%i", t);
-	root->set_attribute("timestamp", buffer);
+	stringstream my_stream;
+	my_stream << socketId << flush;  	
+	std::string sockId = my_stream.str();
+	std::string sockDesc("Socket");
+	root->set_attribute(XML_WELCOME_FIRST_ELEMENT, sockId + sockDesc);
+	
+	//char buffer[64];
+	//time_t t = time(NULL);
+	//memset(buffer, 0, sizeof(buffer));
+	//sprintf(buffer, "%i", t);
+	//root->set_attribute("timestamp", buffer);
 
 	return doc.write_to_string();
-	 */
-	
-	return "Mensaje_Simple";
 }
 
 
@@ -113,6 +118,7 @@ void Listener::client_connections_admin()
     int i, j;
 	int cant_clientes = 0;
     
+	char logBuffer[BUFFER_SIZE];        // Buffer for echo string 
     char echoBuffer[BUFFER_SIZE];        // Buffer for echo string 
 
     FD_ZERO(&master);    // clear the master and temp sets
@@ -120,13 +126,13 @@ void Listener::client_connections_admin()
 
     // get the servSock
     if ((servSock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("Listener: socket");
+        Tools::error("Listener: socket");
         exit(1);
     }
 
     // lose the pesky "address already in use" error message
     if (setsockopt(servSock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-        perror("Listener: setsockopt");
+        Tools::error("Listener: setsockopt");
         exit(1);
     }
 
@@ -137,13 +143,13 @@ void Listener::client_connections_admin()
 	myaddr.sin_port = htons(listener_port);
     memset(&(myaddr.sin_zero), '\0', 8);
     if (bind(servSock, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
-        perror("Listener: bind");
+        Tools::error("Listener: bind");
         exit(1);
     }
 
     // listen
     if (listen(servSock, 10) == -1) {
-        perror("Listener: listen");
+        Tools::error("Listener: listen");
         exit(1);
     }
 
@@ -156,16 +162,15 @@ void Listener::client_connections_admin()
     // main loop
 
     while(true) 
-    {
-    
+    {    
         read_fds = master; // copy it
-		printf("Listener: antes del select\n");
+		Tools::debug("Listener: antes del select");
         if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) 
         {
-            perror("Listener: select");
+            Tools::error("Listener: select");
             return;
         }
-		printf("Listener: despues del select\n");
+		Tools::debug("Listener: despues del select");
         // run through the existing connections looking for data to read
         for(i = 0; i <= fdmax; i++) 
         {
@@ -174,14 +179,14 @@ void Listener::client_connections_admin()
 	        
                 if (i == servSock) 
                 {
-                    // handle new connections
-                    //if (Broadcaster::instance()->get_count() < MAX_CONNECTED)
-					if (cant_clientes < MAX_CONNECTED)
-                    {
+                  // handle new connections
+                  //if (Broadcaster::instance()->get_count() < MAX_CONNECTED)
+				  if (cant_clientes < MAX_CONNECTED)
+                  {
                     addrlen = sizeof(remoteaddr);
                     if ((newfd = accept(servSock, (struct sockaddr *)&remoteaddr, &addrlen)) == -1) 
                     { 
-                        perror("Listener: accept");
+                        Tools::error("Listener: accept");
                     } 
                     else 
                     {
@@ -202,20 +207,28 @@ void Listener::client_connections_admin()
 						//broad_ev.id = BD_ADD_IP;
 						//broad_ev.tag = ip;
 						//Broadcaster::instance()->post_event(broad_ev, true);                        
-                        //printf("selectserver: new connection from %s on socket %d\n", inet_ntoa(remoteaddr.sin_addr), newfd);
-						printf("Listener: Nueva conexion de [%s] con el socket %d\n", inet_ntoa(remoteaddr.sin_addr), newfd);
-                                                                                   
+						memset(logBuffer, 0 , sizeof(logBuffer));
+                        sprintf(logBuffer, "Listener: Nueva conexion de [%s] con el socket %d", inet_ntoa(remoteaddr.sin_addr), newfd);
+						Tools::info(logBuffer);
+						
 						//handshake:
-						std::string ans = get_connect_msg();
+						std::string ans = get_connect_msg(newfd);
 						int size = ans.length()+1;
-//                      printf("Se va a enviar %s de %d bytes\n", ans.c_str(), size);
+						memset(logBuffer, 0 , sizeof(logBuffer));
+						sprintf(logBuffer, "Listener: Se va a enviar el handshake al cliente: [%s] de %d bytes\n", ans.c_str(), size);
+						Tools::info(logBuffer);						
 						if (send(newfd, ans.c_str(), size, 0) != size)
 						{
-							perror("Listener: Fallo el envio del handshake.");
+							Tools::error("Listener: Fallo el envio del handshake.");
 							return ;
 						}                            
                     }
-                    }
+                  }
+				  else 
+				  {
+					  Tools::error("Listener: Se llego al limite de conexiones aceptadas por el Listener");
+					  Tools::info_label_value ("Listener: Maximo de clientes conectados", MAX_CONNECTED);
+				  }
                 } 
                 else 
                 {                					
@@ -228,8 +241,13 @@ void Listener::client_connections_admin()
                         // got error or connection closed by client
                         if (nbytes == 0) 
                         {
-                            printf("Listener: Connection closed (socket %d)\n", i);
-                            //printf("Listener: removiendo ip %s\n", socket_ip_map[i].c_str()	);
+							memset(logBuffer, 0 , sizeof(logBuffer));
+    		                sprintf(logBuffer, "Listener: Connection closed (socket %d)", i);
+							Tools::info(logBuffer);
+							
+							memset(logBuffer, 0 , sizeof(logBuffer));
+    		                sprintf(logBuffer, "Listener: Removiendo la IP  [%s]\n", socket_ip_map[i].c_str());
+							Tools::info(logBuffer);							
 							cant_clientes--;
 					    	//Event evRmClient;
 					    	//evRmClient.id = BD_RM_IP;
@@ -238,7 +256,7 @@ void Listener::client_connections_admin()
                         } 
                         else 
                         {
-                            perror("Listener: recv");
+                            Tools::error("Listener: recv");
                         }
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
@@ -247,9 +265,10 @@ void Listener::client_connections_admin()
                     else 
                     {// we got some data from a client
                                             
-//                       printf("Enviando paquete a Logic , analizando socket %d\n", i);                        
-						printf("Paquete recibido del socker %d: {%s}\n", i, echoBuffer);                        
-						
+						memset(logBuffer, 0 , sizeof(logBuffer));
+						sprintf(logBuffer, "Listener: Paquete recibido del socker %d: [%s]", i, echoBuffer);
+						Tools::info(logBuffer);
+												
 //				    	Event ev;
 //				    	ev.id = CLIENT_MSG;
 //				    	ev.tag = duplicate(echoBuffer);
@@ -263,13 +282,8 @@ void Listener::client_connections_admin()
 
 
 
-void Listener::procesar_pre_quit(const void *event_tag) 
+void Listener::close_TCP_connections() 
 {
-	// Inicia la rutina de salida
-	close(servSock);	
-	
-	//Event ev;
-	//ev.id  = QUIT;
-	//this->post_event(ev, true);
+	close(servSock);
 }
 
