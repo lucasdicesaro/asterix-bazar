@@ -10,6 +10,8 @@
 #include <sys/un.h>
 #include <netdb.h>
 #include <unistd.h>
+#include "types.h"
+
 
 class SocketUtil
 {
@@ -21,6 +23,8 @@ class SocketUtil
 		int static cliente_abrir_conexion_tcp (const char *server_ip, int serverPort);
 		
 		char static *recibir_mensaje(int socket);
+		
+		void static enviar_mensaje(int socket, std::string mensaje);
 
 		/**
 		 * Abre un socket UDP con un servidor  
