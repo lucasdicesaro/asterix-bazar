@@ -31,7 +31,7 @@ class Listener : public Runner
 		* Se espera por conexiones, se abren y cierran los sockets TCP con los clientes dependiendo del evento ocurrido
 		*/	
 		void client_connections_admin();
-		std::string get_connect_msg(int socketId);
+		std::string get_connect_msg();
 		
 	
 	protected:

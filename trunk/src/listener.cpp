@@ -2,7 +2,7 @@
 
 #include "common/tools.h"
 #include "common/types.h"
-//#include "common/socket_util.h"
+#include "common/socket_util.h"
 #include "listener.h"
 #include "logic.h"
 #include <iostream>
@@ -15,7 +15,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-//#include <pthread.h>
 #include <sstream>
 #include <string>
 
@@ -49,11 +48,7 @@ void Listener::on_event(const Event& ev)
 		case INIT:
 			Tools::debug("Listener: on_event: INIT:");
 			client_connections_admin();
-			break;				
-			
-		//case PRE_QUIT:
-		//	Tools::debug("Listener: on_event: QUIT:");			
-		//	break;	
+			break;
 			
 		default:
 			Tools::debug("Listener: on event: *UNKNOWN*.");
@@ -61,31 +56,9 @@ void Listener::on_event(const Event& ev)
 	}
 }
 
-std::string Listener::get_connect_msg(int socketId)
+std::string Listener::get_connect_msg()
 {
-	//Tools::debug("Listener: armando mensaje de bienvenida al cliente");
-	using namespace xmlpp;
-	using namespace std;
-	Document doc;
-	Element* node = NULL;
-	Element* root = doc.create_root_node(XML_WELCOME_ROOT_ELEMENT);
-
-	// TODO sacar este hardcode
-//	std::string id = Logic::instance()->add_client();
-	
-	stringstream my_stream;
-	my_stream << socketId << flush;  	
-	std::string sockId = my_stream.str();
-	std::string sockDesc("Socket");
-	root->set_attribute(XML_WELCOME_FIRST_ELEMENT, sockId + sockDesc);
-	
-	//char buffer[64];
-	//time_t t = time(NULL);
-	//memset(buffer, 0, sizeof(buffer));
-	//sprintf(buffer, "%i", t);
-	//root->set_attribute("timestamp", buffer);
-
-	return doc.write_to_string();
+	return "BROADCAST: Te escucho perfectamente";
 }
 
 
@@ -94,11 +67,11 @@ void Listener::client_connections_admin()
 {
     fd_set master;   // master file descriptor list
     fd_set read_fds; // temp file descriptor list for select()
-    struct sockaddr_in myaddr;     // server address
+    //struct sockaddr_in myaddr;     // server address
     struct sockaddr_in remoteaddr; // client address
     int fdmax;        // maximum file descriptor number
     int newfd;        // newly accept()ed socket descriptor
-    char buf[256];    // buffer for client data
+    //char buf[256];    // buffer for client data
     int nbytes;			//Size of received message
     int yes=1;        // for setsockopt() SO_REUSEADDR, below
     socklen_t addrlen;
@@ -110,36 +83,9 @@ void Listener::client_connections_admin()
 
     FD_ZERO(&master);    // clear the master and temp sets
     FD_ZERO(&read_fds);
-
-    // get the servSock
-    if ((servSock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-        Tools::error("Listener: socket");
-        exit(1);
-    }
-
-    // lose the pesky "address already in use" error message
-    if (setsockopt(servSock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-        Tools::error("Listener: setsockopt");
-        exit(1);
-    }
-
-    // bind
-    myaddr.sin_family = AF_INET;
-    myaddr.sin_addr.s_addr = INADDR_ANY;
-    //myaddr.sin_port = htons(PORT_TCP);
-	myaddr.sin_port = htons(listener_port);
-    memset(&(myaddr.sin_zero), '\0', 8);
-    if (bind(servSock, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
-        Tools::error("Listener: bind");
-        exit(1);
-    }
-
-    // listen
-    if (listen(servSock, 10) == -1) {
-        Tools::error("Listener: listen");
-        exit(1);
-    }
-
+	
+	servSock = SocketUtil::servidor_abrir_conexion_tcp(listener_port);
+	
     // add the servSock to the master set
     FD_SET(servSock, &master);
 
@@ -199,16 +145,17 @@ void Listener::client_connections_admin()
 						Tools::info(logBuffer);
 						
 						//handshake:
-						std::string ans = get_connect_msg(newfd);
-						int size = ans.length()+1;
+						std::string mensaje = get_connect_msg();
+						//int size = mensaje.length()+1;
 						memset(logBuffer, 0 , sizeof(logBuffer));
-						sprintf(logBuffer, "Listener: Se va a enviar el handshake al cliente: [%s] de %d bytes\n", ans.c_str(), size);
+						sprintf(logBuffer, "Listener: Enviando Handshake [%s]", mensaje.c_str());
 						Tools::info(logBuffer);						
-						if (send(newfd, ans.c_str(), size, 0) != size)
-						{
-							Tools::error("Listener: Fallo el envio del handshake.");
-							return ;
-						}                            
+						//if (send(newfd, mensaje.c_str(), size, 0) != size)
+						//{
+						//	Tools::error("Listener: Fallo el envio del handshake.");
+						//	return ;
+						//}                            
+						SocketUtil::enviar_mensaje(newfd, mensaje);
                     }
                   }
 				  else 
@@ -233,7 +180,7 @@ void Listener::client_connections_admin()
 							Tools::info(logBuffer);
 							
 							memset(logBuffer, 0 , sizeof(logBuffer));
-    		                sprintf(logBuffer, "Listener: Removiendo la IP  [%s]\n", socket_ip_map[i].c_str());
+    		                sprintf(logBuffer, "Listener: Removiendo la IP [%s]\n", socket_ip_map[i].c_str());
 							Tools::info(logBuffer);							
 							cant_clientes--;
 					    	//Event evRmClient;

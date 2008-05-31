@@ -16,13 +16,10 @@ class Router : public Runner
 		*/
 		virtual void on_event(const Event& ev);
 
-		void procesar_start_connection(const void *event_tag);
-		void procesar_pre_quit(const void *event_tag);
+		void start_connections();		
 		void close_TCP_connections();
-		//void procesar_look_up(const void *event_tag);
-		//void procesar_buy(const void *event_tag);
 		void decode_mesage(char * buffer);
-		void send_message(const void* msg);
+		void send_broadcast_message(const void* msg);
 	
 	protected:
 		Router();
@@ -33,10 +30,6 @@ class Router : public Runner
 		int sock_vecino1;
 		int sock_vecino2;
 		
-		//int sock;
-		//const char* serverIP;				// Server IP address (dotted quad)
-		//unsigned short serverPort;	// Server port
-		//std::string playerId;		
 };
 
 #endif //_ROUTER_H_

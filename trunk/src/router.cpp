@@ -4,6 +4,7 @@
 #include "common/types.h"
 #include "common/socket_util.h"
 #include "router.h"
+#include "logic.h"
 #include <iostream>
 #include <assert.h>
 #include <unistd.h>
@@ -39,12 +40,12 @@ void Router::on_event(const Event& ev)
 	{
 		case INIT:
 			Tools::debug("Router: on_event: INIT:");			
-			procesar_start_connection(ev.tag);
-			break;
+			start_connections();
+			break;			
 			
-		case SEND_MSG:
-			Tools::debug("Router: on_event: SEND_MSG:");
-			send_message(ev.tag);
+		case SEND_BROADCAST_MSG:
+			Tools::debug("Router: on_event: SEND_BROADCAST_MSG:");
+			send_broadcast_message(ev.tag);
 			break;	
 			
 		default:
@@ -53,18 +54,16 @@ void Router::on_event(const Event& ev)
 	}
 }
 
-void Router::procesar_start_connection(const void *event_tag) 
+
+void Router::start_connections() 
 {	
-	char logBuffer[BUFFER_SIZE];		// Buffer for log
-	char *echoBuffer = new char[BUFFER_SIZE];		// Buffer for echo string     
+	char logBuffer[BUFFER_SIZE];
+	char *echoBuffer = new char[BUFFER_SIZE];
 	
 	Tools* tools = Tools::instance();
-	//tools->Config_Parser("lista_participante.conf");
-	//Tools::debug (nombre_nodo);
 	ConfigDS* my_config = tools->get_info_nodo(nombre_nodo);
-	//printf("my_config: nombre: [%s], ip: [%s], puerto: [%d]\n", my_config->nombre, my_config->ip, my_config->port);		
-	ConfigDS* vecino1_config = tools->get_info_nodo(my_config->vecino1);	
-	//printf("vecino1_config: nombre: [%s], ip: [%s], puerto: [%d]\n", vecino1_config->nombre, vecino1_config->ip, vecino1_config->port);
+	
+	ConfigDS* vecino1_config = tools->get_info_nodo(my_config->vecino1);		
 	if (vecino1_config == NULL) 
 	{
 		sprintf(logBuffer, "Router: El nombre de nodo %s, no existe en el archivo de configuracion", my_config->vecino1);
@@ -78,7 +77,7 @@ void Router::procesar_start_connection(const void *event_tag)
 		sprintf(logBuffer, "Router: El nombre de nodo %s, no existe en el archivo de configuracion", my_config->vecino2);
 		Tools::info(logBuffer);
 		exit(1);
-	}
+	}	
 	
 	sock_vecino1 = SocketUtil::cliente_abrir_conexion_tcp (vecino1_config->ip, vecino1_config->port);
 	if (sock_vecino1 != SOCK_ERRONEO)
@@ -116,26 +115,25 @@ void Router::procesar_start_connection(const void *event_tag)
 		}
 		if (!conexiones_incompletas) 
 		{
-			Tools::info("Router: Se logro completar las conexiones");
+			Tools::info("Router: Se logro la conexion con ambos vecinos");
 		}
+		
 		// Comenzar a Comprar / Vender
-		//Event ev;
-		//ev.id = INIT;		
-		//this->post_event (ev, true);
+		Event ev;
+		ev.id = INIT;		
+		Logic::instance()->post_event(ev, true);
 	}
 }
 
 
 void Router::decode_mesage(char* buffer)
 {
-	char logBuffer[BUFFER_SIZE];		// Buffer for log
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Router: Recibiendo Handshake [%s]", buffer);
+	Tools::info(logBuffer);	
 	//<event ticket="socket_id" timestamp="12341234" />
-	using namespace xmlpp;
-	sprintf(logBuffer, "Router: Decodificando handshake del server [%s]", buffer);
-	Tools::info(logBuffer);
+	/*using namespace xmlpp;
 	
-	//time_t last_tms = 0;
-		
 	DomParser parser;
 	parser.parse_memory(buffer);
 	
@@ -143,10 +141,7 @@ void Router::decode_mesage(char* buffer)
 	Element* root = doc->get_root_node();
 	assert(root);
 	
-	std::string bar("/");
-	std::string root_element(XML_WELCOME_ROOT_ELEMENT);
-	NodeSet nodes = root->find(bar + root_element);
-	//NodeSet nodes = root->find("/event");
+	NodeSet nodes = root->find("/event");
 	assert(!nodes.empty());
 	Node* node = nodes[0];
 
@@ -156,12 +151,12 @@ void Router::decode_mesage(char* buffer)
 	elem->get_child_text();
 	
 	Attribute* attr = NULL;
-	//attr = elem->get_attribute("client");
-	attr = elem->get_attribute(XML_WELCOME_FIRST_ELEMENT);
+	attr = elem->get_attribute("ticket");
 	const char * sockectId = attr->get_value().c_str();	
 	std::string sockectId_str = sockectId;
 	Tools::info("Router: El connect retorno [" + sockectId_str + "]");
-	
+	*/
+	//time_t last_tms = 0;			
 	//attr = elem->get_attribute("timestamp");
 	//time_t tms = atoi(attr->get_value().c_str());
 	
@@ -171,23 +166,26 @@ void Router::decode_mesage(char* buffer)
 }
 
 
-void Router::send_message(const void* msg)
+void Router::send_broadcast_message(const void* msg)
 {
 	char logBuffer[BUFFER_SIZE];		// Buffer for log
-	const char * mensaje = (const char*)msg;
+	std::string mensaje = (const char*)msg;
 	
-	sprintf(logBuffer, "Router: Se va a enviar el mensaje [%s]", mensaje);
+	sprintf(logBuffer, "Router: Se va a enviar el mensaje [%s]", mensaje.c_str());
 	Tools::info(logBuffer);	
-
-	// TODO Hay que saber a que VECINO se lo mando 
-
-	unsigned int mensajeLen = strlen(mensaje)+1;
-	if (send(sock_vecino1, mensaje, mensajeLen, 0) != mensajeLen)
+	
+	if (sock_vecino1 != SOCK_ERRONEO)
 	{
-		Tools::error("send() sent a different number of bytes than expected");
-		throw "";
+		SocketUtil::enviar_mensaje(sock_vecino1, mensaje);
 	}
+	if (sock_vecino2 != SOCK_ERRONEO)
+	{
+		SocketUtil::enviar_mensaje(sock_vecino2, mensaje);
+	}	
 }
+
+
+
 
 void Router::close_TCP_connections()
 {
