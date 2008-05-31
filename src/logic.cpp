@@ -46,14 +46,10 @@ void Logic::on_event(const Event& ev)
 		case BUILD_MSG:
 			Tools::debug("Logic: on_event: BUILD_MSG:");
 			Event evSend;
-	    	evSend.id = SEND_MSG;
+	    	evSend.id = SEND_BROADCAST_MSG;
 			evSend.tag = Tools::duplicate(build_msg());
 	    	Router::instance()->post_event(evSend, true); 			
 			break;						
-			
-		//case PRE_QUIT:
-		//	Tools::debug("Logic: on_event: QUIT:");			
-		//	break;	
 			
 		default:
 			Tools::debug("Logic: on event: *UNKNOWN*.");
@@ -70,13 +66,13 @@ std::string Logic::build_msg()
 	using namespace std;
 	Document doc;
 	Element* node = NULL;
-	Element* root = doc.create_root_node(XML_WELCOME_ROOT_ELEMENT);
+	Element* root = doc.create_root_node("event");
 
 	// TODO sacar este hardcode
 //	std::string id = Logic::instance()->add_client();
 	
 	std::string sockDesc("Pepito");
-	root->set_attribute(XML_WELCOME_FIRST_ELEMENT, sockDesc);
+	root->set_attribute("ticket", sockDesc);
 
 	return doc.write_to_string();
 }
@@ -98,13 +94,12 @@ void Logic::on_client_msg(const void* msg)
 	Element* root = doc->get_root_node();
 	
 	//string client = get_attr_value(root, "client");
-	string client = Tools::get_attr_value(root, XML_WELCOME_FIRST_ELEMENT);
+	string client = Tools::get_attr_value(root, "ticket");
 	//int id = atoi(get_attr_value(root, "id").c_str());
 	//string timestamp = get_attr_value(root, "timestamp");
 	//Entity* e = (Entity*)clients[client];
 	//if (e == NULL)
 	//	return; //client was removed.
-	
 
 	if (primeraVez && client == "Pepito")
 	{
