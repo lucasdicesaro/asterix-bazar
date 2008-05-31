@@ -14,7 +14,11 @@ libasterix_bazar_a_SOURCES = \
 	tools.cpp          \
 	tools.h          \
 	types.h          \
-	socket_util.h
+	socket_util.h          \
+	socket_util.cpp          \
+	entity.cpp          \
+	entity.h          \
+	mapa.h
 
 ## File created by the gnome-build tools
 

@@ -58,12 +58,22 @@ char *SocketUtil::recibir_mensaje(int socket)
 	memset(echoBuffer, 0, sizeof(echoBuffer));
 	if ((bytesRcvd = recv(socket, echoBuffer, BUFFER_SIZE, 0)) < 0)
 	{
-		//perror("SocketUtil: recv() failed or connection closed prematurely");			
 		Tools::error("SocketUtil: recv() failed or connection closed prematurely");
 		raise(SIGTERM);
 	}
 	
 	return echoBuffer;
+}
+
+
+void SocketUtil::enviar_mensaje(int socket, std::string mensaje)
+{	
+	int size = mensaje.length()+1;
+	if (send(socket, mensaje.c_str(), size, 0) != size)
+	{
+		Tools::error("SocketUtil: send() sent a different number of bytes than expected");
+		raise(SIGTERM);
+	} 
 }
 
 
@@ -79,7 +89,7 @@ int SocketUtil::cliente_abrir_conexion_udp (struct sockaddr_in *localAddr)
 
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 	{
-		perror("SocketUtil: socket() failed");
+		Tools::error("SocketUtil: socket() failed");
 	}
 
 	memset(localAddr, 0, sizeof(struct sockaddr_in));
@@ -106,7 +116,7 @@ int SocketUtil::servidor_aceptar_conexion_cliente(int sock)
 	clienteLen = sizeof (remoteaddr);
 	if ((sockCliente = accept (sock, &remoteaddr, &clienteLen)) < 0)
 	{
-		perror("SocketUtil: accept() failed");
+		Tools::error("SocketUtil: accept() failed");
 		//exit(1);
 	}
 
@@ -120,21 +130,21 @@ int SocketUtil::servidor_aceptar_conexion_cliente(int sock)
 int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
 {
     struct sockaddr_in myaddr;     // server address
-    struct sockaddr_in remoteaddr; // client address
+    //struct sockaddr_in remoteaddr; // client address
     int yes=1;        // for setsockopt() SO_REUSEADDR, below
     socklen_t addrlen;
     int servSock;
 
     // get the servSock
     if ((servSock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("SocketUtil: socket");
+        Tools::error("SocketUtil: socket");
         exit(1);
     }
 
     // lose the pesky "address already in use" error message
     if (setsockopt(servSock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 		close (servSock);
-		perror("SocketUtil: setsockopt");
+		Tools::error("SocketUtil: setsockopt");
         exit(1);
     }
 
@@ -146,14 +156,14 @@ int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
     memset(&(myaddr.sin_zero), '\0', 8);
     if (bind(servSock, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
 		close (servSock);
-		perror("SocketUtil: bind");
+		Tools::error("SocketUtil: bind");
         exit(1);
     }
 
     // listen
     if (listen(servSock, 10) == -1) {
 		close (servSock);
-		perror("SocketUtil: listen");
+		Tools::error("SocketUtil: listen");
         exit(1);
     }
 
@@ -171,7 +181,7 @@ int SocketUtil::servidor_abrir_conexion_udp(struct sockaddr_in *localAddr)
 
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        perror("SocketUtil: socket() failed");
+        Tools::error("SocketUtil: socket() failed");
 		exit(1);
     }
 
@@ -183,7 +193,7 @@ int SocketUtil::servidor_abrir_conexion_udp(struct sockaddr_in *localAddr)
     if (bind(sock, (struct sockaddr *) localAddr, sizeof(struct sockaddr_in)) < 0)
     {
 		close (sock);
-		perror("SocketUtil: bind() failed");
+		Tools::error("SocketUtil: bind() failed");
 		exit(1);
     }
 	
@@ -199,10 +209,11 @@ int SocketUtil::servidor_abrir_conexion_udp(struct sockaddr_in *localAddr)
  */
 void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nClientes)
 {
+	char logBuffer[BUFFER_SIZE];
 	/* Acepta la conexión con el cliente, guardándola en el array */
 	if ((clientes[*nClientes] = servidor_aceptar_conexion_cliente(sockServidor)) < 0)
 	{
-		printf ("SocketUtil: No se puede abrir socket de cliente\n");
+		Tools::error ("SocketUtil: No se puede abrir socket de cliente");
 		exit (-1);
 	}
 
@@ -212,7 +223,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	 * se deja todo como estaba y se vuelve. */
 	if ((*nClientes) >= MAX_CONNECTED)
 	{
-		printf("SocketUtil: Se supero el tope de clientes. Se rechaza el pedido\n");
+		Tools::info("SocketUtil: Se supero el tope de clientes. Se rechaza el pedido");
 		close (clientes[(*nClientes) -1]);
 		(*nClientes)--;
 		return;
@@ -222,7 +233,8 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	//escribir_socket_tcp(clientes[(*nClientes)-1], (char *)nClientes);
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
-	printf("SocketUtil: Se acepto al cliente %d\n", *nClientes);
+	sprintf(logBuffer, "SocketUtil: Se acepto al cliente %d", *nClientes);
+	Tools::info(logBuffer);			
 	return;
 }
 
