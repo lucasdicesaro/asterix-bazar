@@ -13,6 +13,7 @@ class Listener : public Runner
 {
 	public:
 		typedef std::map<int, std::string> IpMapping;
+		typedef std::map<int, std::string> NodoMapping;
 		/**
 		Singleton
 		*/
@@ -31,7 +32,7 @@ class Listener : public Runner
 		* Se espera por conexiones, se abren y cierran los sockets TCP con los clientes dependiendo del evento ocurrido
 		*/	
 		void client_connections_admin();
-		std::string get_connect_msg();
+		void decode_mesage(char * buffer);
 		
 	
 	protected:
@@ -43,6 +44,7 @@ class Listener : public Runner
 		struct sockaddr_in echoServAddr; // Local address
 	    int port;
 		IpMapping socket_ip_map;
+        NodoMapping socket_nodo_map;
 };
 
 #endif //_LISTENER_H_

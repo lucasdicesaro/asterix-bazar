@@ -13,14 +13,15 @@
 Router* Router::single_instance = NULL;
 
 extern char *nombre_nodo;
-int intentos_reconexion = INTENTOS_RECONEXION;
-int delay_reconexion = DELAY_RECONEXION;
 
 /**
 * Constructors
 */
 Router::Router()
 {
+	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
+	intentos_reconexion = reconnectParams->intentos_reconexion;
+	delay_reconexion = reconnectParams->delay_reconexion;
 }
 
 Router::~Router()
@@ -43,8 +44,8 @@ void Router::on_event(const Event& ev)
 			start_connections();
 			break;			
 			
-		case SEND_BROADCAST_MSG:
-			Tools::debug("Router: on_event: SEND_BROADCAST_MSG:");
+		case BROADCAST:
+			Tools::debug("Router: on_event: BROADCAST:");
 			send_broadcast_message(ev.tag);
 			break;	
 			
@@ -82,18 +83,18 @@ void Router::start_connections()
 	sock_vecino1 = SocketUtil::cliente_abrir_conexion_tcp (vecino1_config->ip, vecino1_config->port);
 	if (sock_vecino1 != SOCK_ERRONEO)
 	{			
-		echoBuffer = SocketUtil::recibir_mensaje(sock_vecino1);
-		decode_mesage(echoBuffer);
+		std::string mensaje = get_connect_msg();
+		SocketUtil::enviar_mensaje(sock_vecino1, mensaje);		
 	}
 	
 	sock_vecino2 = SocketUtil::cliente_abrir_conexion_tcp (vecino2_config->ip, vecino2_config->port);	
 	if (sock_vecino2 != SOCK_ERRONEO)
 	{		
-		echoBuffer = SocketUtil::recibir_mensaje(sock_vecino2);
-		decode_mesage(echoBuffer);
+		std::string mensaje = get_connect_msg();
+		SocketUtil::enviar_mensaje(sock_vecino2, mensaje);			
 	}
 	
-	bool conexiones_incompletas = (sock_vecino1 == SOCK_ERRONEO || sock_vecino1 == SOCK_ERRONEO);
+	bool conexiones_incompletas = sock_vecino1 == SOCK_ERRONEO || sock_vecino2 == SOCK_ERRONEO;
 	if (intentos_reconexion > 0 && conexiones_incompletas)
 	{
 		//Tools::info("Router: No se pudo lograr la comunicacion con al menos uno de los dos vecinos");
@@ -111,58 +112,25 @@ void Router::start_connections()
 	{
 		if (intentos_reconexion == 0)
 		{
-			Tools::info("Router: Se agotaron los intentos de reconexion");		
+			if (sock_vecino1 == SOCK_ERRONEO && sock_vecino2 == SOCK_ERRONEO)				
+			{
+				// No se establecio conexion con ninguno de los dos vecinos
+				Tools::info("Router: Se agotaron los intentos de reconexion. Presiones Ctrl+C e intente mas tarde.");
+			}
 		}
 		if (!conexiones_incompletas) 
 		{
 			Tools::info("Router: Se logro la conexion con ambos vecinos");
 		}
-		
-		// Comenzar a Comprar / Vender
-		Event ev;
-		ev.id = INIT;		
-		Logic::instance()->post_event(ev, true);
+				
+		if (sock_vecino1 != SOCK_ERRONEO || sock_vecino2 != SOCK_ERRONEO) 
+		{
+			// Al menos hay una conexion con alguno de los dos vecinos: Comenzar a Comprar / Vender
+			Event ev;
+			ev.id = DO_LOOKUP;		
+			Logic::instance()->post_event(ev, true);
+		}
 	}
-}
-
-
-void Router::decode_mesage(char* buffer)
-{
-	char logBuffer[BUFFER_SIZE];
-	sprintf(logBuffer, "Router: Recibiendo Handshake [%s]", buffer);
-	Tools::info(logBuffer);	
-	//<event ticket="socket_id" timestamp="12341234" />
-	/*using namespace xmlpp;
-	
-	DomParser parser;
-	parser.parse_memory(buffer);
-	
-	Document* doc = parser.get_document();
-	Element* root = doc->get_root_node();
-	assert(root);
-	
-	NodeSet nodes = root->find("/event");
-	assert(!nodes.empty());
-	Node* node = nodes[0];
-
-	Element* elem = dynamic_cast<Element*>(node);
-			
-	std::string node_name = elem->get_name().c_str();
-	elem->get_child_text();
-	
-	Attribute* attr = NULL;
-	attr = elem->get_attribute("ticket");
-	const char * sockectId = attr->get_value().c_str();	
-	std::string sockectId_str = sockectId;
-	Tools::info("Router: El connect retorno [" + sockectId_str + "]");
-	*/
-	//time_t last_tms = 0;			
-	//attr = elem->get_attribute("timestamp");
-	//time_t tms = atoi(attr->get_value().c_str());
-	
-	//Sender::instance()->playerId = client;
-	//Receptor::instance()->tms = tms;
-	//Tools::debug("< Router: decode_mesage");
 }
 
 
@@ -170,20 +138,29 @@ void Router::send_broadcast_message(const void* msg)
 {
 	char logBuffer[BUFFER_SIZE];		// Buffer for log
 	std::string mensaje = (const char*)msg;
-	
-	sprintf(logBuffer, "Router: Se va a enviar el mensaje [%s]", mensaje.c_str());
-	Tools::info(logBuffer);	
-	
+		
 	if (sock_vecino1 != SOCK_ERRONEO)
-	{
+	{				
 		SocketUtil::enviar_mensaje(sock_vecino1, mensaje);
 	}
 	if (sock_vecino2 != SOCK_ERRONEO)
 	{
 		SocketUtil::enviar_mensaje(sock_vecino2, mensaje);
-	}	
+	}
+	sprintf(logBuffer, "Router: Se envio el mensaje [%s] a los vecinos", mensaje.c_str());
+	Tools::info(logBuffer);		
 }
 
+
+
+std::string Router::get_connect_msg()
+{
+	char logBuffer[BUFFER_SIZE];
+	//memset(logBuffer, 0 , sizeof(logBuffer));
+	sprintf(logBuffer, "Router: Enviando Handshake [%s]", nombre_nodo);
+	Tools::info(logBuffer);			
+	return Tools::duplicate(nombre_nodo);
+}
 
 
 

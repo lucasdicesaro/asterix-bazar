@@ -56,12 +56,6 @@ void Listener::on_event(const Event& ev)
 	}
 }
 
-std::string Listener::get_connect_msg()
-{
-	return "BROADCAST: Te escucho perfectamente";
-}
-
-
 
 void Listener::client_connections_admin()
 {
@@ -71,15 +65,15 @@ void Listener::client_connections_admin()
     struct sockaddr_in remoteaddr; // client address
     int fdmax;        // maximum file descriptor number
     int newfd;        // newly accept()ed socket descriptor
-    //char buf[256];    // buffer for client data
     int nbytes;			//Size of received message
     int yes=1;        // for setsockopt() SO_REUSEADDR, below
     socklen_t addrlen;
     int i, j;
 	int cant_clientes = 0;
     
-	char logBuffer[BUFFER_SIZE];        // Buffer for echo string 
+	char logBuffer[BUFFER_SIZE];        // Buffer for log
     char echoBuffer[BUFFER_SIZE];        // Buffer for echo string 
+	char *handshakeBuffer = new char [BUFFER_SIZE]; // Buffer handshake
 
     FD_ZERO(&master);    // clear the master and temp sets
     FD_ZERO(&read_fds);
@@ -144,18 +138,11 @@ void Listener::client_connections_admin()
                         sprintf(logBuffer, "Listener: Nueva conexion de [%s] con el socket %d", inet_ntoa(remoteaddr.sin_addr), newfd);
 						Tools::info(logBuffer);
 						
-						//handshake:
-						std::string mensaje = get_connect_msg();
-						//int size = mensaje.length()+1;
-						memset(logBuffer, 0 , sizeof(logBuffer));
-						sprintf(logBuffer, "Listener: Enviando Handshake [%s]", mensaje.c_str());
-						Tools::info(logBuffer);						
-						//if (send(newfd, mensaje.c_str(), size, 0) != size)
-						//{
-						//	Tools::error("Listener: Fallo el envio del handshake.");
-						//	return ;
-						//}                            
-						SocketUtil::enviar_mensaje(newfd, mensaje);
+						//handshake:						
+						memset(handshakeBuffer, 0, BUFFER_SIZE);
+						handshakeBuffer = SocketUtil::recibir_mensaje(newfd);						
+						decode_mesage(handshakeBuffer);
+						socket_nodo_map[newfd] = handshakeBuffer;
                     }
                   }
 				  else 
@@ -195,13 +182,14 @@ void Listener::client_connections_admin()
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
    						socket_ip_map.erase(i); //Remuevo la ip del mapa de control interno
+						socket_nodo_map.erase(i); //Remuevo el nodo del mapa de control interno
                     } 
                     else 
                     {// we got some data from a client
                                             
-						memset(logBuffer, 0 , sizeof(logBuffer));
-						sprintf(logBuffer, "Listener: Paquete recibido del socker %d: [%s]", i, echoBuffer);
-						Tools::info(logBuffer);
+						//memset(logBuffer, 0 , sizeof(logBuffer));
+						//sprintf(logBuffer, "Listener: Paquete recibido del socker %d: [%s]", i, echoBuffer);
+						//Tools::info(logBuffer);
 												
 				    	Event ev;
 				    	ev.id = CLIENT_MSG;
@@ -212,6 +200,15 @@ void Listener::client_connections_admin()
             }
         }
     }
+}
+
+
+
+void Listener::decode_mesage(char* buffer)
+{
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Listener: Recibiendo Handshake [%s]", buffer);
+	Tools::info(logBuffer);	
 }
 
 

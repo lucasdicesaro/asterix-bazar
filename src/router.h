@@ -18,8 +18,10 @@ class Router : public Runner
 
 		void start_connections();		
 		void close_TCP_connections();
-		void decode_mesage(char * buffer);
 		void send_broadcast_message(const void* msg);
+		
+	protected:	
+		std::string get_connect_msg();
 	
 	protected:
 		Router();
@@ -29,7 +31,8 @@ class Router : public Runner
 		char *vecino2;
 		int sock_vecino1;
 		int sock_vecino2;
-		
+		int intentos_reconexion;
+		int delay_reconexion;
 };
 
 #endif //_ROUTER_H_
