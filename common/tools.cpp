@@ -85,61 +85,6 @@ std::string Tools::get_attr_value(xmlpp::Element* el, const char* attr_name)
 	return (attr == NULL)? "" : attr->get_value();
 }
 
-/**
-AcceptTCPConnection
-*/
-ConnectDS* Tools::AcceptTCPConnection(int servSock)
-{
-    int clntSock;                    /* Socket descriptor for client */
-    struct sockaddr_in echoClntAddr; /* Client address */
-    unsigned int clntLen;            /* Length of client address data structure */
-
-    /* Set the size of the in-out parameter */
-    clntLen = sizeof(echoClntAddr);
-    
-    /* Wait for a client to connect */
-    if ((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, &clntLen)) < 0)
-     DieWithError("accept() failed");
-    
-   char *client_ip = inet_ntoa(echoClntAddr.sin_addr);
-    ConnectDS* ret = new ConnectDS;
-    memset(ret->ip, 0, sizeof(ret->ip));
-    ret->sock = clntSock;
-    strcpy(ret->ip, client_ip);
-
-    return ret;
-}
-
-
-/**
-CreateTCPServerSocket
-*/
-int Tools::CreateTCPServerSocket(unsigned short port, int max_pending)
-{
-    int sock;                        /* socket to create */
-    struct sockaddr_in echoServAddr; /* Local address */
-
-    /* Create socket for incoming connections */
-    if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-        DieWithError("socket() failed");
-      
-    /* Construct local address structure */
-    memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
-    echoServAddr.sin_family = AF_INET;                /* Internet address family */
-    echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
-    echoServAddr.sin_port = htons(port);              /* Local port */
-
-    /* Bind to the local address */
-    if (bind(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
-        DieWithError("bind() failed");
-
-    /* Mark the socket so it will listen for incoming connections */
-    if (listen(sock, max_pending) < 0)
-        DieWithError("listen() failed");
-      
-    return sock;
-}
-
 
 /**
 Config_Parser
@@ -157,6 +102,7 @@ int Tools::Config_Parser (const char* FileName)
 	int port;
 	char* vecino1;	
 	char* vecino2;
+	reconnectParams = new ReconnectParamsDS();
 
 
 	/* abro archivo 
@@ -203,16 +149,19 @@ int Tools::Config_Parser (const char* FileName)
 		if  (strcmp(Param, "listener_port") == 0)
 		{
 			listener_port = atoi(Value);
+		}		
+		if  (strcmp(Param, "intentos_reconexion") == 0)
+		{
+			reconnectParams->intentos_reconexion = atoi(Value);
 		}
-		
-		/*
-		// PARAMETROS CHAR //
-		if  (strcmp(Param, "param_1") == 0)
-			 strcpy(conf->param_1,  Value);
-			 
-		// PARAMETROS INT //
-		if  (strcmp(Param, "param_3") == 0) 	
-			 conf->param_3 = atoi(Value);*/
+		if  (strcmp(Param, "delay_reconexion") == 0)
+		{
+			reconnectParams->delay_reconexion = atoi(Value);
+		}
+		if  (strcmp(Param, "hopcount") == 0)
+		{
+			reconnectParams->hopcount = atoi(Value);
+		}		
 		
 		if  (strcmp(Param, "participante") == 0) {
 			nombre = strtok(Value, ",");
@@ -298,6 +247,29 @@ ConfigDS *Tools::get_info_nodo(const char *nombre) {
 }
 
 
+
+char *Tools::get_nombre_nodo() 
+{
+	return nombre_nodo;
+}
+
+int Tools::get_listener_port()
+{
+	return listener_port;
+}
+
+ReconnectParamsDS *Tools::get_reconnect_params()
+{
+	return reconnectParams;
+}
+
+
+
+
+
+
+
+
 /**
 Abrir log
 */
@@ -351,14 +323,5 @@ void Tools::Close_Log ()
 	fclose(LOG_FILE);
 
 	return;
-}
-
-char * Tools::get_nombre_nodo() 
-{
-	return nombre_nodo;
-}
-int Tools::get_listener_port()
-{
-	return listener_port;
 }
 

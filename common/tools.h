@@ -42,23 +42,9 @@ class Tools
 		char *get_IP_De_Participante(const char *nombre);
 		
 		ConfigDS *get_info_nodo(const char *nombre);
+		ReconnectParamsDS *get_reconnect_params();
 
-		/**
-		CreateTCPServerSocket
-		*/
-		int  CreateTCPServerSocket(unsigned short port, int max_pending);
-
-		/**
-		AcceptTCPConnection
-		*/
-		ConnectDS* AcceptTCPConnection(int servSock);
-
-		/**
-		Imprime Mensaje con codigo de error y termina el proceso.
-		*/
 		void DieWithError(const char *errorMessage);
-
-		void HandleTCPClient(int clntSocket);
 
 		/**
 		Retorna el valor del atributo o un string vacio si no existe:
@@ -84,6 +70,7 @@ class Tools
 		*/
 		FILE* LOG_FILE;
 		ListaConfig listaConfig;
+		ReconnectParamsDS *reconnectParams;
 		char *nombre_nodo;
 		int listener_port;
 };

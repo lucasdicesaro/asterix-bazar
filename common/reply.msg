@@ -1,7 +1,7 @@
-<msg>
+<mensaje>
 	<timestamp>834435</timestamp>
 	<body code="reply" vendedor="ElNegro" />
-	<peer id="LaPetisita"/>
-	<peer id="ElFlaco"/>
-	<peer id="ElTano"/>
-</msg>
+	<nodo name="LaPetisita"/>
+	<nodo name="ElFlaco"/>
+	<nodo name="ElTano"/>
+</mensaje>

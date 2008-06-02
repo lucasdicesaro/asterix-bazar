@@ -10,28 +10,31 @@
 
 #define MAX_CONNECTED (10)
 
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 2000
 
 #define NOMBRE_NODO_SIZE (30)
 
 #define SOCK_ERRONEO (-1)
-#define INTENTOS_RECONEXION (3)
-#define DELAY_RECONEXION (20)
 
 #define DEBUG_LEVEL "DEBUG "
 #define INFO_LEVEL "INFO "
 #define ERROR_LEVEL "ERROR "
 
-#define XML_WELCOME_ROOT_ELEMENT "event"
-#define XML_WELCOME_FIRST_ELEMENT "ticket"
+#define PRODUCTO_SAL ("sal")
+#define PRODUCTO_PESCADO ("pescado")
+#define PRODUCTO_VERDURA ("verdura")
 
-typedef std::basic_string<char> bstring;
+#define CODIGO_LOOKUP ("lookup")
+#define CODIGO_REPLY ("reply")
+#define CODIGO_BUY ("buy")
 
-typedef struct
-{
-	int sock;
-	char ip[32];
-}ConnectDS;
+//typedef std::basic_string<char> bstring;
+
+//typedef struct
+//{
+//	int sock;
+//	char ip[32];
+//}ConnectDS;
 
 typedef enum
 {
@@ -42,11 +45,12 @@ typedef enum
 	KEY_SPACE,
 	KEY_ESCAPE,
 	INIT,
+	DO_LOOKUP,
+	DO_REPLY,	
+	DO_BUY,				
 	QUIT,
 	RUN_TIMEOUT,
 	LOOP,
-	BUILD_MSG,
-	SEND_BROADCAST_MSG,
 	CLIENT_MSG,
 	NEWDATA,
 	PLAYER_ID,
@@ -57,10 +61,7 @@ typedef enum
 	BD_KILL_ALL,
 	LS_LISTEN,
 	LS_CLOSE_CONNECTIONS,
-	SND_BLOCKED,
-	LOOKUP,
-	REPLAY,
-	BUY
+	SND_BLOCKED
 } EventID;
 
 typedef struct
@@ -71,13 +72,18 @@ typedef struct
 
 typedef struct
 {
+    int intentos_reconexion;
+    int delay_reconexion;
+    int hopcount;
+} ReconnectParamsDS;
+
+typedef struct
+{
         char 		  nombre[NOMBRE_NODO_SIZE];
         char		  ip[30];
         int			  port;
         char		  vecino1[NOMBRE_NODO_SIZE];
-        char		  vecino2[NOMBRE_NODO_SIZE];
-        unsigned int  param_3;
-        unsigned int  param_4;
+        char		  vecino2[NOMBRE_NODO_SIZE];        
 }ConfigDS;
 
 
