@@ -19,8 +19,10 @@ class Logic : public Runner
 		virtual void on_event(const Event& ev);
 
 		Mensaje *build_look_up_msg(std::string product_name, int cantidad);
-		Mensaje *build_reply_msg();
+		Mensaje *build_reply_msg(Mensaje *mensaje);
 		Mensaje *build_buy_msg(std::string vendedor);
+		std::string get_next_node_name(const void* msg);
+		std::string get_mensaje_as_string(const void* msg);
 
 		void on_client_msg(const void* msg);
 		

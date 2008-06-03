@@ -211,14 +211,39 @@ void Listener::decode_mesage(char* buffer)
 	Tools::info(logBuffer);	
 }
 
-int Listener::get_socket_from_client()
-{
-	int socket = SOCK_ERRONEO;
-	for (socket_nodo_map_it = socket_ip_map.begin(); socket_nodo_map_it != socket_ip_map.end(); socket_nodo_map_it++)
+int Listener::get_socket_from_client(std::string nombre_nodo)
+{	
+	char logBuffer[BUFFER_SIZE];
+	std::string aux;
+	int socket = SOCK_ERRONEO;	
+	if (!nombre_nodo.empty())
 	{
-		//send_udp(it->c_str(), cl_port, msg);
-		// TODO recorrer el mapa para obtener el socket
-	}	
+		//lock();
+		memset(logBuffer, 0 , sizeof(logBuffer));
+		sprintf(logBuffer, "Listener: get_socket_from_client: Nombre_nodo [%s]", nombre_nodo.c_str());
+		Tools::debug(logBuffer);			
+		bool encontrado = false;
+		for (NodoMappingIterator it = socket_nodo_map.begin(); encontrado || it != socket_nodo_map.end(); it++)
+		{
+			aux = (*it).second;
+			memset(logBuffer, 0 , sizeof(logBuffer));
+			sprintf(logBuffer, "Listener: get_socket_from_client: Nodo actual [%s]", aux.c_str());
+			Tools::debug(logBuffer);			
+			if (nombre_nodo.compare(aux) == 0)
+			{
+				socket = (*it).first;
+				encontrado = true;				
+				memset(logBuffer, 0 , sizeof(logBuffer));
+				sprintf(logBuffer, "Listener: get_socket_from_client: Socket [%d]", socket);
+				Tools::debug(logBuffer);				
+			}
+		}
+		//unlock();	
+	}
+	else 
+	{
+		Tools::error("Listener: get_socket_from_client: Nombre_nodo esta vacio");
+	}
 	return socket;
 }
 
