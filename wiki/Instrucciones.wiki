@@ -1,0 +1,35 @@
+#summary Pasos para ponerlo en funcionamiento
+
+= Introduction =
+
+Se debe correr cada nodo en una carpeta con su archivo de configuración, que le indica cómo se llama, ip y puerto, así como los de los otros nodos.
+
+= Details =
+
+Ejemplo:
+
+/1/
+   asterix_bazar <-- link simbólico al binario
+   lista_participante.conf <-- LaPetisita 127.0.0.1:2552
+/2/
+   asterix_bazar <-- link simbólico al binario
+   lista_participante.conf <-- ElNegro 127.0.0.1:2553
+/3/
+   asterix_bazar <-- link simbólico al binario
+   lista_participante.conf <-- ElRuso 127.0.0.1:2554
+/4/
+   asterix_bazar <-- link simbólico al binario
+   lista_participante.conf <-- ElTurco 127.0.0.1:2555
+
+= Archivo de configuración =
+
+nombre_nodo=LaPetisita
+listener_port=2552
+intentos_reconexion=2;
+delay_reconexion=7;
+hopcount=3;
+participante=LaPetisita,127.0.0.1:2552,ElNegro,ElRuso
+participante=ElNegro,127.0.0.1:2553,LaPetisita,ElTurco
+participante=ElRuso,127.0.0.1:2554,ElNegro,ElTurco
+participante=ElTurco,127.0.0.1:2555,LaPetisita,ElNegro
+participante=ElTano,127.0.0.1:2556,ElTurco,ElNegro
