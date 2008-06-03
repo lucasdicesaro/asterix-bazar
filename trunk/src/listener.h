@@ -26,7 +26,7 @@ class Listener : public Runner
 
 		void close_TCP_connections();
 		
-		int get_socket_from_client();
+		int get_socket_from_client(std::string nombre_nodo);
 
 	protected:
 	
@@ -47,8 +47,7 @@ class Listener : public Runner
 		struct sockaddr_in echoServAddr; // Local address
 	    int port;
 		IpMapping socket_ip_map;
-        NodoMapping socket_nodo_map;
-        NodoMappingIterator socket_nodo_map_it;
+        NodoMapping socket_nodo_map;       
 };
 
 #endif //_LISTENER_H_

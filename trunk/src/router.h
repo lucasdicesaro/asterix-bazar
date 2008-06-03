@@ -23,6 +23,7 @@ class Router : public Runner
 		
 	protected:	
 		std::string get_connect_msg();
+		int try_connection(const char *nombre_nodo);
 	
 	protected:
 		Router();
