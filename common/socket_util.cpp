@@ -17,10 +17,10 @@
 /*
 * Conecta con un servidor remoto a traves de socket TCP
 */
-int SocketUtil::cliente_abrir_conexion_tcp (const char *server_ip, int serverPort)
+int SocketUtil::cliente_abrir_conexion_tcp (const char *serverIP, int serverPort)
 {
 	int sock;
-	const char *serverIP = (server_ip != NULL)? server_ip : "127.0.0.1";
+	//const char *serverIP = (server_ip != NULL)? server_ip : "127.0.0.1";
 	//int serverPort = PORT_TCP;			
 	struct sockaddr_in serverAddr;	
 	char *logBuffer = new char[BUFFER_SIZE];

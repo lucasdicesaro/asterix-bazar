@@ -164,17 +164,17 @@ bool Mensaje::load(xmlpp::Document* doc)
 			if (attr != NULL)
 			{
 				this->product_name = attr->get_value();
-				memset(logBuffer, 0 , sizeof(logBuffer));
-				sprintf(logBuffer, "Mensaje: product_name: [%s]", attr->get_value().c_str());
-				Tools::debug(logBuffer);							
+				//memset(logBuffer, 0 , sizeof(logBuffer));
+				//sprintf(logBuffer, "Mensaje: product_name: [%s]", attr->get_value().c_str());
+				//Tools::debug(logBuffer);							
 			}			
 			attr = el->get_attribute("vendedor");
 			if (attr != NULL)
 			{
 				this->vendedor = attr->get_value();			
-				memset(logBuffer, 0 , sizeof(logBuffer));
-				sprintf(logBuffer, "Mensaje: vendedor: [%s]", attr->get_value().c_str());
-				Tools::debug(logBuffer);			
+				//memset(logBuffer, 0 , sizeof(logBuffer));
+				//sprintf(logBuffer, "Mensaje: vendedor: [%s]", attr->get_value().c_str());
+				//Tools::debug(logBuffer);			
 			}					
 			attr = el->get_attribute("cantidad");
 			if (attr != NULL)
