@@ -211,6 +211,16 @@ void Listener::decode_mesage(char* buffer)
 	Tools::info(logBuffer);	
 }
 
+int Listener::get_socket_from_client()
+{
+	int socket = SOCK_ERRONEO;
+	for (socket_nodo_map_it = socket_ip_map.begin(); socket_nodo_map_it != socket_ip_map.end(); socket_nodo_map_it++)
+	{
+		//send_udp(it->c_str(), cl_port, msg);
+		// TODO recorrer el mapa para obtener el socket
+	}	
+	return socket;
+}
 
 
 void Listener::close_TCP_connections() 

@@ -14,6 +14,7 @@ class Listener : public Runner
 	public:
 		typedef std::map<int, std::string> IpMapping;
 		typedef std::map<int, std::string> NodoMapping;
+		typedef std::map<int, std::string>::iterator NodoMappingIterator;
 		/**
 		Singleton
 		*/
@@ -24,6 +25,8 @@ class Listener : public Runner
 		virtual void on_event(const Event& ev);
 
 		void close_TCP_connections();
+		
+		int get_socket_from_client();
 
 	protected:
 	
@@ -45,6 +48,7 @@ class Listener : public Runner
 	    int port;
 		IpMapping socket_ip_map;
         NodoMapping socket_nodo_map;
+        NodoMappingIterator socket_nodo_map_it;
 };
 
 #endif //_LISTENER_H_

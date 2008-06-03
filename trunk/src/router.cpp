@@ -49,6 +49,11 @@ void Router::on_event(const Event& ev)
 			send_broadcast_message(ev.tag);
 			break;	
 			
+		case SEND_TO_SOCKET:
+			Tools::debug("Router: on_event: SEND_TO_SOCKET:");
+			send_to_socket_message(ev.tag);
+			break;
+			
 		default:
 			Tools::debug("Router: on event: *UNKNOWN*.");
 			break;
@@ -148,6 +153,18 @@ void Router::send_broadcast_message(const void* msg)
 		SocketUtil::enviar_mensaje(sock_vecino2, mensaje);
 	}
 	sprintf(logBuffer, "Router: Se envio el mensaje [%s] a los vecinos", mensaje.c_str());
+	Tools::info(logBuffer);		
+}
+
+void Router::send_to_socket_message(const void* msg)
+{
+	char logBuffer[BUFFER_SIZE];
+	std::string mensaje = (const char*)msg;
+	int socket = 3; // TODO determinar como obtener el socket del ultimo nodo
+	
+	
+	//SocketUtil::enviar_mensaje(socket, mensaje);	
+	sprintf(logBuffer, "Router: Se envio el mensaje [%s] solo al socket [%d]", mensaje.c_str(), socket);
 	Tools::info(logBuffer);		
 }
 
