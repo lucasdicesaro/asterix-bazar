@@ -9,13 +9,14 @@
 extern char *nombre_nodo;
 
 Logic* Logic::single_instance = NULL;
+int Logic::HOPCOUNT;
 /**
 * Constructors
 */
 Logic::Logic()
 {
 	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
-	hopcount = reconnectParams->hopcount;
+	Logic::HOPCOUNT = reconnectParams->hopcount;
 }
 
 Logic::~Logic()
@@ -51,24 +52,70 @@ void Logic::on_event(const Event& ev)
 			Router::instance()->post_event(evBroad, true);			
 			break;
 			
+		case DO_LOOKUP_FORWARD:
+			Tools::debug("Logic: on_event: DO_LOOKUP_FORWARD:");
+			// TODO  Decrementar el hopcount
+			// y enviar a mis vecinos
+
+			mensaje = (Mensaje *)ev.tag;
+			if (mensaje != NULL)
+			{
+				add_nodo(mensaje, nombre_nodo);
+				less_hopcount(mensaje);
+				if (mensaje->get_hopcount() > 0)				
+				{					
+					Tools::error("Logic: Reenviando el LOOKUP");					
+					evBroad.id = BROADCAST;
+					evBroad.tag = Tools::duplicate(mensaje->to_string());
+					Router::instance()->post_event(evBroad, true);					
+				}
+				else 
+				{
+					Tools::debug("Logic: Se descarto el mensaje, por agotarse su hopcount");
+				}	
+			}
+			else
+			{
+				Tools::error("Logic: mensaje es NULL en DO_LOOKUP_FORWARD");
+			}
+			break;								
+			
 		case DO_REPLY:
-			Tools::debug("Logic: on_event: DO_REPLY:");
-			// TODO definir 
-			mensaje = build_reply_msg();
-			//add_nodo(mensaje, nombre_nodo);			
+			Tools::debug("Logic: on_event: DO_REPLY:"); 
+			mensaje = build_reply_msg();			
 			
 			evBroad.id = BROADCAST;
 			evBroad.tag = Tools::duplicate(mensaje->to_string());
 			Router::instance()->post_event(evBroad, true);			
 			break;
+						
+		case DO_REPLY_FORWARD:
+			Tools::debug("Logic: on_event: DO_REPLY_FORWARD:");
+
+			mensaje = (Mensaje *)ev.tag;
+			if (mensaje != NULL)
+			{
+				Tools::error("Logic: Reenviando el REPLY");
+				less_nodo(mensaje);				
+				// TODO 
+				// Determinar si mando el mensaje->to_string() o el Mensaje, porque 
+				// en el Router tengo que saber a quien (socket) se lo mando
+				
+				//evBroad.id = SEND_TO_SOCKET;
+				//evBroad.tag = Tools::duplicate(mensaje->to_string());
+				//Router::instance()->post_event(evBroad, true);					
+			}
+			else
+			{
+				Tools::error("Logic: mensaje es NULL en DO_REPLY_FORWARD");
+			}
+			break;			
 			
 		case DO_BUY:
 			Tools::debug("Logic: on_event: DO_BUY:");
-			// TODO definir 
 			vendedor = (char *)ev.tag;
 			mensaje = build_buy_msg(vendedor);
-			//add_nodo(mensaje, nombre_nodo);
-			
+			// TODO Preparar todo para iniciar un connect al vendedor
 			evBroad.id = BROADCAST;
 			evBroad.tag = Tools::duplicate(mensaje->to_string());
 			Router::instance()->post_event(evBroad, true);			
@@ -94,7 +141,7 @@ Mensaje *Logic::build_look_up_msg(std::string product_name, int cantidad)
 	mensaje->set_code(CODIGO_LOOKUP);
 	mensaje->set_product_name(product_name);
 	mensaje->set_cantidad(cantidad);
-	mensaje->set_hopcount(hopcount);
+	mensaje->set_hopcount(HOPCOUNT);
 	return mensaje;
 }
 
@@ -115,7 +162,7 @@ Mensaje *Logic::build_buy_msg(std::string vendedor)
 	mensaje->set_vendedor(vendedor);
 	mensaje->set_cantidad(-1);
 	mensaje->set_hopcount(-1);
-	return mensaje;
+	return mensaje;	
 }
 
 
@@ -132,19 +179,38 @@ void Logic::add_nodo(Mensaje *mensaje, const char*buffer)
 	unlock();
 }
 
+void Logic::less_nodo(Mensaje *mensaje)
+{
+//http://www.cplusplus.com/reference/stl/list/
+	lock();
+	char logBuffer[BUFFER_SIZE];
+	Nodo *nodo = (Nodo *)mensaje->get_nodos().back();
+	memset(logBuffer, 0 , sizeof(logBuffer));
+	sprintf(logBuffer, "Logic: less_nodo: Se elimino el nodo [%s]", nodo->name.c_str());
+	Tools::debug(logBuffer);
+	mensaje->get_nodos().pop_back();
+	
+	// TODO deberia borrar esto ?
+	Tools::debug("Logic: less_nodo: Borrando nodo");
+	delete nodo;	
+	Tools::debug("Logic: less_nodo: Se Borro nodo");	
+	unlock();
+}
+
+void Logic::less_hopcount(Mensaje *mensaje)
+{
+	lock();
+	mensaje->set_hopcount(mensaje->get_hopcount()-1);
+	unlock();
+}
+
+
 
 /**
 Client msg handler:
 */
 void Logic::on_client_msg(const void* xml_tag)
-{	
-	// Verificar si tengo lo que pide, si es Look up
-	// Verificar si el paquete es mio, si es un Replay
-	// Analizar todos lo casos..
-	// Si no me corresponde
-	// Decrementar el hopcount
-	// y enviar a mis vecinos
-		
+{		
 	assert(xml_tag);
 	std::string xml = (char *)xml_tag;
 	Mensaje *mensaje = new Mensaje();
@@ -166,24 +232,51 @@ void Logic::on_client_msg(const void* xml_tag)
 		sprintf(logBuffer, "Logic: Es un lookup. Tengo [%d] unidades de [%s]?", 
 				mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 		Tools::debug(logBuffer);
+
 		
+		// TODO Determinar las condiciones que dicen si tengo o no el producto y 
+		// la cantidad
+		bool tengoProductoCantidad = false;
 		Event ev;
-		ev.id = DO_REPLY;
+		if (tengoProductoCantidad)
+		{			
+			ev.id = DO_REPLY;
+		}
+		else
+		{
+			ev.id = DO_LOOKUP_FORWARD;
+			ev.tag = mensaje;			
+		}
 		this->post_event(ev, true);
 	}
 	else if (mensaje->get_code().compare(CODIGO_REPLY) == 0)
 	{
 		Tools::debug("Logic: codigo REPLY:");
 		
+		// TODO Determinar las condiciones que dicen si lo que me llega como REPLY
+		// es mio o si lo tengo que seguir pasando por donde vino
+		// Supongo que tengo que guardar una lista de los paquetes que envio
+		// o bien si queda un unico nodo y soy yo 
+		bool yoPediEsto = false;
 		Event ev;
-		ev.id = DO_BUY;
-		ev.tag = Tools::duplicate(mensaje->get_vendedor());
-		this->post_event(ev, true);
+		if (yoPediEsto)
+		{
+			ev.id = DO_BUY;
+			ev.tag = Tools::duplicate(mensaje->get_vendedor());			
+		}
+		else
+		{
+			ev.id = DO_REPLY_FORWARD;
+			ev.tag = mensaje;
+		}
+		this->post_event(ev, true);		
 	}
 	else if (mensaje->get_code().compare(CODIGO_BUY) == 0)
 	{
 		Tools::debug("Logic: codigo BUY:");
-		// Preparar todo para recibir un connect del comprador.
+		// TODO Preparar todo para recibir un connect del comprador.
+		// Como se la cantidad del producto que vendo, quiere el cliente?
+		// Supongo que hay que mantener una lista de los lookups que respondi (yo, vendedor)
 	}
 }
 

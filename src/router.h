@@ -19,6 +19,7 @@ class Router : public Runner
 		void start_connections();		
 		void close_TCP_connections();
 		void send_broadcast_message(const void* msg);
+		void send_to_socket_message(const void* msg);
 		
 	protected:	
 		std::string get_connect_msg();
