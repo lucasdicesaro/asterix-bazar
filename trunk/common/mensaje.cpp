@@ -274,7 +274,6 @@ void Mensaje::set_hopcount(int hopcount)
 	this->hopcount = hopcount;
 }
 
-
 unsigned int Mensaje::count() const
 {
 	return nodos.size();
