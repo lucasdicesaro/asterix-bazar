@@ -149,9 +149,9 @@ bool Mensaje::load(xmlpp::Document* doc)
 		ContentNode* ct = dynamic_cast<ContentNode*>(el->get_child_text());
 		const char* text = (ct == NULL)? NULL : ct->get_content().c_str();
 
-		memset(logBuffer, 0 , sizeof(logBuffer));
-		sprintf(logBuffer, "Mensaje: node_name: [%s]", node_name.c_str());
-		Tools::debug(logBuffer);
+		//memset(logBuffer, 0 , sizeof(logBuffer));
+		//sprintf(logBuffer, "Mensaje: node_name: [%s]", node_name.c_str());
+		//Tools::debug(logBuffer);
 		
 		if (node_name == "body")
 		{
