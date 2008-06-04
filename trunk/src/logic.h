@@ -22,6 +22,7 @@ class Logic : public Runner
 		Mensaje *build_reply_msg(Mensaje *mensaje);
 		Mensaje *build_buy_msg(std::string vendedor);
 		std::string get_next_node_name(const void* msg);
+		std::string get_next_node_name(Mensaje* mensaje);
 		std::string get_mensaje_as_string(const void* msg);
 
 		void on_client_msg(const void* msg);

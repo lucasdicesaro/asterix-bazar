@@ -245,9 +245,15 @@ void Logic::less_hopcount(Mensaje *mensaje)
 
 std::string Logic::get_next_node_name(const void* msg)
 {
+	Mensaje *mensaje = (Mensaje*)msg;
+	return get_next_node_name(mensaje);
+}
+
+std::string Logic::get_next_node_name(Mensaje *mensaje)
+{
 	char logBuffer[BUFFER_SIZE];
 	memset(logBuffer, 0 , sizeof(logBuffer));
-	Mensaje *mensaje = (Mensaje*)msg;	
+	//Mensaje *mensaje = (Mensaje*)msg;	
 	Nodo *nodo = NULL;
 	std::string node_name;
 	if (!mensaje->get_nodos().empty())
@@ -255,7 +261,7 @@ std::string Logic::get_next_node_name(const void* msg)
 		nodo = (Nodo *)mensaje->get_nodos().back();		
 		if (nodo != NULL)
 		{
-			node_name = nodo->name;
+			node_name = Tools::duplicate(nodo->name);
 			sprintf(logBuffer, "Logic: get_next_node_name: nombre de nodo a retornar [%s]", node_name.c_str());
 			Tools::debug(logBuffer);			
 		}
@@ -277,7 +283,7 @@ std::string Logic::get_mensaje_as_string(const void* msg)
 	std::string mensaje_as_string;
 	if (mensaje != NULL)
 	{
-		mensaje_as_string = mensaje->to_string();
+		mensaje_as_string = Tools::duplicate(mensaje->to_string());
 	}
 	else
 	{
@@ -301,7 +307,7 @@ void Logic::on_client_msg(const void* xml_tag)
 	
 	char logBuffer[BUFFER_SIZE];
 	memset(logBuffer, 0 , sizeof(logBuffer));
-	sprintf(logBuffer, "Logic: Mensaje recibido [%s]", xml.c_str());
+	sprintf(logBuffer, "Logic: on_client_msg: Mensaje recibido [%s]", xml.c_str());
 	Tools::debug(logBuffer);
 	
 	//memset(logBuffer, 0 , sizeof(logBuffer));
@@ -311,7 +317,7 @@ void Logic::on_client_msg(const void* xml_tag)
 	if (mensaje->get_code().compare(CODIGO_LOOKUP) == 0) 
 	{
 		memset(logBuffer, 0 , sizeof(logBuffer));
-		sprintf(logBuffer, "Logic: Es un lookup. Tengo [%d] unidades de [%s]?", 
+		sprintf(logBuffer, "Logic: on_client_msg: Es un lookup. Tengo [%d] unidades de [%s]?", 
 				mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 		Tools::debug(logBuffer);
 		
@@ -331,21 +337,30 @@ void Logic::on_client_msg(const void* xml_tag)
 	}
 	else if (mensaje->get_code().compare(CODIGO_REPLY) == 0)
 	{
-		Tools::debug("Logic: codigo REPLY:");
+		Tools::debug("Logic: on_client_msg: codigo REPLY:");
 		
 		// TODO Determinar las condiciones que dicen si lo que me llega como REPLY
 		// es a partir de un LOOKUP mio o si lo tengo que seguir pasando por donde vino
 		// Supongo que tengo que guardar una lista de ids de los paquetes que envio 
 		// o bien, si queda un unico nodo y soy yo 
-		bool yoPediEsto = false;
-		Event ev;
-		if (yoPediEsto)
+		
+		// El paquete debe volver por el camino por donde fue.
+		// Si todo esta bien, cuando queda un nodo solo en el mensaje, 
+		// el nombre de ese nodo, tiene que coincidir con el nombre de nodo que lo inicio.
+		Event ev;		
+		std::string last_nodo_name;
+		if (mensaje->count() <= 1)
 		{
+			last_nodo_name = get_next_node_name(mensaje);
+			memset(logBuffer, 0 , sizeof(logBuffer));
+			sprintf(logBuffer, "Logic: on_client_msg: Queda solo un nodo en el mensaje [%s]", last_nodo_name.c_str());
+			Tools::debug(logBuffer);			
 			ev.id = DO_BUY;
-			ev.tag = Tools::duplicate(mensaje->get_vendedor());
+			ev.tag = Tools::duplicate(mensaje->get_vendedor());			
 		}
 		else
 		{
+			Tools::debug("Logic: on_client_msg: Sigue quedando mas de un nodo en el mensaje. Se reenvia");
 			ev.id = DO_REPLY_FORWARD;
 			ev.tag = mensaje;
 		}
@@ -353,7 +368,7 @@ void Logic::on_client_msg(const void* xml_tag)
 	}
 	else if (mensaje->get_code().compare(CODIGO_BUY) == 0)
 	{
-		Tools::debug("Logic: codigo BUY:");
+		Tools::debug("Logic: on_client_msg: codigo BUY:");
 		// TODO Preparar todo para recibir un connect del comprador.
 		// Cómo sé la cantidad de producto que "vendo"/"quiere el cliente"?
 		// Supongo que hay que mantener una lista de los lookups que respondi (yo, como vendedor)
