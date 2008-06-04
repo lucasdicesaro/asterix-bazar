@@ -142,7 +142,9 @@ void Listener::client_connections_admin()
 						memset(handshakeBuffer, 0, BUFFER_SIZE);
 						handshakeBuffer = SocketUtil::recibir_mensaje(newfd);						
 						decode_mesage(handshakeBuffer);
-						socket_nodo_map[newfd] = handshakeBuffer;
+						//lock();
+						socket_nodo_map[newfd] = Tools::duplicate(handshakeBuffer);
+						//unlock();
                     }
                   }
 				  else 
@@ -182,7 +184,9 @@ void Listener::client_connections_admin()
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
    						socket_ip_map.erase(i); //Remuevo la ip del mapa de control interno
+						//lock();
 						socket_nodo_map.erase(i); //Remuevo el nodo del mapa de control interno
+						//unlock();
                     } 
                     else 
                     {// we got some data from a client
@@ -215,7 +219,8 @@ int Listener::get_socket_from_client(std::string nombre_nodo)
 {	
 	char logBuffer[BUFFER_SIZE];
 	std::string aux;
-	int socket = SOCK_ERRONEO;	
+	int socket = SOCK_ERRONEO;
+	//int *socket = NULL;
 	if (!nombre_nodo.empty())
 	{
 		//lock();
@@ -225,25 +230,40 @@ int Listener::get_socket_from_client(std::string nombre_nodo)
 		bool encontrado = false;
 		for (NodoMappingIterator it = socket_nodo_map.begin(); encontrado || it != socket_nodo_map.end(); it++)
 		{
-			aux = (*it).second;
+			aux = Tools::duplicate((*it).second);
 			memset(logBuffer, 0 , sizeof(logBuffer));
 			sprintf(logBuffer, "Listener: get_socket_from_client: Nodo actual [%s]", aux.c_str());
 			Tools::debug(logBuffer);			
 			if (nombre_nodo.compare(aux) == 0)
 			{
+//				socket = new int;
+//				*socket = (*it).first;
 				socket = (*it).first;
 				encontrado = true;				
-				memset(logBuffer, 0 , sizeof(logBuffer));
+				//memset(logBuffer, 0 , sizeof(logBuffer));
 				sprintf(logBuffer, "Listener: get_socket_from_client: Socket [%d]", socket);
 				Tools::debug(logBuffer);				
 			}
+			if (encontrado)
+			{
+				Tools::debug("Listener: El nodo fue encontrado");		
+			}
+			else
+			{
+				Tools::debug("Listener: El nodo NO fue encontrado");						
+			}
 		}
+		
 		//unlock();	
 	}
 	else 
 	{
 		Tools::error("Listener: get_socket_from_client: Nombre_nodo esta vacio");
 	}
+	
+	//memset(logBuffer, 0 , sizeof(logBuffer));
+	sprintf(logBuffer, "Listener: get_socket_from_client: Se va a retornar el socket [%d]", socket);
+	Tools::debug(logBuffer);
 	return socket;
 }
 

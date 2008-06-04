@@ -190,13 +190,13 @@ void Router::send_broadcast_message(const void* msg)
 	Tools::debug("Router::send_broadcast_message: Se va a enviar el mensaje a los vecinos");
 	if (sock_vecino1 != SOCK_ERRONEO)
 	{				
-		//Tools::debug("Router::send_broadcast_message: se enviara por socket1");
+		Tools::debug("Router::send_broadcast_message: se enviara por socket1");
 		SocketUtil::enviar_mensaje(sock_vecino1, mensaje);
 		//Tools::debug("Router::send_broadcast_message: enviado por socket1");		
 	}
 	if (sock_vecino2 != SOCK_ERRONEO)
 	{
-		//Tools::debug("Router::send_broadcast_message: se enviara por socket2");
+		Tools::debug("Router::send_broadcast_message: se enviara por socket2");
 		SocketUtil::enviar_mensaje(sock_vecino2, mensaje);
 		//Tools::debug("Router::send_broadcast_message: enviado por socket2");				
 	}
@@ -216,13 +216,25 @@ void Router::send_to_socket_message(const void* msg)
 {
 	char logBuffer[BUFFER_SIZE];
 	std::string nombre_nodo = Logic::instance()->get_next_node_name(msg);
+	sprintf(logBuffer, "Router: send_to_socket_message: Se obtuvo de get_next_node_name el nombre [%s]", nombre_nodo.c_str());		
+	Tools::debug(logBuffer);
+	
 	int socket = Listener::instance()->get_socket_from_client(nombre_nodo);
+	//int socket = *sock;
+	sprintf(logBuffer, "Router: send_to_socket_message: Se obtuvo de get_socket_from_client el socket [%d]", socket);		
+	Tools::debug(logBuffer);
+	
 	std::string mensaje = Logic::instance()->get_mensaje_as_string(msg);
+	sprintf(logBuffer, "Router: send_to_socket_message: Se obtuvo de get_mensaje_as_string el mensaje [%s]", mensaje.c_str());		
+	Tools::debug(logBuffer);
+	
+	//std::string mensaje("PUTTOOOOOOOOOO");
+	//Tools::debug("Router: send_to_socket_message: LLego a puto");
 	if (socket != SOCK_ERRONEO)
 	{		
 		SocketUtil::enviar_mensaje(socket, mensaje);	
 		sprintf(logBuffer, "Router: send_to_socket_message: Se envio el mensaje [%s] solo al socket [%d]", mensaje.c_str(), socket);		
-		Tools::info(logBuffer);
+		Tools::debug(logBuffer);
 	}
 	else
 	{
@@ -235,7 +247,7 @@ void Router::send_to_socket_message(const void* msg)
 		{
 			Tools::error("Router: send_to_socket_message: el socket es erroneo y el mensaje esta vacio");
 		}
-	}	
+	}
 }
 
 
