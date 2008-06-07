@@ -16,9 +16,11 @@
 
 #define SOCK_ERRONEO (-1)
 
-#define DEBUG_LEVEL "DEBUG "
-#define INFO_LEVEL "INFO "
-#define ERROR_LEVEL "ERROR "
+#define DEBUG_LEVEL "DEBUG"
+#define INFO_LEVEL "INFO"
+#define WARN_LEVEL "WARN"
+#define ERROR_LEVEL "ERROR"
+
 
 #define PRODUCTO_SAL ("sal")
 #define PRODUCTO_PESCADO ("pescado")
@@ -48,10 +50,17 @@ typedef enum
 	RUN_TIMEOUT,
 	LOOP,
 	CLIENT_MSG,
+	FIRST_BROADCAST,
 	BROADCAST,
 	SEND_TO_SOCKET,	
 	LS_LISTEN,
-	LS_CLOSE_CONNECTIONS
+	LS_CLOSE_CONNECTIONS,
+	RT_ADD_NODO_CLIENTE,
+	RT_RM_NODO_CLIENTE,
+	RT_ADD_NODO_SERVIDOR,
+	RT_RM_NODO_SERVIDOR,	
+	LS_ADD_SOCKET,
+	LS_RM_SOCKET	
 } EventID;
 
 typedef struct
@@ -75,6 +84,13 @@ typedef struct
         char		  vecino1[NOMBRE_NODO_SIZE];
         char		  vecino2[NOMBRE_NODO_SIZE];        
 }ConfigDS;
+
+//typedef struct
+//{
+//    char nombre_nodo[NOMBRE_NODO_SIZE];
+//    int id_socket;
+//} RouterDS;
+
 
 
 #endif //_TYPES_H_

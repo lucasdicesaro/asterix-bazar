@@ -24,7 +24,10 @@ class SocketUtil
 		
 		char static *recibir_mensaje(int socket);
 		
-		void static enviar_mensaje(int socket, std::string mensaje);
+		/**
+		* Se retorna el socket, por si tuvo alguna modificacion (ej. una caida)
+		*/
+		int static enviar_mensaje(int socket, std::string mensaje);
 
 		/**
 		 * Abre un socket UDP con un servidor  

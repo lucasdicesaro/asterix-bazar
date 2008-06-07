@@ -52,3 +52,12 @@ void Nodo::to_xml(xmlpp::Element* parent)
 	node->set_attribute("name", nodo->name);
 }
 
+Nodo *Nodo::clone()
+{
+	Nodo *nodo = new Nodo();
+	
+	//if (!this->name.empty())
+		nodo->name = Tools::duplicate (this->name);
+	
+	return nodo;
+}

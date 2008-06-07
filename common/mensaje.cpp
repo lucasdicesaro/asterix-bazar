@@ -231,6 +231,12 @@ Mensaje::Nodos& Mensaje::get_nodos()
 {
 	return nodos;
 }
+void Mensaje::set_nodos(Mensaje::Nodos& nodos)
+{
+	this->nodos = nodos;
+}
+
+
 
 std::string Mensaje::get_code() const
 {
@@ -277,5 +283,85 @@ void Mensaje::set_hopcount(int hopcount)
 unsigned int Mensaje::count() const
 {
 	return nodos.size();
+}
+
+Mensaje *Mensaje::clone()
+{
+	Mensaje *mensaje = new Mensaje();
+	Nodos nodos_aux;
+	
+	//if (!this->code.empty())
+		mensaje->code = Tools::duplicate (this->code);
+	//if (!this->product_name.empty())	
+		mensaje->product_name = Tools::duplicate (this->product_name);	
+	//if (!this->vendedor.empty())	
+		mensaje->vendedor = Tools::duplicate (this->vendedor);			
+	//if (this->cantidad > 0)
+		mensaje->cantidad = this->cantidad;		
+	//if (this->hopcount > 0)
+		mensaje->hopcount = this->hopcount;				
+	
+	for (Nodos::iterator it = nodos.begin(); it != nodos.end(); it++)
+	{
+		Nodo* nodo = *it;
+		nodos_aux.push_back(nodo->clone());
+	}
+	mensaje->nodos = nodos_aux;
+	return mensaje;
+}
+
+std::string Mensaje::get_next_node_name()
+{
+	char logBuffer[BUFFER_SIZE];
+	memset(logBuffer, 0 , sizeof(logBuffer));
+	//Mensaje *mensaje = (Mensaje*)msg;	
+	Nodo *nodo = NULL;
+	std::string node_name;
+	if (!this->get_nodos().empty())
+	{
+		nodo = (Nodo *)this->get_nodos().back();		
+		if (nodo != NULL)
+		{
+			node_name = Tools::duplicate(nodo->name);
+			sprintf(logBuffer, "Mensaje: get_next_node_name: nombre de nodo a retornar [%s]", node_name.c_str());
+			Tools::debug(logBuffer);			
+		}
+		else
+		{
+			Tools::debug("Mensaje: get_next_node_name: nodo es NULL");
+		}		
+	}
+	else
+	{
+		Tools::debug("Mensaje: get_next_node_name: mensaje->get_nodos() esta vacia");
+	}
+	return node_name;
+}
+
+std::string Mensaje::get_creator_node_name()
+{
+	char logBuffer[BUFFER_SIZE];
+	memset(logBuffer, 0 , sizeof(logBuffer));
+	
+	std::string node_name;
+	if (!nodos.empty())
+	{
+		Nodo *nodo = (Nodo *)nodos.front();
+		if (nodo != NULL)
+		{
+			node_name = Tools::duplicate(nodo->name);
+			sprintf(logBuffer, "Mensaje: get_creator_node_name: nombre de nodo a retornar [%s]", node_name.c_str());
+			Tools::debug(logBuffer);			
+		}
+		else
+		{
+			Tools::debug("Mensaje: get_creator_node_name: nodo es NULL");
+		}		
+	}
+	else
+	{
+		Tools::debug("Mensaje: get_creator_node_name: mensaje->get_nodos() esta vacia");
+	}
+	return node_name;
 }
 
