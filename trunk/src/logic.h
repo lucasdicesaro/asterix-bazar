@@ -18,22 +18,28 @@ class Logic : public Runner
 		*/
 		virtual void on_event(const Event& ev);
 
-		Mensaje *build_look_up_msg(std::string product_name, int cantidad);
-		Mensaje *build_reply_msg(Mensaje *mensaje);
-		Mensaje *build_buy_msg(std::string vendedor);
-		std::string get_next_node_name(const void* msg);
-		std::string get_next_node_name(Mensaje* mensaje);
-		std::string get_mensaje_as_string(const void* msg);
-
 		void on_client_msg(const void* msg);
 		
 		//Mensaje& get_mensaje();
 		static int HOPCOUNT;
 		
 	protected:	
+		Mensaje *build_look_up_msg(std::string product_name, int cantidad);
+		Mensaje *build_reply_msg(Mensaje *mensaje);
+		Mensaje *build_buy_msg(std::string vendedor, std::string product_name, int cantidad);
 		void add_nodo(Mensaje *mensaje, const char*buffer);
 		void less_hopcount(Mensaje *mensaje);		
 		void less_nodo(Mensaje *mensaje);
+		void on_timeout();
+		void on_look_up();
+		void on_look_up_forward(const void* msg);		
+		void on_replay(const void* msg);
+		void on_replay_forward(const void* msg);
+		void on_buy(const void* msg);
+				
+		void on_codigo_look_up(Mensaje *mensaje);
+		void on_codigo_replay(Mensaje *mensaje);
+		void on_codigo_buy(Mensaje *mensaje);
 		
 	protected:
 		Logic();

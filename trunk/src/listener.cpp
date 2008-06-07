@@ -5,6 +5,7 @@
 #include "common/socket_util.h"
 #include "listener.h"
 #include "logic.h"
+#include "router.h"
 #include <iostream>
 #include <assert.h>
 #include <stdio.h>
@@ -28,6 +29,8 @@ Listener* Listener::single_instance = NULL;
 */
 Listener::Listener()
 {
+	yes=1; // for setsockopt() SO_REUSEADDR, below	
+	cant_clientes = 0;
 }
 
 Listener::~Listener()
@@ -43,12 +46,33 @@ Listener* Listener::instance()
 
 void Listener::on_event(const Event& ev)
 {
+	int id_socket;
+	std::string socket;
 	switch (ev.id)
 	{
 		case INIT:
 			Tools::debug("Listener: on_event: INIT:");
-			client_connections_admin();
+			prepare_connections();
 			break;
+			
+		case LOOP:
+			//Tools::debug("Listener: on_event: LOOP:");
+			client_connections_admin();
+			break;			
+			
+		case LS_ADD_SOCKET:
+			Tools::debug("Listener: on_event: LS_ADD_SOCKET:");
+			socket = (char*)ev.tag;			
+			id_socket = atoi(socket.c_str());
+			add_socket(id_socket);
+			break;			
+			
+		case LS_RM_SOCKET:
+			Tools::debug("Listener: on_event: LS_RM_SOCKET:");
+			socket = (char*)ev.tag;			
+			id_socket = atoi(socket.c_str());
+			rm_socket(id_socket);
+			break;			
 			
 		default:
 			Tools::debug("Listener: on event: *UNKNOWN*.");
@@ -56,25 +80,9 @@ void Listener::on_event(const Event& ev)
 	}
 }
 
-
-void Listener::client_connections_admin()
-{
-    fd_set master;   // master file descriptor list
-    fd_set read_fds; // temp file descriptor list for select()
-    //struct sockaddr_in myaddr;     // server address
-    struct sockaddr_in remoteaddr; // client address
-    int fdmax;        // maximum file descriptor number
-    int newfd;        // newly accept()ed socket descriptor
-    int nbytes;			//Size of received message
-    int yes=1;        // for setsockopt() SO_REUSEADDR, below
-    socklen_t addrlen;
-    int i, j;
-	int cant_clientes = 0;
-    
-	char logBuffer[BUFFER_SIZE];        // Buffer for log
-    char echoBuffer[BUFFER_SIZE];        // Buffer for echo string 
-	char *handshakeBuffer = new char [BUFFER_SIZE]; // Buffer handshake
-
+void Listener::prepare_connections()
+{    
+	Tools::debug("Listener: prepare_connections:");
     FD_ZERO(&master);    // clear the master and temp sets
     FD_ZERO(&read_fds);
 	
@@ -85,19 +93,36 @@ void Listener::client_connections_admin()
 
     // keep track of the biggest file descriptor
     fdmax = servSock; // so far, it's this one
+	
+	Event ev;
+	ev.id = LOOP;
+	this->post_event(ev, true);  	
+}
 
-    // main loop
+void Listener::client_connections_admin()
+{
+//  while(true) 
+//  {    
+    timeout.tv_sec = 5;// Timeout del select
+    timeout.tv_usec = 0;	
+    read_fds = master; // copy it
+	//Tools::debug("Listener: client_connections_admin: antes del select");	
+	int retornoSelect;
+	if ((retornoSelect = select(fdmax+1, &read_fds, NULL, NULL, &timeout)) == -1) 
+    //if ((retornoSelect = select(fdmax+1, &read_fds, NULL, NULL, NULL)) == -1) 
+    {
+        Tools::error("Listener: client_connections_admin: select");
+        return;
+    }
+	else if (retornoSelect == 0)
+	{   
+		Tools::debug("Listener: client_connections_admin: el select volvio por timeout");
+	}
+	else if (retornoSelect > 0) 
+	{
+		Tools::debug("Listener: client_connections_admin: el select volvio por escritura en los descriptores");
 
-    while(true) 
-    {    
-        read_fds = master; // copy it
-		Tools::debug("Listener: antes del select");
-        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) 
-        {
-            Tools::error("Listener: select");
-            return;
-        }
-		Tools::debug("Listener: despues del select");
+
         // run through the existing connections looking for data to read
         for(i = 0; i <= fdmax; i++) 
         {
@@ -130,27 +155,37 @@ void Listener::client_connections_admin()
 						socket_ip_map[newfd] = ip;// Asignacion al mapa de ip's
 						
 						cant_clientes++;
-						//Event broad_ev;
-						//broad_ev.id = BD_ADD_IP;
-						//broad_ev.tag = ip;
-						//Broadcaster::instance()->post_event(broad_ev, true);                        
+						
 						memset(logBuffer, 0 , sizeof(logBuffer));
                         sprintf(logBuffer, "Listener: Nueva conexion de [%s] con el socket %d", inet_ntoa(remoteaddr.sin_addr), newfd);
-						Tools::info(logBuffer);
+						Tools::debug(logBuffer);
 						
-						//handshake:						
-						memset(handshakeBuffer, 0, BUFFER_SIZE);
-						handshakeBuffer = SocketUtil::recibir_mensaje(newfd);						
-						decode_mesage(handshakeBuffer);
-						//lock();
-						socket_nodo_map[newfd] = Tools::duplicate(handshakeBuffer);
-						//unlock();
+						char *nombre_nodo_vecino = new char[BUFFER_SIZE];
+						// Recibo el nombre de nodo de mi vecino
+						memset(nombre_nodo_vecino, 0, BUFFER_SIZE);
+						nombre_nodo_vecino = SocketUtil::recibir_mensaje(newfd);						
+						decode_handshake_msg(nombre_nodo_vecino);
+						
+						// Armo el mensaje con mi nombre de nodo y lo mando a mi vecino
+						char *rta_hndsk = get_rta_handshake_msg();
+						SocketUtil::enviar_mensaje(newfd, rta_hndsk);
+						
+						
+						// Transformo el socket de int a char*
+						char *buffer_nodo_socket_id = new char[BUFFER_SIZE];
+						memset(buffer_nodo_socket_id, 0, BUFFER_SIZE);
+						sprintf(buffer_nodo_socket_id, "%s,%d", nombre_nodo_vecino, newfd);
+							
+						Event broad_ev;
+						broad_ev.id = RT_ADD_NODO_SERVIDOR;
+						broad_ev.tag = Tools::duplicate(buffer_nodo_socket_id);
+						Router::instance()->post_event(broad_ev, true);						
                     }
                   }
 				  else 
 				  {
 					  Tools::error("Listener: Se llego al limite de conexiones aceptadas por el Listener");
-					  Tools::info_label_value ("Listener: Maximo de clientes conectados", MAX_CONNECTED);
+					  Tools::debug_label_value ("Listener: Maximo de clientes conectados", MAX_CONNECTED);
 				  }
                 } 
                 else 
@@ -166,34 +201,49 @@ void Listener::client_connections_admin()
                         {
 							memset(logBuffer, 0 , sizeof(logBuffer));
     		                sprintf(logBuffer, "Listener: Connection closed (socket %d)", i);
-							Tools::info(logBuffer);
+							Tools::debug(logBuffer);
 							
-							memset(logBuffer, 0 , sizeof(logBuffer));
-    		                sprintf(logBuffer, "Listener: Removiendo la IP [%s]\n", socket_ip_map[i].c_str());
-							Tools::info(logBuffer);							
-							cant_clientes--;
-					    	//Event evRmClient;
-					    	//evRmClient.id = BD_RM_IP;
-					    	//evRmClient.tag = duplicate(socket_ip_map[i]);
-					    	//Broadcaster::instance()->post_event(evRmClient, true);                            
+							if (!socket_ip_map[i].empty()) 
+							{
+								memset(logBuffer, 0 , sizeof(logBuffer));
+						        sprintf(logBuffer, "Listener: Removiendo la IP [%s]", socket_ip_map[i].c_str());
+								Tools::debug(logBuffer);
+								
+								// Transformo el socket de int a char*
+								char *buffer_socket_id = new char[10];
+								sprintf(buffer_socket_id, "%d", i);
+											
+								Event evRmClient;
+								evRmClient.id = RT_RM_NODO_SERVIDOR;
+								evRmClient.tag =  Tools::duplicate(buffer_socket_id);
+								Router::instance()->post_event(evRmClient, true);										
+							}
+							else								
+							{
+								memset(logBuffer, 0 , sizeof(logBuffer));
+						        sprintf(logBuffer, "Listener: El socket [%d] no esta en el mapa interno, por lo que es un vecino el que se va", i);
+								Tools::debug(logBuffer);							
+							}
+												
+							cant_clientes--;							                       					
                         } 
                         else 
                         {
-                            Tools::error("Listener: recv");
+							memset(logBuffer, 0 , sizeof(logBuffer));
+    		                sprintf(logBuffer, "Listener: recv (socket %d)", i);
+							Tools::error(logBuffer);							
                         }
+																		
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
    						socket_ip_map.erase(i); //Remuevo la ip del mapa de control interno
-						//lock();
-						socket_nodo_map.erase(i); //Remuevo el nodo del mapa de control interno
-						//unlock();
                     } 
                     else 
                     {// we got some data from a client
                                             
 						//memset(logBuffer, 0 , sizeof(logBuffer));
 						//sprintf(logBuffer, "Listener: Paquete recibido del socker %d: [%s]", i, echoBuffer);
-						//Tools::info(logBuffer);
+						//Tools::debug(logBuffer);
 												
 				    	Event ev;
 				    	ev.id = CLIENT_MSG;
@@ -203,70 +253,59 @@ void Listener::client_connections_admin()
                 }
             }
         }
-    }
+			
+	}			
+//  }
+	Event ev;
+	ev.id = LOOP;
+	this->post_event(ev, true); 	
 }
 
-
-
-void Listener::decode_mesage(char* buffer)
+void Listener::add_socket(int id_socket)
 {
 	char logBuffer[BUFFER_SIZE];
-	sprintf(logBuffer, "Listener: Recibiendo Handshake [%s]", buffer);
-	Tools::info(logBuffer);	
-}
-
-int Listener::get_socket_from_client(std::string nombre_nodo)
-{	
-	char logBuffer[BUFFER_SIZE];
-	std::string aux;
-	int socket = SOCK_ERRONEO;
-	//int *socket = NULL;
-	if (!nombre_nodo.empty())
-	{
-		//lock();
-		memset(logBuffer, 0 , sizeof(logBuffer));
-		sprintf(logBuffer, "Listener: get_socket_from_client: Nombre_nodo [%s]", nombre_nodo.c_str());
-		Tools::debug(logBuffer);			
-		bool encontrado = false;
-		for (NodoMappingIterator it = socket_nodo_map.begin(); encontrado || it != socket_nodo_map.end(); it++)
-		{
-			aux = Tools::duplicate((*it).second);
-			memset(logBuffer, 0 , sizeof(logBuffer));
-			sprintf(logBuffer, "Listener: get_socket_from_client: Nodo actual [%s]", aux.c_str());
-			Tools::debug(logBuffer);			
-			if (nombre_nodo.compare(aux) == 0)
-			{
-//				socket = new int;
-//				*socket = (*it).first;
-				socket = (*it).first;
-				encontrado = true;				
-				//memset(logBuffer, 0 , sizeof(logBuffer));
-				sprintf(logBuffer, "Listener: get_socket_from_client: Socket [%d]", socket);
-				Tools::debug(logBuffer);				
-			}
-			if (encontrado)
-			{
-				Tools::debug("Listener: El nodo fue encontrado");		
-			}
-			else
-			{
-				Tools::debug("Listener: El nodo NO fue encontrado");						
-			}
-		}
+	sprintf(logBuffer, "Listener: Se agrega al conjunto de sockets de escucha, uno de los vecinos con el socket_id [%d]", id_socket);
+	Tools::debug(logBuffer);		
 		
-		//unlock();	
-	}
-	else 
-	{
-		Tools::error("Listener: get_socket_from_client: Nombre_nodo esta vacio");
-	}
+	// add id_socket to the master set	
+    FD_SET(id_socket, &master);
 	
-	//memset(logBuffer, 0 , sizeof(logBuffer));
-	sprintf(logBuffer, "Listener: get_socket_from_client: Se va a retornar el socket [%d]", socket);
-	Tools::debug(logBuffer);
-	return socket;
+	if ( fdmax < id_socket )  // Si el socket que asigne al master es mas alto 
+	    fdmax = id_socket;    // que el maximo socket, piso el maximo
+	
+	Event evRta;
+	evRta.id = LOOP;
+	this->post_event(evRta, true); 	
 }
 
+void Listener::rm_socket(int id_socket)
+{		
+	Event evRta;
+	evRta.id = LOOP;
+	this->post_event(evRta, true); 
+}
+
+void Listener::decode_handshake_msg(const char *msg)
+{
+	char logBuffer[BUFFER_SIZE];	
+	if (msg != NULL)
+	{
+		sprintf(logBuffer, "Listener: Recibiendo handshake [%s]", msg);
+		Tools::debug(logBuffer);	
+	}   
+	else
+	{
+		Tools::error("Listener: decode_handshake_msg: Mensaje NULL");
+	}	
+}
+
+char *Listener::get_rta_handshake_msg()
+{
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Listener: get_rta_handshake_msg: Enviando respuesta handshake [%s]", nombre_nodo);
+	Tools::debug(logBuffer);			
+	return nombre_nodo;	
+}
 
 void Listener::close_TCP_connections() 
 {
