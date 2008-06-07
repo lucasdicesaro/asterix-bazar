@@ -1,6 +1,4 @@
 #include "stock.h"
-#include "common/tools.h"
-#include <stdlib.h>
 
 Stock* Stock::single_instance = NULL;
 

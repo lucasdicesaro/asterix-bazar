@@ -2,6 +2,9 @@
 #define _KEYBOARD_H_
 
 #include "common/runner.h"
+#include "common/tools.h"
+#include "common/types.h"
+
 
 class Keyboard : public Runner
 {

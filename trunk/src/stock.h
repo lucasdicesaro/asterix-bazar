@@ -1,6 +1,10 @@
 #ifndef _STOCK_H_
 #define _STOCK_H_
 
+#include "common/tools.h"
+#include "common/types.h"
+
+
 class Stock
 {
 	public:
