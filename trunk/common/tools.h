@@ -23,6 +23,7 @@ class Tools
 		Imprimi una linea de debug
 		*/
 		void static debug(const char* msg);
+		void static debug(const char* nombre_nodo, const char* msg);
 		void static info(std::string msg);
 		void static warn(std::string msg);
 		void static error(std::string msg);		

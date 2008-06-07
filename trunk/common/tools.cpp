@@ -5,6 +5,8 @@
 #include <algorithm>  // For find
 Tools* Tools::single_instance = NULL;
 
+
+
 /**
 * Constructors
 */
@@ -30,6 +32,12 @@ void Tools::debug(const char* msg)
 {
 	printf("%s %s\n", DEBUG_LEVEL, msg);
 }
+
+void Tools::debug(const char* nombre_nodo, const char* msg)
+{
+	printf("%s - %s %s\n", nombre_nodo, DEBUG_LEVEL, msg);
+}
+
 
 void Tools::info(std::string msg)
 {
