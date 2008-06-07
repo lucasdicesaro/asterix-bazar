@@ -26,7 +26,7 @@ Runner::post_event
 */
 void Runner::post_event(const Event& ev, bool signal /*= false*/)
 {
-	Tools::debug("Runner: post_event");
+	//Tools::debug("Runner: post_event");
 	if (!initialized)
 		initialize();
 	
@@ -126,7 +126,7 @@ Runner::signal
 */
 void Runner::signal()
 {
-	Tools::debug("Runner: signal");
+	//Tools::debug("Runner: signal");
 	lock();
 	pthread_cond_broadcast(&ds.cond);
 	unlock();
@@ -138,7 +138,7 @@ Runner::signal
 int Runner::wait(unsigned int time /*= INFINITE */)
 {
 	char logBuffer[BUFFER_SIZE];
-	Tools::debug("Runner: wait");
+	//Tools::debug("Runner: wait");
 	lock();
 	if (time == INFINITE)
 	{
