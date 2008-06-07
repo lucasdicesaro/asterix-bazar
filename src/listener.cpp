@@ -116,11 +116,11 @@ void Listener::client_connections_admin()
     }
 	else if (retornoSelect == 0)
 	{   
-		Tools::debug("Listener: client_connections_admin: el select volvio por timeout");
+		//Tools::debug(nombre_nodo, "Listener: client_connections_admin: el select volvio por timeout");
 	}
 	else if (retornoSelect > 0) 
 	{
-		Tools::debug("Listener: client_connections_admin: el select volvio por escritura en los descriptores");
+		//Tools::debug(nombre_nodo, "Listener: client_connections_admin: el select volvio por escritura en los descriptores");
 
 
         // run through the existing connections looking for data to read
