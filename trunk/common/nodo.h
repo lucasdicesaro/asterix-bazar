@@ -21,6 +21,7 @@ class Nodo
 		 */
 		void to_xml(xmlpp::Element* parent);
 		
+		Nodo *clone();
 	
 //protected:
 	public:

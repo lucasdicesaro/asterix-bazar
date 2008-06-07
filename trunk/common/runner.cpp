@@ -137,6 +137,7 @@ Runner::signal
 */
 int Runner::wait(unsigned int time /*= INFINITE */)
 {
+	char logBuffer[BUFFER_SIZE];
 	Tools::debug("Runner: wait");
 	lock();
 	if (time == INFINITE)
@@ -152,6 +153,10 @@ int Runner::wait(unsigned int time /*= INFINITE */)
     	ti.tv_nsec = ( tv.tv_usec + ( time % 1000 ) * 1000 ) * 1000; 
     	ti.tv_sec = tv.tv_sec + (time / 1000) + ( ti.tv_nsec / 1000000000 ); 
     	ti.tv_nsec %= 1000000000; 
+		
+		//sprintf(logBuffer, "Runner: wait: ti.tv_nsec %d, ti.tv_sec %d, time %d", ti.tv_nsec, ti.tv_sec, time);
+		//Tools::debug(logBuffer);		
+		
 		pthread_cond_timedwait(&ds.cond, &ds.mutex, &ti);
 		unlock();
 		Event ev;

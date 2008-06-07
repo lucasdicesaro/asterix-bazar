@@ -37,6 +37,7 @@ class Mensaje
 		Retorna las entidades.
 		*/
 		Nodos& get_nodos();
+		void set_nodos(Nodos& nodos);		
 		
 		/**
 		Retorna la cantidad de entidades en el mapa.
@@ -59,8 +60,10 @@ class Mensaje
 		void set_vendedor(std::string vendedor);		
 		void set_cantidad(int cantidad = -1);
 		void set_hopcount(int hopcount = -1);
+		Mensaje *clone();
+		std::string get_next_node_name();
+		std::string get_creator_node_name();
 		
-				 
 	protected:
 		void load_nodo(xmlpp::Element* );
 		bool load(xmlpp::Document* doc);
@@ -68,7 +71,7 @@ class Mensaje
 	protected:
 		Nodos nodos;
 		std::string code, product_name, vendedor;
-		int cantidad, hopcount;
+		int cantidad, hopcount;		
 };
 
 

@@ -28,28 +28,33 @@ Debug
 */
 void Tools::debug(const char* msg)
 {
-	printf("%s%s\n", DEBUG_LEVEL, msg);
+	printf("%s %s\n", DEBUG_LEVEL, msg);
 }
 
 void Tools::info(std::string msg)
 {
-	printf("%s%s\n", INFO_LEVEL, msg.c_str());	
+	printf("%s %s\n", INFO_LEVEL, msg.c_str());	
+}
+
+void Tools::warn(std::string msg)
+{
+	printf("%s %s\n", WARN_LEVEL, msg.c_str());	
 }
 
 void Tools::error(std::string msg)
 {
-	printf("%s%s\n", ERROR_LEVEL, msg.c_str());
-	perror(msg.c_str());	
+	printf("%s %s\n", ERROR_LEVEL, msg.c_str());
+	//perror(msg.c_str());	
 }
 
 void Tools::debug_label_value(std::string label, int value)
 {
-	std::cout << DEBUG_LEVEL << label.c_str() << ": " << value << std::endl;
+	std::cout << DEBUG_LEVEL << " " << label.c_str() << ": " << value << std::endl;
 }
 
 void Tools::info_label_value(std::string label, int value)
 {
-	std::cout << INFO_LEVEL << label.c_str() << ": " << value << std::endl;
+	std::cout << INFO_LEVEL << " " << label.c_str() << ": " << value << std::endl;
 }
 
 /**

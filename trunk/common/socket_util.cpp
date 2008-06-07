@@ -39,9 +39,8 @@ int SocketUtil::cliente_abrir_conexion_tcp (const char *serverIP, int serverPort
 	if (connect(sock, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
 	{
 		sprintf(logBuffer, "SocketUtil: No se pudo conectar a la ip [%s] con puerto %d", serverIP, serverPort);
-		Tools::info(logBuffer);	
+		Tools::warn(logBuffer);	
 		
-		//perror("connect() failed");
 		close (sock);
 		//exit(1);
 		sock = SOCK_ERRONEO; // Envio un sock erroneo		
@@ -66,14 +65,26 @@ char *SocketUtil::recibir_mensaje(int socket)
 }
 
 
-void SocketUtil::enviar_mensaje(int socket, std::string mensaje)
+int SocketUtil::enviar_mensaje(int socket, std::string mensaje)
 {	
 	int size = mensaje.length()+1;
-	if (send(socket, mensaje.c_str(), size, 0) != size)
+	char *logBuffer = new char[BUFFER_SIZE];
+	int size_enviado;
+	if ((size_enviado = send(socket, mensaje.c_str(), size, 0)) != size)
 	{
-		Tools::error("SocketUtil: send() sent a different number of bytes than expected");
-		raise(SIGTERM);
-	} 
+		sprintf(logBuffer, "SocketUtil: enviar_mensaje:  send() sent a different number of bytes than expected. Se esperaba enviar %d y se envio %d. Socket: %d. Mensaje: [%s]", size, size_enviado, socket, mensaje.c_str());
+		Tools::warn(logBuffer);		
+		if (size_enviado == -1)
+		{
+			Tools::debug("Se cerro el socket mientras se tomaba da decision de enviarle un mensaje");
+			socket = SOCK_ERRONEO;
+		}
+		else 
+		{
+			raise(SIGTERM);
+		}		
+	}
+	return socket;
 }
 
 
@@ -223,7 +234,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	 * se deja todo como estaba y se vuelve. */
 	if ((*nClientes) >= MAX_CONNECTED)
 	{
-		Tools::info("SocketUtil: Se supero el tope de clientes. Se rechaza el pedido");
+		Tools::debug("SocketUtil: Se supero el tope de clientes. Se rechaza el pedido");
 		close (clientes[(*nClientes) -1]);
 		(*nClientes)--;
 		return;
@@ -234,7 +245,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
 	sprintf(logBuffer, "SocketUtil: Se acepto al cliente %d", *nClientes);
-	Tools::info(logBuffer);			
+	Tools::debug(logBuffer);			
 	return;
 }
 
