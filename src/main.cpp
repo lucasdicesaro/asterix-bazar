@@ -80,7 +80,7 @@ void* proc_logic(void* param)
 	try
 	{	
 		Logic* logic = (Logic*) param;
-		logic->run();
+		logic->run(); // Cada n se pide una compra
 	} catch (...)
 	{
 		printf("Main: Exception on logic\n");
