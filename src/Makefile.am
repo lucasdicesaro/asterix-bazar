@@ -16,7 +16,11 @@ asterix_bazar_SOURCES = \
 	listener.h       \
 	lista_participante.conf       \
 	logic.cpp       \
-	logic.h
+	logic.h       \
+	stock.h       \
+	stock.cpp       \
+	keyboard.cpp       \
+	keyboard.h
 
 asterix_bazar_LDFLAGS = \
 	-pthread

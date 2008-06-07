@@ -44,7 +44,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_asterix_bazar_OBJECTS = main.$(OBJEXT) router.$(OBJEXT) \
-	listener.$(OBJEXT) logic.$(OBJEXT)
+	listener.$(OBJEXT) logic.$(OBJEXT) stock.$(OBJEXT) \
+	keyboard.$(OBJEXT)
 asterix_bazar_OBJECTS = $(am_asterix_bazar_OBJECTS)
 am__DEPENDENCIES_1 =
 asterix_bazar_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -172,7 +173,11 @@ asterix_bazar_SOURCES = \
 	listener.h       \
 	lista_participante.conf       \
 	logic.cpp       \
-	logic.h
+	logic.h       \
+	stock.h       \
+	stock.cpp       \
+	keyboard.cpp       \
+	keyboard.h
 
 asterix_bazar_LDFLAGS = \
 	-pthread
@@ -253,10 +258,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/keyboard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/router.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stock.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
