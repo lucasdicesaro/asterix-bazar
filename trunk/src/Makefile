@@ -44,7 +44,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_asterix_bazar_OBJECTS = main.$(OBJEXT) router.$(OBJEXT) \
-	listener.$(OBJEXT) logic.$(OBJEXT)
+	listener.$(OBJEXT) logic.$(OBJEXT) stock.$(OBJEXT) \
+	keyboard.$(OBJEXT)
 asterix_bazar_OBJECTS = $(am_asterix_bazar_OBJECTS)
 am__DEPENDENCIES_1 =
 asterix_bazar_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -68,11 +69,11 @@ DIST_SOURCES = $(asterix_bazar_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/lucas/asterix-bazar/missing --run aclocal-1.10
-AMTAR = ${SHELL} /home/lucas/asterix-bazar/missing --run tar
-AUTOCONF = ${SHELL} /home/lucas/asterix-bazar/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/lucas/asterix-bazar/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/lucas/asterix-bazar/missing --run automake-1.10
+ACLOCAL = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run aclocal-1.10
+AMTAR = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run tar
+AUTOCONF = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run automake-1.10
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -100,8 +101,8 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAINT = #
-MAKEINFO = ${SHELL} /home/lucas/asterix-bazar/missing --run makeinfo
+MAINT = 
+MAKEINFO = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = asterix_bazar
@@ -119,10 +120,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 0.1
-abs_builddir = /home/lucas/asterix-bazar/src
-abs_srcdir = /home/lucas/asterix-bazar/src
-abs_top_builddir = /home/lucas/asterix-bazar
-abs_top_srcdir = /home/lucas/asterix-bazar
+abs_builddir = /home/guille/Desktop/asterix-bazar/src
+abs_srcdir = /home/guille/Desktop/asterix-bazar/src
+abs_top_builddir = /home/guille/Desktop/asterix-bazar
+abs_top_srcdir = /home/guille/Desktop/asterix-bazar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -142,7 +143,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/lucas/asterix-bazar/install-sh
+install_sh = $(SHELL) /home/guille/Desktop/asterix-bazar/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -172,7 +173,11 @@ asterix_bazar_SOURCES = \
 	listener.h       \
 	lista_participante.conf       \
 	logic.cpp       \
-	logic.h
+	logic.h       \
+	stock.h       \
+	stock.cpp       \
+	keyboard.cpp       \
+	keyboard.h
 
 asterix_bazar_LDFLAGS = \
 	-pthread
@@ -191,7 +196,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cpp .o .obj
-$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -216,9 +221,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure: # $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
@@ -253,10 +258,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/keyboard.Po
 include ./$(DEPDIR)/listener.Po
 include ./$(DEPDIR)/logic.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/router.Po
+include ./$(DEPDIR)/stock.Po
 
 .cpp.o:
 	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
