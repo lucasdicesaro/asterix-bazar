@@ -1,5 +1,6 @@
 #include "keyboard.h"
-#include "common/tools.h"
+#include "logic.h"
+
 
 Keyboard* Keyboard::single_instance = NULL;
 
@@ -39,6 +40,12 @@ void Keyboard::on_event(const Event& ev)
 
 int Keyboard::get_key()
 {
+	char *buffer = new char[BUFFER_SIZE];
+	
+	Event ev;
+	//ev.id = CLIENT_MSG;
+	ev.tag = Tools::duplicate(buffer);
+	Logic::instance()->post_event(ev, true);                        
 }
 
 
