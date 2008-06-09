@@ -53,8 +53,7 @@ ARFLAGS = cru
 libasterix_bazar_a_AR = $(AR) $(ARFLAGS)
 libasterix_bazar_a_LIBADD =
 am_libasterix_bazar_a_OBJECTS = runner.$(OBJEXT) tools.$(OBJEXT) \
-	socket_util.$(OBJEXT) mensaje.$(OBJEXT) nodo.$(OBJEXT) \
-	rodolfo.$(OBJEXT)
+	socket_util.$(OBJEXT) mensaje.$(OBJEXT) nodo.$(OBJEXT)
 libasterix_bazar_a_OBJECTS = $(am_libasterix_bazar_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -73,11 +72,11 @@ DIST_SOURCES = $(libasterix_bazar_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run aclocal-1.10
-AMTAR = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run tar
-AUTOCONF = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run automake-1.10
+ACLOCAL = ${SHELL} /home/lucas/asterix-bazar/missing --run aclocal-1.10
+AMTAR = ${SHELL} /home/lucas/asterix-bazar/missing --run tar
+AUTOCONF = ${SHELL} /home/lucas/asterix-bazar/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/lucas/asterix-bazar/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/lucas/asterix-bazar/missing --run automake-1.10
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -105,8 +104,8 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAINT = 
-MAKEINFO = ${SHELL} /home/guille/Desktop/asterix-bazar/missing --run makeinfo
+MAINT = #
+MAKEINFO = ${SHELL} /home/lucas/asterix-bazar/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = asterix_bazar
@@ -124,10 +123,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 0.1
-abs_builddir = /home/guille/Desktop/asterix-bazar/common
-abs_srcdir = /home/guille/Desktop/asterix-bazar/common
-abs_top_builddir = /home/guille/Desktop/asterix-bazar
-abs_top_srcdir = /home/guille/Desktop/asterix-bazar
+abs_builddir = /home/lucas/asterix-bazar/common
+abs_srcdir = /home/lucas/asterix-bazar/common
+abs_top_builddir = /home/lucas/asterix-bazar
+abs_top_srcdir = /home/lucas/asterix-bazar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -147,7 +146,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/guille/Desktop/asterix-bazar/install-sh
+install_sh = $(SHELL) /home/lucas/asterix-bazar/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -187,14 +186,13 @@ libasterix_bazar_a_SOURCES = \
 	mensaje.cpp          \
 	mensaje.h          \
 	nodo.h          \
-	nodo.cpp          \
-	rodolfo.cpp
+	nodo.cpp          
 
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cpp .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -219,9 +217,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: # $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 install-libLIBRARIES: $(lib_LIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -265,7 +263,6 @@ distclean-compile:
 
 include ./$(DEPDIR)/mensaje.Po
 include ./$(DEPDIR)/nodo.Po
-include ./$(DEPDIR)/rodolfo.Po
 include ./$(DEPDIR)/runner.Po
 include ./$(DEPDIR)/socket_util.Po
 include ./$(DEPDIR)/tools.Po
