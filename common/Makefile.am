@@ -19,8 +19,7 @@ libasterix_bazar_a_SOURCES = \
 	mensaje.cpp          \
 	mensaje.h          \
 	nodo.h          \
-	nodo.cpp          \
-	rodolfo.cpp
+	nodo.cpp          
 
 ## File created by the gnome-build tools
 
