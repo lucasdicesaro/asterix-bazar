@@ -2,6 +2,7 @@
 #include "router.h"
 #include "listener.h"
 #include "logic.h"
+#include "keyboard.h"
 #include "common/tools.h"
 #include <iostream>
 #include <pthread.h>
@@ -11,6 +12,7 @@ void sig_handler(int id);
 void* proc_router(void* param);
 void* proc_listener(void* param);
 void* proc_logic(void* param);
+void* proc_keyboard (void* param);
 
 //using namespace std;
 
@@ -37,16 +39,19 @@ int main()
 	Router* router = Router::instance();
 	Listener* listener = Listener::instance();		
 	Logic* logic = Logic::instance();
+	Keyboard * keyboard = Keyboard ::instance();
 	
-	pthread_t thr_logic, thr_router, thr_listener;
+	pthread_t thr_logic, thr_router, thr_listener, thr_keyboard;
 	pthread_create(&thr_router, NULL, proc_router, router);
 	pthread_create(&thr_listener, NULL, proc_listener, listener);
 	pthread_create(&thr_logic, NULL, proc_logic, logic);
+	pthread_create(&thr_keyboard, NULL, proc_keyboard , keyboard);
 
-	
+	pthread_join(thr_keyboard, NULL);	
 	pthread_join(thr_router, NULL);
 	pthread_join(thr_listener, NULL);
-	pthread_join(thr_logic, NULL);	
+	pthread_join(thr_logic, NULL);
+
 	Tools::debug("Main: Finished");
 }
 
@@ -129,10 +134,23 @@ void* proc_listener(void* param)
 	return NULL;
 }
 
+void* proc_keyboard(void* param)
+{
+	Tools::debug("Main: proc_keyboard: enter.");
 
+	try
+	{	
+		Keyboard* keyboard = (Keyboard*) param;
+		keyboard->run();
+	} catch (...)
+	{
+		printf("Main: Exception on keyboard\n");
+		exit(2);
+	}
 
-
-
+	Tools::debug("Main: proc_keyboard: leave.");
+	return NULL;
+}
 
 
 
