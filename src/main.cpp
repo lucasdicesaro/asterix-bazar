@@ -3,6 +3,7 @@
 #include "listener.h"
 #include "logic.h"
 #include "keyboard.h"
+#include "stock.h"
 #include "common/tools.h"
 #include <iostream>
 #include <pthread.h>
@@ -19,7 +20,7 @@ void* proc_keyboard (void* param);
 char *nombre_nodo;
 int listener_port;
 
-int main()
+int main(int argc, char *argv[])
 {				
 	signal(SIGTERM, sig_handler);
 	signal(SIGINT, sig_handler);
@@ -34,12 +35,19 @@ int main()
 	
 	listener_port = tools->get_listener_port();
 	Tools::info_label_value("Main: listener_port", listener_port);
-	
+
+	// inicializa productos a comprar y vender segun parametros
+	if (argc > 2) 
+	{
+		Stock* stock = Stock::instance();
+		stock->set_compro(argv[1]);
+		stock->set_vendo(argv[2]);
+	}
 	
 	Router* router = Router::instance();
 	Listener* listener = Listener::instance();		
 	Logic* logic = Logic::instance();
-	Keyboard * keyboard = Keyboard ::instance();
+	Keyboard * keyboard = Keyboard ::instance();        
 	
 	pthread_t thr_logic, thr_router, thr_listener, thr_keyboard;
 	pthread_create(&thr_router, NULL, proc_router, router);
