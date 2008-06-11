@@ -4,6 +4,8 @@
 #include "common/types.h"
 #include "logic.h"
 #include "router.h"
+#include "stock.h"
+#include "common/tools.h"
 #include <assert.h>
 
 extern char *nombre_nodo;
@@ -17,6 +19,18 @@ Logic::Logic()
 {
 	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
 	Logic::HOPCOUNT = reconnectParams->hopcount;
+	
+	Stock* stock = Stock::instance();
+	stock->load_stock();
+	
+	Tools* tools = Tools::instance();
+	Tools::info_label_value("Logic: stock de sal:", stock->get_stock("sal"));
+	Tools::info_label_value("Logic: stock de pescado:", stock->get_stock("pescado"));
+	Tools::info_label_value("Logic: stock de verdura:", stock->get_stock("verdura"));
+	std::string str_compro = stock->get_compro();
+	std::string str_vendo = stock->get_vendo();
+	Tools::info("Logic: compro: " + str_compro);
+	Tools::info("Logic: vendo: " + str_vendo);
 }
 
 Logic::~Logic()
@@ -92,8 +106,10 @@ void Logic::on_look_up()
 {
 	char logBuffer[BUFFER_SIZE];
 	
-	// TODO definir los criterios del producto a elegir para comprar y la cantidad	
-	Mensaje *mensaje = build_look_up_msg(PRODUCTO_SAL, 2);
+	//obtiene producto a comprar de clase STOCK
+	Stock* stock = Stock::instance();
+	std::string str_compro = stock->get_compro();
+	Mensaje *mensaje = build_look_up_msg(str_compro, 2);
 	add_nodo(mensaje, nombre_nodo);
 	
 	//Tools::debug("Logic: on_event: Se agrego NODO");
@@ -205,7 +221,7 @@ void Logic::on_buy(const void* msg)
 	// Despues borrar esto. SOLO ES PRUEBA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	sleep(60);
 	Event ev;
-	ev.id = DO_LOOKUP;		
+	ev.id = DO_LOOKUP;
 	this->post_event(ev, true);	
 		
 		
@@ -251,14 +267,31 @@ void Logic::on_client_msg(const void* xml_tag)
 
 void Logic::on_codigo_look_up(Mensaje *mensaje)
 {
+	Stock* stock = Stock::instance();
+	bool tengoProductoCantidad = false;
+		
 	char logBuffer[BUFFER_SIZE];
 	memset(logBuffer, 0 , sizeof(logBuffer));
 	sprintf(logBuffer, "Logic: on_codigo_look_up: Tengo [%d] unidades de [%s]?", 
 			mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 	Tools::debug(logBuffer);
 	
-	// TODO Determinar las condiciones que dicen si tengo o no el producto y la cantidad
-	bool tengoProductoCantidad = false;
+	// Checkea stock para determinar si vendo lo solicitado y tengo stock
+	
+	std::string producto_solicitado = mensaje->get_product_name();
+	int cantidad_solicitada = mensaje->get_cantidad();
+	char* vendo = stock->get_vendo();
+	if ((vendo == producto_solicitado) && (stock->get_stock(producto_solicitado) >= cantidad_solicitada)) 
+	{
+		Tools::debug("Logic: Vendo y tengo lo que pide");
+		tengoProductoCantidad = true;
+	}
+	else
+	{
+		Tools::debug("Logic: NO tengo o vendo lo que pide");
+		tengoProductoCantidad = false;
+	}
+	
 	Event ev;
 	ev.tag = mensaje;
 	if (tengoProductoCantidad)
