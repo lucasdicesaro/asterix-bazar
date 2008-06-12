@@ -29,9 +29,15 @@ void Stock::load_stock()
 
 void Stock::decrement_stock(char* product_name, int cantidad)
 {
+	char logBuffer[BUFFER_SIZE];
 	if (mapa_stock.count(product_name) > 0 && mapa_stock[product_name] > cantidad) 
 		mapa_stock[product_name] = mapa_stock[product_name]-cantidad;
-	//TODO: Como levantar el error si decrementa a menos de 0?
+	else
+	{
+		//TODO: Como levantar el error si decrementa a menos de 0?	
+		sprintf(logBuffer, "Stock: decrement_stock: No se puede decrementar el %s en %d unidades, sabiendo que tengo %d unidades", product_name, cantidad, mapa_stock[product_name]);
+		Tools::warn(logBuffer);
+	}
 }
 
 void Stock::increment_stock(char* product_name, int cantidad)
@@ -46,6 +52,13 @@ int Stock::get_stock(std::string product_name)
 		return mapa_stock[product_name];
 	else
 		return -1;
+}
+
+
+void Stock::set_stock(std::string product_name, int cantidad)
+{
+	// Puede pisarse o acumularse, eso se decide
+	mapa_stock[product_name] = cantidad;
 }
 
 char* Stock::get_compro()

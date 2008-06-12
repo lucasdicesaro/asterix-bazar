@@ -54,9 +54,7 @@ class Listener : public Runner
 	    struct sockaddr_in remoteaddr; // client address
 		int newfd;        // newly accept()ed socket descriptor
 		int nbytes;			//Size of received message
-		int yes;        // for setsockopt() SO_REUSEADDR, below
-		socklen_t addrlen;
-		int i, j;
+		socklen_t addrlen;		
 		int cant_clientes;
 		
 		char logBuffer[BUFFER_SIZE];        // Buffer for log

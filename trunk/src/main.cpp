@@ -19,6 +19,7 @@ void* proc_keyboard (void* param);
 
 char *nombre_nodo;
 int listener_port;
+bool en_operacion = false;
 
 int main(int argc, char *argv[])
 {				
@@ -65,14 +66,14 @@ int main(int argc, char *argv[])
 
 void sig_handler(int id)
 {
-	Tools::debug("Main: Termination Signal arrived");
+	Tools::debug("Main: sig_handler: Termination Signal arrived");
 	if (id == SIGINT) 
 	{
-		Tools::debug("Main: Se recibio la señal SIGINT");
+		Tools::debug("Main: sig_handler: Se recibio la señal SIGINT");
 	} 
 	else if (id == SIGTERM) 
 	{
-		Tools::debug("Main: Se recibio la señal SIGTERM");
+		Tools::debug("Main: sig_handler: Se recibio la señal SIGTERM");
 	}
 	
 	Listener::instance()->close_TCP_connections();
@@ -81,9 +82,10 @@ void sig_handler(int id)
 	Event ev;
 	ev.id = QUIT;
 	Router::instance()->post_event(ev, true);
-	Listener::instance()->post_event(ev, true);	
+	Listener::instance()->post_event(ev, true);
+	Logic::instance()->post_event(ev, true);
+	Keyboard::instance()->post_event(ev, true);	
 	exit(15);	
-	
 }
 
 void* proc_logic(void* param)
