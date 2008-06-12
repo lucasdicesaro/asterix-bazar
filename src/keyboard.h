@@ -18,7 +18,7 @@ class Keyboard : public Runner
 		*/
 		virtual void on_event(const Event& ev);
 
-		int get_key();	
+		void get_key();	
 
 	protected:
 		Keyboard();
