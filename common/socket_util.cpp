@@ -140,6 +140,7 @@ int SocketUtil::servidor_aceptar_conexion_cliente(int sock)
 */
 int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
 {
+	//Tools::debug_label_value ("SocketUtil: servidor_abrir_conexion_tcp: listenerPort", listenerPort);
     struct sockaddr_in myaddr;     // server address
     //struct sockaddr_in remoteaddr; // client address
     int yes=1;        // for setsockopt() SO_REUSEADDR, below

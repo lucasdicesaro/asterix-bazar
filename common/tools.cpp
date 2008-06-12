@@ -30,39 +30,54 @@ Debug
 */
 void Tools::debug(const char* msg)
 {
-	printf("%s %s\n", DEBUG_LEVEL, msg);
+	if (Tools::instance()->debug_level)
+		printf("%s %s\n", DEBUG_LEVEL, msg);
+}
+
+void Tools::debug(std::string msg)
+{
+	if (Tools::instance()->debug_level)	
+		printf("%s %s\n", DEBUG_LEVEL, msg.c_str());	
 }
 
 void Tools::debug(const char* nombre_nodo, const char* msg)
 {
-	printf("%s - %s %s\n", nombre_nodo, DEBUG_LEVEL, msg);
+	if (Tools::instance()->debug_level)	
+		printf("%s - %s %s\n", nombre_nodo, DEBUG_LEVEL, msg);
 }
 
 
 void Tools::info(std::string msg)
 {
-	printf("%s %s\n", INFO_LEVEL, msg.c_str());	
+	if (Tools::instance()->info_level)	
+		printf("%s %s\n", INFO_LEVEL, msg.c_str());	
 }
 
 void Tools::warn(std::string msg)
 {
-	printf("%s %s\n", WARN_LEVEL, msg.c_str());	
+	if (Tools::instance()->warn_level)	
+		printf("%s %s\n", WARN_LEVEL, msg.c_str());	
 }
 
 void Tools::error(std::string msg)
 {
-	printf("%s %s\n", ERROR_LEVEL, msg.c_str());
-	//perror(msg.c_str());	
+	if (Tools::instance()->error_level)	
+	{
+		printf("%s %s\n", ERROR_LEVEL, msg.c_str());
+		//perror(msg.c_str());	
+	}
 }
 
 void Tools::debug_label_value(std::string label, int value)
 {
-	std::cout << DEBUG_LEVEL << " " << label.c_str() << ": " << value << std::endl;
+	if (Tools::instance()->debug_level)
+		std::cout << DEBUG_LEVEL << " " << label.c_str() << ": " << value << std::endl;
 }
 
 void Tools::info_label_value(std::string label, int value)
 {
-	std::cout << INFO_LEVEL << " " << label.c_str() << ": " << value << std::endl;
+	if (Tools::instance()->info_level)	
+		std::cout << INFO_LEVEL << " " << label.c_str() << ": " << value << std::endl;
 }
 
 /**
@@ -159,10 +174,10 @@ int Tools::Config_Parser (const char* FileName)
 			strcpy(nombre_nodo,  Value);
 		}
 
-		if  (strcmp(Param, "listener_port") == 0)
-		{
-			listener_port = atoi(Value);
-		}		
+		//if  (strcmp(Param, "listener_port") == 0)
+		//{
+		//	listener_port = atoi(Value);
+		//}		
 		if  (strcmp(Param, "intentos_reconexion") == 0)
 		{
 			reconnectParams->intentos_reconexion = atoi(Value);
@@ -185,7 +200,13 @@ int Tools::Config_Parser (const char* FileName)
 			ip = strtok(ip_port, ":");
 			port = atoi(strtok(NULL , ":"));
 			//printf ("ip: %s - port: %d\n", ip, port);
-						
+			
+			// Guardo el listener_port, si el nodo que estoy parseando soy yo
+			if (strcmp(nombre, nombre_nodo) == 0)
+			{
+				listener_port = port;
+			}
+			
 			strcpy(conf.nombre, nombre);
 			strcpy(conf.ip, ip);			
 			conf.port = port;
@@ -194,6 +215,24 @@ int Tools::Config_Parser (const char* FileName)
 			listaConfig.push_back(conf);			
 		}
 		
+		if  (strcmp(Param, DEBUG_LEVEL) == 0)
+		{
+			debug_level = atoi(Value);
+		}		
+		if  (strcmp(Param, INFO_LEVEL) == 0)
+		{
+			info_level = atoi(Value);
+		}				
+		if  (strcmp(Param, WARN_LEVEL) == 0)
+		{
+			warn_level = atoi(Value);
+		}
+		if  (strcmp(Param, ERROR_LEVEL) == 0)
+		{
+			error_level = atoi(Value);
+		}
+		
+
 		/*	Leo la siguiente linea 
     	*/
 		fgets(Line, sizeof(Line), CONFIG_FILE);
