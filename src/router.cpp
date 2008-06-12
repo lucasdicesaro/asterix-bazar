@@ -69,9 +69,20 @@ void Router::on_event(const Event& ev)
 			Tools::debug("Router: on_event: SEND_TO_SOCKET:");
 			send_to_next_node_message(ev.tag);
 			break;
+			
+		case RT_SEND_TO_P2P_SOCKET:
+			Tools::debug("Router: on_event: RT_SEND_TO_P2P_SOCKET:");
+			send_to_p2p_socket_message(ev.tag);
+			break;			
+			
 		case RT_START_P2P_CONNECT:
 			Tools::debug("Router: on_event: RT_START_P2P_CONNECT:");
 			start_p2p_connect(ev.tag);
+			break;	
+			
+		case RT_CLOSE_P2P_CONNECT:
+			Tools::debug("Router: on_event: RT_CLOSE_P2P_CONNECT:");
+			close_p2p_connect(ev.tag);
 			break;			
 
 		case RT_ADD_NODO_SERVIDOR:		
@@ -193,28 +204,6 @@ void Router::start_connections()
 			Tools::debug("Router: start_connections: Se logro la conexion con ambos vecinos");							
 			Tools::info("Se logro la conexion con ambos vecinos");
 		}
-
-		
-		// TODO Decidir, a apartir de que evento se va a empezar a hacer "compras"
-		/*if (!enviado1 && sock_vecino1 != SOCK_ERRONEO)
-		{
-			enviado1 = true;
-			Event ev;
-			ev.id = DO_LOOKUP;		
-			Logic::instance()->post_event(ev, true);	
-		}
-		else if (!enviado2 && sock_vecino2 != SOCK_ERRONEO)
-		{
-			enviado2 = true;
-			Event ev;
-			ev.id = DO_LOOKUP;		
-			Logic::instance()->post_event(ev, true);	
-		}*/
-		bool al_menos_una_conexion = sock_vecino1 != SOCK_ERRONEO || sock_vecino2 != SOCK_ERRONEO;
-		// Si no se mostro el menu y, 
-		// (estoy conectado con mis dos vecinos o
-		// (estoy conectado con algun vecino, pero no quedan intentos de reconexion))
-		//if (!show_menu && (!conexiones_incompletas || (intentos_reconexion == 0 && al_menos_una_conexion)))
 		
 		// Solo si no se mostro aun el menu
 		if (!show_menu)
@@ -223,17 +212,6 @@ void Router::start_connections()
 			Event ev;
 			ev.id = KB_SHOW_MENU;		
 			Keyboard::instance()->post_event(ev, true);
-		}
-		
-				
-		if (al_menos_una_conexion) 
-		{
-			// Funcionalidad comentada: Ahora se maneja por timeout: Cada tanto le llega un evento DO_LOOKUP a Logic (Ver Logic::on_timeout)
-			
-			// Al menos hay una conexion con alguno de los dos vecinos: Comenzar a Comprar / Vender
-			//Event ev;
-			//ev.id = DO_LOOKUP;		
-			//Logic::instance()->post_event(ev, true);
 		}
 	}
 }
@@ -377,6 +355,7 @@ void Router::send_broadcast_message(const void* msg)
 void Router::start_p2p_connect(const void* msg)
 {
 	char logBuffer[BUFFER_SIZE];
+	char socketBuffer[BUFFER_SIZE];	
 	Mensaje *mensaje = (Mensaje *)msg;
 	std::string vendedor = mensaje->get_vendedor();
 	//sprintf(logBuffer, "Router: start_p2p_connect:  [%s]", mensaje_xml.c_str());		
@@ -386,12 +365,53 @@ void Router::start_p2p_connect(const void* msg)
 	Tools::debug(logBuffer);
 	
 	sock_p2p = try_connection(vendedor.c_str());
-	sprintf(logBuffer, "Router: start_p2p_connect: Se obtuvo de try_connection el socket [%d]", sock_p2p);		
-	Tools::debug(logBuffer);
+	if (sock_p2p != SOCK_ERRONEO)
+	{
+		sprintf(logBuffer, "Router: start_p2p_connect: Se obtuvo de try_connection el socket [%d]", sock_p2p);		
+		Tools::debug(logBuffer);
+			
+		memset(socketBuffer, 0, BUFFER_SIZE);
+		sprintf(socketBuffer, "%d", sock_p2p);				
+		// Le envio al Listener el socket p2p (nueva conexion)
+		Event evListener;
+		evListener.id = LS_ADD_SOCKET_P2P;
+		evListener.tag = Tools::duplicate (socketBuffer);
+		Listener::instance()->post_event(evListener, true);			
+
+		sprintf(logBuffer, "Esperando respuesta del vendedor [%s]...", vendedor.c_str());		
+		Tools::info(logBuffer);		
+		sleep(DEFAULT_WAIT_SECONDS+1); // Solo para darle tiempo a que el listener, incorpore en su set de socket de escucha al socket p2p
 		
-	send_to_socket_message(sock_p2p, mensaje_xml);
+		send_to_socket_message(sock_p2p, mensaje_xml);
+	}		
+	else
+	{
+		sprintf(logBuffer, "Router: start_p2p_connect: No se logro la comunicacion p2p con el vendedor [%s]", vendedor.c_str());		
+		Tools::error(logBuffer);	
+	}
 }
 
+
+void Router::close_p2p_connect(const void* msg)
+{
+	char logBuffer[BUFFER_SIZE];
+	//Mensaje *mensaje = (Mensaje *)msg;
+	//std::string mensaje_xml = mensaje->to_string();
+	//sprintf(logBuffer, "Router: close_p2p_connect: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
+	//Tools::debug(logBuffer);
+	
+	//send_to_socket_message(sock_p2p, mensaje_xml);
+	
+	//sprintf(logBuffer, "Esperando que le llegue la respuesta al vendedor [%s], para asi cerrar el socket p2p...", mensaje->get_vendedor().c_str());
+	//Tools::info(logBuffer);
+	//sleep(DEFAULT_WAIT_SECONDS+1);
+	
+	sprintf(logBuffer, "Cerrando socket p2p [%d]", sock_p2p);		
+	Tools::info(logBuffer);
+	
+	close(sock_p2p);
+	sock_p2p = SOCK_ERRONEO;
+}
 
 void Router::send_to_next_node_message(const void* msg)
 {
@@ -409,6 +429,19 @@ void Router::send_to_next_node_message(const void* msg)
 	sprintf(logBuffer, "Router: send_to_next_node_message: Se obtuvo de nodo_socket_map[%s] el socket [%d]", next_node_name.c_str(), socket);		
 	Tools::debug(logBuffer);	
 	send_to_socket_message(socket, mensaje_xml);
+}
+
+
+void Router::send_to_p2p_socket_message(const void* msg)
+{
+	char logBuffer[BUFFER_SIZE];
+	Mensaje *mensaje = (Mensaje *)msg;	
+	
+	std::string mensaje_xml = mensaje->to_string();
+	sprintf(logBuffer, "Router: send_to_next_node_message: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
+	Tools::debug(logBuffer);
+	
+	send_to_socket_message(sock_p2p, mensaje_xml);
 }
 
 

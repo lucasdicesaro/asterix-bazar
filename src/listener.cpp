@@ -31,6 +31,7 @@ Listener* Listener::single_instance = NULL;
 Listener::Listener()
 {
 	cant_clientes = 0;
+	sock_p2p = SOCK_ERRONEO;
 }
 
 Listener::~Listener()
@@ -65,7 +66,7 @@ void Listener::on_event(const Event& ev)
 			socket = (char*)ev.tag;			
 			id_socket = atoi(socket.c_str());
 			add_socket(id_socket);
-			break;			
+			break;
 			
 		case LS_RM_SOCKET:
 			Tools::debug("Listener: on_event: LS_RM_SOCKET:");
@@ -73,6 +74,18 @@ void Listener::on_event(const Event& ev)
 			id_socket = atoi(socket.c_str());
 			rm_socket(id_socket);
 			break;			
+			
+		case LS_ADD_SOCKET_P2P:
+			Tools::debug("Listener: on_event: LS_ADD_SOCKET_P2P:");
+			socket = (char*)ev.tag;			
+			id_socket = atoi(socket.c_str());
+			add_socket_p2p(id_socket);
+			break;			
+			
+		case LS_RM_SOCKET_P2P:
+			Tools::debug("Listener: on_event: LS_RM_SOCKET_P2P:");
+			rm_socket_p2p();
+			break;						
 			
 		default:
 			Tools::debug("Listener: on event: *UNKNOWN*.");
@@ -100,11 +113,10 @@ void Listener::prepare_connections()
 }
 
 void Listener::client_connections_admin()
-{
-//  while(true) 
-//  {    
-    timeout.tv_sec = 5;// Timeout del select
-    timeout.tv_usec = 0;	
+{   
+    timeout.tv_sec = DEFAULT_WAIT_SECONDS;// Timeout del select
+    timeout.tv_usec = DEFAULT_WAIT_MILISECONDS;	
+	
     read_fds = master; // copy it
 	//Tools::debug("Listener: client_connections_admin: antes del select");	
 	int retornoSelect;
@@ -166,6 +178,10 @@ void Listener::client_connections_admin()
 						memset(nombre_nodo_vecino, 0, BUFFER_SIZE);
 						nombre_nodo_vecino = SocketUtil::recibir_mensaje(newfd);						
 						decode_handshake_msg(nombre_nodo_vecino);
+						
+						
+						// TODO Atencion aca debo detectar que si es una conexion directa (p2p), la que acepte!!!!!!!!!!!!
+						
 						
 						// Armo el mensaje con mi nombre de nodo y lo mando a mi vecino
 						char *rta_hndsk = get_rta_handshake_msg();
@@ -240,8 +256,16 @@ void Listener::client_connections_admin()
                         }
 																		
                         close(i); // bye!
-                        FD_CLR(i, &master); // remove from master set
-   						socket_ip_map.erase(i); //Remuevo la ip del mapa de control interno
+                        FD_CLR(i, &master);     // remove from master set
+   						socket_ip_map.erase(i); // Remuevo la ip del mapa de control interno
+						
+						// Si el sock_p2p no esta cerrada y el socket que se cierra es el sock_p2p
+						if (sock_p2p != SOCK_ERRONEO && i == sock_p2p)
+						{
+    		                sprintf(logBuffer, "Se cerro la conexion p2p. Socket %d", i);
+							Tools::info(logBuffer);							
+							rm_socket_p2p(); // Se borra la variable de control
+						}
                     } 
                     else 
                     {// we got some data from a client
@@ -249,26 +273,37 @@ void Listener::client_connections_admin()
 						//memset(logBuffer, 0 , sizeof(logBuffer));
 						//sprintf(logBuffer, "Listener: client_connections_admin: Paquete recibido del socker %d: [%s]", i, echoBuffer);
 						//Tools::debug(logBuffer);
-								
-						if (!en_operacion) 
+						
+						if (!en_operacion)
 						{
-					    	Event ev;
-					    	ev.id = CLIENT_MSG;
+							Event ev;
+							ev.id = CLIENT_MSG;
 							ev.tag = Tools::duplicate(echoBuffer);
-							Logic::instance()->post_event(ev, true);                        
+							Logic::instance()->post_event(ev, true);
 						}
 						else
 						{
-							sprintf(logBuffer, "Se descarto el mensaje porque el nodo se encuentra en operacion. Mensaje [%s]", echoBuffer);
-							Tools::info(logBuffer);							
-						}
+							if (sock_p2p != SOCK_ERRONEO && i == sock_p2p)
+							{
+								sprintf(logBuffer, "Aunque estoy en operacion, recibo este paquete porque proviene del socket p2p");
+								Tools::info(logBuffer);
+								
+								Event ev;
+								ev.id = CLIENT_MSG;
+								ev.tag = Tools::duplicate(echoBuffer);
+								Logic::instance()->post_event(ev, true);
+							}
+							else
+							{
+								sprintf(logBuffer, "Se descarto el mensaje porque el nodo se encuentra en operacion. Mensaje [%s]", echoBuffer);
+								Tools::info(logBuffer);
+							}
+						}																			
                     }
                 }
             }
-        }
-			
-	}			
-//  }
+        }			
+	}
 	Event ev;
 	ev.id = LOOP;
 	this->post_event(ev, true); 	
@@ -286,16 +321,46 @@ void Listener::add_socket(int id_socket)
 	if ( fdmax < id_socket )  // Si el socket que asigne al master es mas alto 
 	    fdmax = id_socket;    // que el maximo socket, piso el maximo
 	
-	Event evRta;
-	evRta.id = LOOP;
-	this->post_event(evRta, true); 	
+//	Event evRta;
+//	evRta.id = LOOP;
+//	this->post_event(evRta, true); 	
 }
 
+// TODO no implementado aun
 void Listener::rm_socket(int id_socket)
 {		
-	Event evRta;
-	evRta.id = LOOP;
-	this->post_event(evRta, true); 
+	//Event evRta;
+	//evRta.id = LOOP;
+	//this->post_event(evRta, true); 
+}
+
+
+void Listener::add_socket_p2p(int id_socket)
+{
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Listener: add_socket_p2p: Se agrega al conjunto de sockets de escucha, el socket p2p [%d]", id_socket);
+	Tools::debug(logBuffer);		
+		
+	// add id_socket to the master set	
+    FD_SET(id_socket, &master);
+	
+	if (fdmax < id_socket)  // Si el socket que asigne al master es mas alto
+	    fdmax = id_socket;    // que el maximo socket, piso el maximo
+	
+	sock_p2p = id_socket;
+	
+//	Event evRta;
+//	evRta.id = LOOP;
+//	this->post_event(evRta, true); 	
+}
+
+void Listener::rm_socket_p2p()
+{		
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Listener: rm_socket_p2p: Se remueve del conjunto de sockets de escucha, el socket p2p");
+	Tools::debug(logBuffer);		
+	
+	sock_p2p = SOCK_ERRONEO;
 }
 
 void Listener::decode_handshake_msg(const char *msg)

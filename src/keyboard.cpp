@@ -130,7 +130,7 @@ void Keyboard::procesar_submenu1()
 void Keyboard::procesar_lanzar()
 {
 	Event ev;
-	ev.id = DO_START_BUY;
+	ev.id = DO_LOOKUP;
 	Logic::instance()->post_event(ev, true);
 }
 
