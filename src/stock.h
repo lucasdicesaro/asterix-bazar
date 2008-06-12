@@ -15,11 +15,16 @@ class Stock
 		static Stock* instance();
 		
 		void load_stock();
+		
 		int get_stock(std::string product_name);
+		void set_stock(std::string product_name, int cantidad);
+		
 		void decrement_stock(char* product_name, int cantidad);
 		void increment_stock(char* product_name, int cantidad);
+		
 		char* get_compro();
 		void set_compro(char* product_name);
+		
 		char* get_vendo();
 		void set_vendo(char* product_name);
 			

@@ -18,9 +18,14 @@ class Keyboard : public Runner
 		*/
 		virtual void on_event(const Event& ev);
 
+	protected:		
 		void get_key();	
+		void procesar_submenu1();		
+		void procesar_lanzar();
+		int elegir_producto();
 
-	protected:
+	protected:	
+	
 		Keyboard();
 		~Keyboard();
 		static Keyboard* single_instance;				

@@ -9,6 +9,7 @@
 #include <assert.h>
 
 extern char *nombre_nodo;
+extern bool en_operacion;
 
 Logic* Logic::single_instance = NULL;
 int Logic::HOPCOUNT;
@@ -24,13 +25,13 @@ Logic::Logic()
 	stock->load_stock();
 	
 	Tools* tools = Tools::instance();
-	Tools::info_label_value("Logic: stock de sal:", stock->get_stock("sal"));
-	Tools::info_label_value("Logic: stock de pescado:", stock->get_stock("pescado"));
-	Tools::info_label_value("Logic: stock de verdura:", stock->get_stock("verdura"));
+	Tools::debug_label_value("Logic: stock de sal:", stock->get_stock("sal"));
+	Tools::debug_label_value("Logic: stock de pescado:", stock->get_stock("pescado"));
+	Tools::debug_label_value("Logic: stock de verdura:", stock->get_stock("verdura"));
 	std::string str_compro = stock->get_compro();
 	std::string str_vendo = stock->get_vendo();
-	Tools::info("Logic: compro: " + str_compro);
-	Tools::info("Logic: vendo: " + str_vendo);
+	Tools::debug("Logic: compro: " + str_compro);
+	Tools::debug("Logic: vendo: " + str_vendo);
 }
 
 Logic::~Logic()
@@ -47,52 +48,57 @@ Logic* Logic::instance()
 void Logic::on_event(const Event& ev)
 {	
 	char *buffer = new char[BUFFER_SIZE];
-   switch (ev.id)
+	int cantidad;	
+	switch (ev.id)
 	{
+		int cantidad;
 		case INIT:
 			Tools::debug("Logic: on_event: INIT:");
-			break;
-			
-		case RUN_TIMEOUT:
-			Tools::debug("Logic: on_event: RUN_TIMEOUT:");
-			on_timeout();
-			break;			
+			break;		
 			
 		case DO_LOOKUP:
 			Tools::debug("Logic: on_event: DO_LOOKUP:");
-			on_look_up();			
+			// Recibir la cantidad y producto(?) del teclado
+			cantidad = 2;
+			on_send_look_up(Stock::instance()->get_compro(), cantidad);			
 			break;
 			
 		case DO_LOOKUP_FORWARD:
 			Tools::debug("Logic: on_event: DO_LOOKUP_FORWARD:");			
-			on_look_up_forward(ev.tag);
+			on_send_look_up_forward(ev.tag);
 			break;								
 			
 		case DO_REPLY:
 			Tools::debug("Logic: on_event: DO_REPLY:"); 
-			on_replay(ev.tag);
+			on_send_replay(ev.tag);
 			break;
 						
 		case DO_REPLY_FORWARD:
 			Tools::debug("Logic: on_event: DO_REPLY_FORWARD:");
-			on_replay_forward(ev.tag);			
+			on_send_replay_forward(ev.tag);			
 			break;			
 			
 		case DO_BUY:
 			Tools::debug("Logic: on_event: DO_BUY:");
-			on_buy(ev.tag);			
+			on_send_buy(ev.tag);			
 			break;			
 			
 		case CLIENT_MSG:
 			Tools::debug("Logic: on_event: CLIENT_MSG:");
 			on_client_msg(ev.tag);
 			break;			
+			
+		case DO_START_BUY:
+			Tools::debug("Logic: on_event: DO_START_BUY");
+			start_buy();
+			break;				
 
-	   case TECLA:
-			sprintf(buffer, "Logic: on_event: TECLA: %s", (char*) ev.tag);
-   			Tools::debug(buffer);
+		case SET_STOCK_SAL:
+			Tools::debug("Logic: on_event: SET_STOCK_SAL");
+			buffer = (char*) ev.tag;		
+			cantidad = atoi(buffer);		
+			set_stock_product(PRODUCTO_SAL, cantidad);
 			break;			
-
 		  
 		default:
 			Tools::debug("Logic: on event: *UNKNOWN*.");
@@ -101,30 +107,37 @@ void Logic::on_event(const Event& ev)
 }
 
 
-void Logic::on_timeout()
+
+
+
+
+// TODO despues cambiar el nombre del metodo a uno conveniente
+void Logic::start_buy()
 {
-	Tools::debug("Logic: on_timeout:");
 	Event ev;
-	ev.id = DO_LOOKUP;		
-	this->post_event(ev, true);
+	ev.id = DO_LOOKUP;
+	this->post_event(ev, true);	
 }
 
-void Logic::on_look_up()
+void Logic::set_stock_product(std::string product_name, int cantidad)
+{
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Se setea %d unidades de %s en el stock", cantidad, product_name.c_str());
+	Tools::info(logBuffer);
+	
+	Stock::instance()->set_stock(product_name, cantidad);
+}
+
+
+
+void Logic::on_send_look_up(std::string product_name, int cantidad)
 {
 	char logBuffer[BUFFER_SIZE];
 	
-	//obtiene producto a comprar de clase STOCK
-	Stock* stock = Stock::instance();
-	std::string str_compro = stock->get_compro();
-	Mensaje *mensaje = build_look_up_msg(str_compro, 2);
+	// Obtiene producto a comprar de clase STOCK
+	Mensaje *mensaje = build_look_up_msg(product_name, cantidad);
 	add_nodo(mensaje, nombre_nodo);
-	
-	//Tools::debug("Logic: on_event: Se agrego NODO");
-	
-	//memset(logBuffer, 0 , sizeof(logBuffer));
-	//sprintf(logBuffer, "Logic: on_event: Se va a enviar el mensaje [%s]", mensaje->to_string().c_str());
-	//Tools::debug(logBuffer);	
-	
+		
 	Event evRta;
 	evRta.id = FIRST_BROADCAST;
 	evRta.tag = Tools::duplicate(mensaje->to_string());
@@ -132,17 +145,18 @@ void Logic::on_look_up()
 	Router::instance()->post_event(evRta, true);	
 }
 
-void Logic::on_look_up_forward(const void* msg)
+void Logic::on_send_look_up_forward(const void* msg)
 {
 	Mensaje *mensaje = (Mensaje *)msg;
+	char logBuffer[BUFFER_SIZE];
 	
 	if (mensaje != NULL)
-	{				
-		less_hopcount(mensaje);
+	{						
 		if (mensaje->get_hopcount() > 0)				
-		{					
+		{			
+			less_hopcount(mensaje);
 			add_nodo(mensaje, nombre_nodo);					
-			Tools::debug("Logic: on_event: Reenviando el LOOKUP");					
+			Tools::debug("Logic: on_send_look_up_forward: Reenviando el LOOKUP");					
 			
 			Event evRta;
 			evRta.id = BROADCAST;
@@ -152,37 +166,25 @@ void Logic::on_look_up_forward(const void* msg)
 		}
 		else 
 		{
-			//Tools::debug("Logic: on_event: Se descarto el mensaje, por agotarse su hopcount");
-			
-			
-			
-		// BORRAR !!! ESTO !!! QUE ES SOLO PARA PRUEBA!!!
-		Tools::debug("Logic: on_event: SE INICIA LA RESPUESTA");
-		Event evRta;	
-		evRta.id = DO_REPLY;
-		evRta.tag = mensaje;
-		this->post_event(evRta, true);
-		// BORRAR !!! ESTO !!! QUE ES SOLO PARA PRUEBA!!!
-
-			
-			
+			Tools::debug("Logic: on_send_look_up_forward: Se descarto el mensaje, por agotarse su hopcount");
+			sprintf(logBuffer, "Se descarto el mensaje originado por [%s], por agotarse su hopcount. El mensaje buscaba %d unidades de [%s]", 
+				mensaje->get_creator_node_name().c_str(), mensaje->get_cantidad(), mensaje->get_product_name().c_str());			
+			Tools::info(logBuffer);
 		}	
 	}
 	else
 	{
-		Tools::error("Logic: on_event: mensaje es NULL en DO_LOOKUP_FORWARD");
+		Tools::error("Logic: on_send_look_up_forward: mensaje es NULL en DO_LOOKUP_FORWARD. Se descarta");
 	}
 }
 
-void Logic::on_replay(const void* msg)
+void Logic::on_send_replay(const void* msg)
 {
 	Mensaje *mensaje_old = (Mensaje *)msg;
 	Mensaje *mensaje = build_reply_msg(mensaje_old);
 	if (mensaje != NULL)
 	{
-		Tools::debug("Logic: on_event: Enviando el REPLY");
-		// TODO se borra el nodo la 1era vez ?
-		//less_nodo(mensaje);
+		Tools::debug("Logic: on_send_replay: Enviando el REPLY");
 		
 		Event evRta;
 		evRta.id = SEND_TO_SOCKET;
@@ -191,16 +193,16 @@ void Logic::on_replay(const void* msg)
 	}
 	else
 	{
-		Tools::error("Logic: on_event: mensaje es NULL en DO_REPLY_FORWARD. Operacion descatada");
+		Tools::error("Logic: on_send_replay: mensaje es NULL en DO_REPLY_FORWARD. Operacion descatada");
 	}		
 }
 
-void Logic::on_replay_forward(const void* msg)
+void Logic::on_send_replay_forward(const void* msg)
 {
 	Mensaje *mensaje = (Mensaje *)msg;
 	if (mensaje != NULL)
 	{
-		Tools::debug("Logic: on_event: Reenviando el REPLY");
+		Tools::debug("Logic: on_send_replay_forward: Reenviando el REPLY");
 		less_nodo(mensaje);		
 		
 		Event evRta;
@@ -210,28 +212,23 @@ void Logic::on_replay_forward(const void* msg)
 	}
 	else
 	{
-		Tools::error("Logic: on_event: mensaje es NULL en DO_REPLY_FORWARD");
+		Tools::error("Logic: on_send_replay_forward: mensaje es NULL en DO_REPLY_FORWARD");
 	}
 }
 
-void Logic::on_buy(const void* msg)
+void Logic::on_send_buy(const void* msg)
 {
+	Tools::debug("Logic::on_send_buy:");
 	char logBuffer[BUFFER_SIZE];
-	std::string vendedor = (char *)msg;
 	
-	Mensaje *mensaje = build_buy_msg(vendedor, PRODUCTO_SAL, 2);
+	en_operacion = true;	
+	sprintf(logBuffer, "Voy a iniciar la negociacion. Me pongo en estado de operacion. Mi nombre es [%s]", nombre_nodo);
+	Tools::info(logBuffer);
+	
+	Mensaje *mensaje_old = (Mensaje *)msg;		
+	Mensaje *mensaje = build_buy_msg(mensaje_old);
 	// TODO Preparar todo para iniciar un connect al vendedor
-
-	
-	// SOLO ES PRUEBA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// Aca termina el ciclo por ahora.... Asi que puedo iniciar una nueva compra en segundos...
-	// Despues borrar esto. SOLO ES PRUEBA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	sleep(60);
-	Event ev;
-	ev.id = DO_LOOKUP;
-	this->post_event(ev, true);	
-		
-		
+			
 	//Event evRta;
 	//evRta.id = BROADCAST;
 	//evRta.tag = Tools::duplicate(mensaje->to_string());
@@ -254,75 +251,74 @@ void Logic::on_client_msg(const void* xml_tag)
 	sprintf(logBuffer, "Logic: on_client_msg: Mensaje recibido [%s]", xml.c_str());
 	Tools::debug(logBuffer);
 	
-	//memset(logBuffer, 0 , sizeof(logBuffer));
-	//sprintf(logBuffer, "Logic: mensaje->code [%s]", mensaje->get_code().c_str());
-	//Tools::debug(logBuffer);
-	
 	if (mensaje->get_code().compare(CODIGO_LOOKUP) == 0) 
 	{
-		on_codigo_look_up(mensaje);
+		on_receive_look_up(mensaje);
 	}
 	else if (mensaje->get_code().compare(CODIGO_REPLY) == 0)
 	{
-		on_codigo_replay(mensaje);
+		on_receive_replay(mensaje);
 	}
 	else if (mensaje->get_code().compare(CODIGO_BUY) == 0)
 	{
-		on_codigo_buy(mensaje);
+		on_receive_buy(mensaje);
 	}
 }
 
-void Logic::on_codigo_look_up(Mensaje *mensaje)
+void Logic::on_receive_look_up(Mensaje *mensaje)
 {
 	Stock* stock = Stock::instance();
-	bool tengoProductoCantidad = false;
 		
 	char logBuffer[BUFFER_SIZE];
 	memset(logBuffer, 0 , sizeof(logBuffer));
-	sprintf(logBuffer, "Logic: on_codigo_look_up: Tengo [%d] unidades de [%s]?", 
+	sprintf(logBuffer, "Logic: on_receive_look_up: Recibido del LookTengo [%d] unidades de [%s]?", 
 			mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 	Tools::debug(logBuffer);
 	
-	// Checkea stock para determinar si vendo lo solicitado y tengo stock
-	
+	// Checkea stock para determinar si vendo lo solicitado y tengo stock	
+	Event ev;
+	ev.tag = mensaje;	
 	std::string producto_solicitado = mensaje->get_product_name();
 	int cantidad_solicitada = mensaje->get_cantidad();
 	char* vendo = stock->get_vendo();
-	if ((vendo == producto_solicitado) && (stock->get_stock(producto_solicitado) >= cantidad_solicitada)) 
+	
+	if (producto_solicitado.compare(vendo))
 	{
-		Tools::debug("Logic: Vendo y tengo lo que pide");
-		tengoProductoCantidad = true;
+		sprintf(logBuffer, "Yo [%s], vendo lo que me estan pidiendo", nombre_nodo, mensaje->get_product_name().c_str());
+		Tools::info(logBuffer);
+		if (stock->get_stock(producto_solicitado) >= cantidad_solicitada)
+		{
+			sprintf(logBuffer, "y tengo la cantidad (%d) que me piden %d. Respondo el mensaje", stock->get_stock(producto_solicitado), mensaje->get_cantidad());			
+			Tools::info(logBuffer);
+			
+			ev.id = DO_REPLY;
+		}
+		else
+		{
+			sprintf(logBuffer, ", pero NO tengo la cantidad (%d) que me piden %d. Reenvio el mensaje", stock->get_stock(producto_solicitado), mensaje->get_cantidad());			
+			Tools::info(logBuffer);
+			
+			ev.id = DO_LOOKUP_FORWARD;
+		}
 	}
-	else
+	else 
 	{
-		Tools::debug("Logic: NO tengo o vendo lo que pide");
-		tengoProductoCantidad = false;
+		sprintf(logBuffer, "Yo [%s], NO vendo lo que me estan pidiendo. Reenvio el mensaje", nombre_nodo, mensaje->get_product_name().c_str());
+		Tools::info(logBuffer);
+		
+		ev.id = DO_LOOKUP_FORWARD;
 	}
 	
-	Event ev;
-	ev.tag = mensaje;
-	if (tengoProductoCantidad)
-	{			
-		ev.id = DO_REPLY;
-	}
-	else
-	{
-		ev.id = DO_LOOKUP_FORWARD;					
-	}
 	this->post_event(ev, true);	
 }
 
-void Logic::on_codigo_replay(Mensaje *mensaje)
+void Logic::on_receive_replay(Mensaje *mensaje)
 {
-	Tools::debug("Logic: on_codigo_replay:");
+	Tools::debug("Logic: on_receive_replay:");
 	char logBuffer[BUFFER_SIZE];
-	// TODO Determinar las condiciones que dicen si lo que me llega como REPLY
-	// es a partir de un LOOKUP mio o si lo tengo que seguir pasando por donde vino
-	// Supongo que tengo que guardar una lista de ids de los paquetes que envio 
-	// o bien, si queda un unico nodo y soy yo 
 	
-	// El paquete debe volver por el camino por donde fue.
-	// Si todo esta bien, cuando queda un nodo solo en el mensaje, 
+
+	// Si queda un nodo solo en el mensaje, 
 	// el nombre de ese nodo, tiene que coincidir con el nombre de nodo que lo inicio.
 	Event ev;		
 	std::string last_nodo_name;
@@ -330,35 +326,46 @@ void Logic::on_codigo_replay(Mensaje *mensaje)
 	{
 		last_nodo_name = mensaje->get_next_node_name();
 		memset(logBuffer, 0 , sizeof(logBuffer));
-		sprintf(logBuffer, "Logic: on_codigo_replay: Queda solo un nodo en el mensaje [%s]. Cant [%d]", last_nodo_name.c_str(), mensaje->count());
+		sprintf(logBuffer, "Logic: on_receive_replay: Queda solo un nodo en el mensaje [%s]. Cant [%d]", last_nodo_name.c_str(), mensaje->count());
 		Tools::debug(logBuffer);			
 		
 		if (last_nodo_name.compare(nombre_nodo) == 0)
 		{
-			Tools::debug("Logic: on_codigo_replay: El ultimo nodo contiene mi nombre");
+			Tools::debug("Logic: on_receive_replay: El ultimo nodo contiene mi nombre");
 			memset(logBuffer, 0 , sizeof(logBuffer));
 			sprintf(logBuffer, "El vendedor [%s] vende lo que necesito: [%d] unidades de [%s]", mensaje->get_vendedor().c_str(), mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 			Tools::info(logBuffer);
 			ev.id = DO_BUY;
-			ev.tag = Tools::duplicate(mensaje->get_vendedor());			
+			ev.tag = mensaje;
+			this->post_event(ev, true);				
 		}
 		else
 		{
-			Tools::warn("Logic: on_codigo_replay: El ultimo nodo No contiene mi nombre: No deberia llegar aqui. Descarto el mensaje");
+			Tools::warn("Logic: on_receive_replay: El ultimo nodo No contiene mi nombre: No deberia llegar aqui. Descarto el mensaje");			
 		}
 	}
 	else
 	{
 		Tools::debug("Logic: on_codigo_replay: Sigue quedando mas de un nodo en el mensaje. Se reenvia");
+		
+		memset(logBuffer, 0 , sizeof(logBuffer));
+		sprintf(logBuffer, "Se traspasa la respuesta de compra al nodo que origino el pedido: [%s]", mensaje->get_creator_node_name().c_str());
 		ev.id = DO_REPLY_FORWARD;
 		ev.tag = mensaje;
+		this->post_event(ev, true);
 	}
-	this->post_event(ev, true);
+	
 }
 
-void Logic::on_codigo_buy(Mensaje *mensaje)
+void Logic::on_receive_buy(Mensaje *mensaje)
 {
-	Tools::debug("Logic: on_codigo_buy:");
+	Tools::debug("Logic: on_receive_buy:");
+	char logBuffer[BUFFER_SIZE];
+	
+	en_operacion = true;	
+	sprintf(logBuffer, "El comprador me eligio para la negociacion. Me pongo en estado de operacion. Mi nombre es [%s]", nombre_nodo);
+	Tools::info(logBuffer);
+	
 	// TODO Preparar todo para recibir un connect del comprador.
 	// Cómo sé la cantidad de producto que "vendo"/"quiere el cliente"?
 	// Supongo que hay que mantener una lista de los lookups que respondi (yo, como vendedor)	
@@ -397,16 +404,24 @@ Mensaje *Logic::build_reply_msg(Mensaje *mensaje_old)
 	return mensaje;
 }
 
-Mensaje *Logic::build_buy_msg(std::string vendedor, std::string product_name, int cantidad)
+Mensaje *Logic::build_buy_msg(Mensaje *mensaje_old)
 {
+	Mensaje *mensaje = NULL;
 	Tools::debug("Logic: build_buy_msg:");
-	Mensaje *mensaje = new Mensaje();
-	mensaje->set_code(CODIGO_BUY);
-	mensaje->set_vendedor(vendedor);
-	mensaje->set_product_name(product_name);
-	mensaje->set_cantidad(cantidad);
-	mensaje->set_hopcount(-1);
-	return mensaje;	
+	if (mensaje_old != NULL)
+	{
+		mensaje = new Mensaje();
+		mensaje->set_code(CODIGO_BUY);
+		mensaje->set_vendedor(mensaje_old->get_vendedor());
+		mensaje->set_product_name(mensaje_old->get_product_name());		
+		mensaje->set_cantidad(mensaje_old->get_cantidad());
+		mensaje->set_hopcount(-1);
+	}
+	else
+	{
+		Tools::error ("Logic: build_buy_msg: Mensaje recibido NULO");
+	}
+	return mensaje;		
 }
 
 
@@ -433,12 +448,8 @@ void Logic::less_nodo(Mensaje *mensaje)
 	sprintf(logBuffer, "Logic: less_nodo: Se elimino el nodo [%s]", nodo->name.c_str());
 	Tools::debug(logBuffer);
 	
-	mensaje->get_nodos().pop_back();
-	
-	// TODO deberia borrar esto ?
-	Tools::debug("Logic: less_nodo: Borrando nodo");
+	mensaje->get_nodos().pop_back();	
 	delete nodo;	
-	Tools::debug("Logic: less_nodo: Se Borro nodo");	
 }
 
 void Logic::less_hopcount(Mensaje *mensaje)

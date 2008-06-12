@@ -60,7 +60,8 @@ class Router : public Runner
 		//NodoSockets nodo_sockets;
 		
 		bool enviado1;
-		bool enviado2;		
+		bool enviado2;	
+		bool show_menu;		
 };
 
 #endif //_ROUTER_H_

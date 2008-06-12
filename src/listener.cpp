@@ -21,6 +21,7 @@
 
 extern char *nombre_nodo;
 extern int listener_port;
+extern bool en_operacion;
 
 Listener* Listener::single_instance = NULL;
 
@@ -29,7 +30,6 @@ Listener* Listener::single_instance = NULL;
 */
 Listener::Listener()
 {
-	yes=1; // for setsockopt() SO_REUSEADDR, below	
 	cant_clientes = 0;
 }
 
@@ -124,6 +124,7 @@ void Listener::client_connections_admin()
 
 
         // run through the existing connections looking for data to read
+		int i;
         for(i = 0; i <= fdmax; i++) 
         {
 	        if (FD_ISSET(i, &read_fds)) 
@@ -157,7 +158,7 @@ void Listener::client_connections_admin()
 						cant_clientes++;
 						
 						memset(logBuffer, 0 , sizeof(logBuffer));
-                        sprintf(logBuffer, "Listener: Nueva conexion de [%s] con el socket %d", inet_ntoa(remoteaddr.sin_addr), newfd);
+						sprintf(logBuffer, "Listener: client_connections_admin: Nueva conexion de [%s] con el socket %d", inet_ntoa(remoteaddr.sin_addr), newfd);
 						Tools::debug(logBuffer);
 						
 						char *nombre_nodo_vecino = new char[BUFFER_SIZE];
@@ -184,8 +185,8 @@ void Listener::client_connections_admin()
                   }
 				  else 
 				  {
-					  Tools::error("Listener: Se llego al limite de conexiones aceptadas por el Listener");
-					  Tools::debug_label_value ("Listener: Maximo de clientes conectados", MAX_CONNECTED);
+					  Tools::error("Listener: client_connections_admin: Se llego al limite de conexiones aceptadas por el Listener");
+					  Tools::debug_label_value ("Listener: client_connections_admin: Maximo de clientes conectados", MAX_CONNECTED);
 				  }
                 } 
                 else 
@@ -200,13 +201,13 @@ void Listener::client_connections_admin()
                         if (nbytes == 0) 
                         {
 							memset(logBuffer, 0 , sizeof(logBuffer));
-    		                sprintf(logBuffer, "Listener: Connection closed (socket %d)", i);
+    		                sprintf(logBuffer, "Listener: client_connections_admin: Connection closed (socket %d)", i);
 							Tools::debug(logBuffer);
 							
 							if (!socket_ip_map[i].empty()) 
 							{
 								memset(logBuffer, 0 , sizeof(logBuffer));
-						        sprintf(logBuffer, "Listener: Removiendo la IP [%s]", socket_ip_map[i].c_str());
+						        sprintf(logBuffer, "Listener: client_connections_admin: Removiendo la IP [%s]", socket_ip_map[i].c_str());
 								Tools::debug(logBuffer);
 								
 								// Transformo el socket de int a char*
@@ -221,7 +222,7 @@ void Listener::client_connections_admin()
 							else								
 							{
 								memset(logBuffer, 0 , sizeof(logBuffer));
-						        sprintf(logBuffer, "Listener: El socket [%d] no esta en el mapa interno, por lo que es un vecino el que se va", i);
+						        sprintf(logBuffer, "Listener: client_connections_admin: El socket [%d] no esta en el mapa interno, por lo que es un vecino el que se va", i);
 								Tools::debug(logBuffer);							
 							}
 												
@@ -230,7 +231,7 @@ void Listener::client_connections_admin()
                         else 
                         {
 							memset(logBuffer, 0 , sizeof(logBuffer));
-    		                sprintf(logBuffer, "Listener: recv (socket %d)", i);
+    		                sprintf(logBuffer, "Listener: client_connections_admin: recv (socket %d)", i);
 							Tools::error(logBuffer);							
                         }
 																		
@@ -242,13 +243,21 @@ void Listener::client_connections_admin()
                     {// we got some data from a client
                                             
 						//memset(logBuffer, 0 , sizeof(logBuffer));
-						//sprintf(logBuffer, "Listener: Paquete recibido del socker %d: [%s]", i, echoBuffer);
+						//sprintf(logBuffer, "Listener: client_connections_admin: Paquete recibido del socker %d: [%s]", i, echoBuffer);
 						//Tools::debug(logBuffer);
-												
-				    	Event ev;
-				    	ev.id = CLIENT_MSG;
-						ev.tag = Tools::duplicate(echoBuffer);
-				    	Logic::instance()->post_event(ev, true);                        
+								
+						if (!en_operacion) 
+						{
+					    	Event ev;
+					    	ev.id = CLIENT_MSG;
+							ev.tag = Tools::duplicate(echoBuffer);
+							Logic::instance()->post_event(ev, true);                        
+						}
+						else
+						{
+							sprintf(logBuffer, "Listener: client_connections_admin: Se descarto el mensaje porque el nodo se encuentra en operacion. Mensaje [%s]", echoBuffer);
+							Tools::info(logBuffer);							
+						}
                     }
                 }
             }
@@ -290,8 +299,8 @@ void Listener::decode_handshake_msg(const char *msg)
 	char logBuffer[BUFFER_SIZE];	
 	if (msg != NULL)
 	{
-		sprintf(logBuffer, "Listener: Recibiendo handshake [%s]", msg);
-		Tools::debug(logBuffer);	
+		sprintf(logBuffer, "Recibiendo handshake [%s]", msg);
+		Tools::info(logBuffer);	
 	}   
 	else
 	{
@@ -302,8 +311,8 @@ void Listener::decode_handshake_msg(const char *msg)
 char *Listener::get_rta_handshake_msg()
 {
 	char logBuffer[BUFFER_SIZE];
-	sprintf(logBuffer, "Listener: get_rta_handshake_msg: Enviando respuesta handshake [%s]", nombre_nodo);
-	Tools::debug(logBuffer);			
+	sprintf(logBuffer, "Enviando respuesta handshake [%s]", nombre_nodo);
+	Tools::info(logBuffer);			
 	return nombre_nodo;	
 }
 

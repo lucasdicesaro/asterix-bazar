@@ -6,6 +6,7 @@
 #include "router.h"
 #include "logic.h"
 #include "listener.h"
+#include "keyboard.h"
 #include <iostream>
 #include <assert.h>
 #include <unistd.h>
@@ -14,6 +15,7 @@
 Router* Router::single_instance = NULL;
 
 extern char *nombre_nodo;
+extern bool en_operacion;
 
 /**
 * Constructors
@@ -26,7 +28,8 @@ Router::Router()
 	sock_vecino1 = SOCK_ERRONEO;
 	sock_vecino2 = SOCK_ERRONEO;	
 	enviado1 = false;
-	enviado2 = false;	
+	enviado2 = false;
+	show_menu = false;
 }
 
 Router::~Router()
@@ -140,7 +143,7 @@ void Router::start_connections()
 	else
 	{
 		sprintf(logBuffer, "Router: start_connections: El vecino [%s], ya tiene socket", my_config->vecino1);
-		Tools::info(logBuffer);
+		Tools::debug(logBuffer);
 	}
 	
 	if (sock_vecino2 == SOCK_ERRONEO)
@@ -150,7 +153,7 @@ void Router::start_connections()
 	else
 	{
 		sprintf(logBuffer, "Router: start_connections: El vecino [%s], ya tiene socket", my_config->vecino2);
-		Tools::info(logBuffer);
+		Tools::debug(logBuffer);
 	}
 	
 	bool conexiones_incompletas = sock_vecino1 == SOCK_ERRONEO || sock_vecino2 == SOCK_ERRONEO;
@@ -158,7 +161,10 @@ void Router::start_connections()
 	{
 		// No se pudo lograr la comunicacion con al menos uno de los dos vecinos
 		sprintf(logBuffer, "Router: start_connections: Intento de reconexion nro %d. Se espera un delay de %d", intentos_reconexion, delay_reconexion);
-		Tools::info(logBuffer);
+		Tools::debug(logBuffer);
+		sprintf(logBuffer, "Intento de reconexion nro %d. Se espera un delay de %d", intentos_reconexion, delay_reconexion);
+		Tools::debug(logBuffer);
+		
 		
 		intentos_reconexion--;
 		sleep(delay_reconexion);
@@ -174,17 +180,19 @@ void Router::start_connections()
 			if (sock_vecino1 == SOCK_ERRONEO && sock_vecino2 == SOCK_ERRONEO)				
 			{
 				// No se establecio conexion con ninguno de los dos vecinos
-				Tools::info("Router: start_connections: Se agotaron los intentos de reconexion. Presiones Ctrl+C e intente mas tarde.");
+				Tools::debug("Router: start_connections: Se agotaron los intentos de reconexion");				
+				Tools::info("Se agotaron los intentos de reconexion. Presiones Ctrl+C e intente mas tarde.");
 			}
 		}
 		if (!conexiones_incompletas) 
 		{
-			Tools::info("Router: start_connections: Se logro la conexion con ambos vecinos");
+			Tools::debug("Router: start_connections: Se logro la conexion con ambos vecinos");							
+			Tools::info("Se logro la conexion con ambos vecinos");
 		}
 
 		
 		// TODO Decidir, a apartir de que evento se va a empezar a hacer "compras"
-		if (!enviado1 && sock_vecino1 != SOCK_ERRONEO)
+		/*if (!enviado1 && sock_vecino1 != SOCK_ERRONEO)
 		{
 			enviado1 = true;
 			Event ev;
@@ -197,9 +205,24 @@ void Router::start_connections()
 			Event ev;
 			ev.id = DO_LOOKUP;		
 			Logic::instance()->post_event(ev, true);	
+		}*/
+		bool al_menos_una_conexion = sock_vecino1 != SOCK_ERRONEO || sock_vecino2 != SOCK_ERRONEO;
+		// Si no se mostro el menu y, 
+		// (estoy conectado con mis dos vecinos o
+		// (estoy conectado con algun vecino, pero no quedan intentos de reconexion))
+		//if (!show_menu && (!conexiones_incompletas || (intentos_reconexion == 0 && al_menos_una_conexion)))
+		
+		// Solo si no se mostro aun el menu
+		if (!show_menu)
+		{
+			show_menu = true;
+			Event ev;
+			ev.id = KB_SHOW_MENU;		
+			Keyboard::instance()->post_event(ev, true);
 		}
+		
 				
-		if (sock_vecino1 != SOCK_ERRONEO || sock_vecino2 != SOCK_ERRONEO) 
+		if (al_menos_una_conexion) 
 		{
 			// Funcionalidad comentada: Ahora se maneja por timeout: Cada tanto le llega un evento DO_LOOKUP a Logic (Ver Logic::on_timeout)
 			
@@ -223,7 +246,7 @@ int Router::try_connection(const char *nombre_nodo)
 	if (vecino_config == NULL) 
 	{
 		sprintf(logBuffer, "Router: try_connection: El nombre de nodo %s, no existe en el archivo de configuracion", nombre_nodo);
-		Tools::debug(logBuffer);
+		Tools::error(logBuffer);
 		exit(1);
 	}
 	
@@ -285,7 +308,7 @@ void Router::send_first_broadcast_message(const void* msg)
 	
 	if (sock_vecino1 == SOCK_ERRONEO && sock_vecino2 == SOCK_ERRONEO)
 	{
-		sprintf(logBuffer, "Router: send_first_broadcast_message: No se envio el mensaje [%s] porque no hay sockets_vecinos. Oprima Ctrl+C y vuelva a ejecutar para retomar posibles conexiones", mensaje_xml.c_str());		
+		sprintf(logBuffer, "Router: send_first_broadcast_message: No se envio el mensaje [%s] porque no hay sockets_vecinos. Si desea retomar posibles conexiones, oprima Ctrl+C", mensaje_xml.c_str());		
 		Tools::warn(logBuffer);		
 	}
 }
@@ -342,7 +365,7 @@ void Router::send_broadcast_message(const void* msg)
 	}
 	if (sock_vecino1 == SOCK_ERRONEO && sock_vecino2 == SOCK_ERRONEO)
 	{
-		sprintf(logBuffer, "Router: send_broadcast_message: No se envio el mensaje porque no hay sockets_vecinos. Oprima Ctrl+C y vuelva a ejecutar para retomar posibles conexiones");		
+		sprintf(logBuffer, "Router: send_broadcast_message: No se envio el mensaje porque no hay sockets_vecinos. Si desea retomar posibles conexiones, oprima Ctrl+C");		
 		Tools::warn(logBuffer);		
 	}
 }
@@ -385,8 +408,8 @@ char *Router::get_handshake_msg()
 {
 	char logBuffer[BUFFER_SIZE];
 	//memset(logBuffer, 0 , sizeof(logBuffer));
-	sprintf(logBuffer, "Router: get_handshake_msg: Enviando handshake [%s]", nombre_nodo);
-	Tools::debug(logBuffer);			
+	sprintf(logBuffer, "Enviando handshake [%s]", nombre_nodo);
+	Tools::info(logBuffer);			
 	return nombre_nodo;
 }
 
@@ -395,8 +418,8 @@ void Router::decode_rta_handshake_msg(const char *msg)
 	char logBuffer[BUFFER_SIZE];
 	if (msg != NULL)
 	{
-		sprintf(logBuffer, "Listener: decode_rta_handshake_msg: Recibiendo respuesta handshake [%s]", msg);		
-		Tools::debug(logBuffer);
+		sprintf(logBuffer, "Recibiendo respuesta handshake [%s]", msg);		
+		Tools::info(logBuffer);
 	}
 	else
 	{
@@ -515,6 +538,8 @@ void Router::rm_nodo_socket_from_server_map(std::string nombre_nodo)
 		//memset(logBuffer, 0 , sizeof(logBuffer));
 		sprintf(logBuffer, "Router: rm_nodo_socket_from_server_map: Se elimino nodo_socket_map.erase(%s)", nombre_nodo.c_str());
 		Tools::debug(logBuffer);	
+		sprintf(logBuffer, "Se retiro el nodo [%s]", nombre_nodo.c_str());
+		Tools::info(logBuffer);			
 	}
 	else
 	{
@@ -532,6 +557,9 @@ void Router::rm_nodo_socket_from_client_map(std::string nombre_nodo)
 		//memset(logBuffer, 0 , sizeof(logBuffer));
 		sprintf(logBuffer, "Router: rm_nodo_socket_from_client_map: Se elimino nodo_socket_map.erase(%s)", nombre_nodo.c_str());
 		Tools::debug(logBuffer);	
+		
+		sprintf(logBuffer, "Se retiro el nodo [%s]", nombre_nodo.c_str());
+		Tools::info(logBuffer);		
 	}
 	else
 	{
