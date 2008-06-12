@@ -46,7 +46,8 @@ Logic* Logic::instance()
 
 void Logic::on_event(const Event& ev)
 {	
-	switch (ev.id)
+	char *buffer = new char[BUFFER_SIZE];
+   switch (ev.id)
 	{
 		case INIT:
 			Tools::debug("Logic: on_event: INIT:");
@@ -86,7 +87,13 @@ void Logic::on_event(const Event& ev)
 			Tools::debug("Logic: on_event: CLIENT_MSG:");
 			on_client_msg(ev.tag);
 			break;			
-						
+
+	   case TECLA:
+			sprintf(buffer, "Logic: on_event: TECLA: %d", (char*) ev.tag);
+   			Tools::debug(buffer);
+			break;			
+
+		  
 		default:
 			Tools::debug("Logic: on event: *UNKNOWN*.");
 			break;
