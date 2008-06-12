@@ -24,6 +24,7 @@ class Tools
 		*/
 		void static debug(const char* msg);
 		void static debug(const char* nombre_nodo, const char* msg);
+		void static debug(std::string msg);
 		void static info(std::string msg);
 		void static warn(std::string msg);
 		void static error(std::string msg);		
@@ -75,6 +76,10 @@ class Tools
 		ReconnectParamsDS *reconnectParams;
 		char *nombre_nodo;
 		int listener_port;
+		bool debug_level;
+		bool info_level;
+		bool warn_level;				
+		bool error_level;		
 };
 
 #endif //_TOOLS_H_
