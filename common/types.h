@@ -60,7 +60,8 @@ typedef enum
 	RT_ADD_NODO_SERVIDOR,
 	RT_RM_NODO_SERVIDOR,	
 	LS_ADD_SOCKET,
-	LS_RM_SOCKET	
+	LS_RM_SOCKET,
+	TECLA
 } EventID;
 
 typedef struct
