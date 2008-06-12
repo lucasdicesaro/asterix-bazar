@@ -25,15 +25,19 @@ class Router : public Runner
 
 		void start_connections();		
 		void close_TCP_connections();
-
-		void send_first_broadcast_message(const void* msg);
-		void send_broadcast_message(const void* msg);
-		void send_to_socket_message(const void* msg);
 		
 	protected:	
+	
+		void send_first_broadcast_message(const void* msg);
+		void send_broadcast_message(const void* msg);
+		
+		void send_to_next_node_message(const void* msg);
+		void send_to_socket_message(int id_socket, std::string mensaje_xml);				
+			
 		char *get_handshake_msg();
 		void decode_rta_handshake_msg(const char *msg);
 				
+		void start_p2p_connect(const void* msg);				
 		int try_connection(const char *nombre_nodo);
 		
 		std::string find_in_server_sockets_nodo_nombre(int id_socket);
@@ -51,16 +55,17 @@ class Router : public Runner
 		static Router* single_instance;				
 		char *vecino1;
 		char *vecino2;
+		char *p2p;		
+		
 		int sock_vecino1;
 		int sock_vecino2;
+		int sock_p2p;
+		
 		int intentos_reconexion;
 		int delay_reconexion;
 		NodoMapping nodo_socket_cliente_map;
-		NodoMapping nodo_socket_servidor_map;		
-		//NodoSockets nodo_sockets;
-		
-		bool enviado1;
-		bool enviado2;	
+		NodoMapping nodo_socket_servidor_map;
+			
 		bool show_menu;		
 };
 

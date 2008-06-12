@@ -210,6 +210,10 @@ void Listener::client_connections_admin()
 						        sprintf(logBuffer, "Listener: client_connections_admin: Removiendo la IP [%s]", socket_ip_map[i].c_str());
 								Tools::debug(logBuffer);
 								
+								memset(logBuffer, 0 , sizeof(logBuffer));
+						        sprintf(logBuffer, "Removiendo la IP [%s]", socket_ip_map[i].c_str());
+								Tools::info(logBuffer);								
+								
 								// Transformo el socket de int a char*
 								char *buffer_socket_id = new char[10];
 								sprintf(buffer_socket_id, "%d", i);
@@ -255,7 +259,7 @@ void Listener::client_connections_admin()
 						}
 						else
 						{
-							sprintf(logBuffer, "Listener: client_connections_admin: Se descarto el mensaje porque el nodo se encuentra en operacion. Mensaje [%s]", echoBuffer);
+							sprintf(logBuffer, "Se descarto el mensaje porque el nodo se encuentra en operacion. Mensaje [%s]", echoBuffer);
 							Tools::info(logBuffer);							
 						}
                     }
