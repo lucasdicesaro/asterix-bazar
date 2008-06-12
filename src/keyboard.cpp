@@ -1,7 +1,6 @@
 #include "keyboard.h"
 #include "logic.h"
-
-
+ 
 Keyboard* Keyboard::single_instance = NULL;
 
 /**
@@ -30,22 +29,35 @@ void Keyboard::on_event(const Event& ev)
 	{
 		case INIT:
 			Tools::debug("Keyboard: on_event: INIT:");
+		  	this->get_key();
+		  break;
+
+		case TECLA:
+			Tools::debug("Keyboard: on_event: TECLA:");
 			break;
-			
+
 		default:
 			Tools::debug("Keyboard: on event: *UNKNOWN*.");
 			break;
 	}
 }
 
-int Keyboard::get_key()
+void Keyboard::get_key()
 {
+	Tools::debug("Keyboard: get_key");
+   	Event ev, ev1;
 	char *buffer = new char[BUFFER_SIZE];
-	
-	Event ev;
-	//ev.id = CLIENT_MSG;
-	ev.tag = Tools::duplicate(buffer);
-	Logic::instance()->post_event(ev, true);                        
+	char key;
+   	
+	key = getchar();   
+   	ev.id = TECLA;
+	//ev.tag = key;
+	sprintf(buffer, "La tecla que apreto es %c", key);
+   	Tools::debug(buffer);
+	Logic::instance()->post_event(ev, true);
+	ev1.id = INIT;
+	Keyboard::instance()->post_event(ev1, true);
+
 }
 
 
