@@ -89,7 +89,7 @@ void Logic::on_event(const Event& ev)
 			break;			
 
 	   case TECLA:
-			sprintf(buffer, "Logic: on_event: TECLA: %d", (char*) ev.tag);
+			sprintf(buffer, "Logic: on_event: TECLA: %s", (char*) ev.tag);
    			Tools::debug(buffer);
 			break;			
 
