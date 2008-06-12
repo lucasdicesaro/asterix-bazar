@@ -27,8 +27,7 @@ Router::Router()
 	delay_reconexion = reconnectParams->delay_reconexion;
 	sock_vecino1 = SOCK_ERRONEO;
 	sock_vecino2 = SOCK_ERRONEO;	
-	enviado1 = false;
-	enviado2 = false;
+	sock_p2p = SOCK_ERRONEO;	
 	show_menu = false;
 }
 
@@ -56,21 +55,25 @@ void Router::on_event(const Event& ev)
 			start_connections();
 			break;			
 			
-		case FIRST_BROADCAST:
+		case RT_FIRST_BROADCAST:
 			Tools::debug("Router: on_event: FIRST_BROADCAST:");
 			send_first_broadcast_message(ev.tag);
 			break;	
 			
-		case BROADCAST:
+		case RT_BROADCAST:
 			Tools::debug("Router: on_event: BROADCAST:");
 			send_broadcast_message(ev.tag);
 			break;	
 			
-		case SEND_TO_SOCKET:
+		case RT_SEND_TO_SOCKET:
 			Tools::debug("Router: on_event: SEND_TO_SOCKET:");
-			send_to_socket_message(ev.tag);
+			send_to_next_node_message(ev.tag);
 			break;
-			
+		case RT_START_P2P_CONNECT:
+			Tools::debug("Router: on_event: RT_START_P2P_CONNECT:");
+			start_p2p_connect(ev.tag);
+			break;			
+
 		case RT_ADD_NODO_SERVIDOR:		
 			Tools::debug("Router: on_event RT_ADD_NODO_SERVIDOR");
 			
@@ -127,6 +130,7 @@ void Router::on_event(const Event& ev)
 			break;
 	}
 }
+
 
 
 void Router::start_connections() 
@@ -370,21 +374,47 @@ void Router::send_broadcast_message(const void* msg)
 	}
 }
 
-void Router::send_to_socket_message(const void* msg)
+void Router::start_p2p_connect(const void* msg)
 {
-	Mensaje *mensaje = (Mensaje *)msg;	
 	char logBuffer[BUFFER_SIZE];
-	std::string next_node_name = mensaje->get_next_node_name();
-	sprintf(logBuffer, "Router: send_to_socket_message: Se obtuvo de mensaje->get_next_node_name el nombre [%s]", next_node_name.c_str());		
+	Mensaje *mensaje = (Mensaje *)msg;
+	std::string vendedor = mensaje->get_vendedor();
+	//sprintf(logBuffer, "Router: start_p2p_connect:  [%s]", mensaje_xml.c_str());		
+	//Tools::debug(logBuffer);
+	std::string mensaje_xml = mensaje->to_string();
+	sprintf(logBuffer, "Router: start_p2p_connect: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
 	Tools::debug(logBuffer);
 	
-	int socket = nodo_socket_servidor_map[next_node_name];
-	sprintf(logBuffer, "Router: send_to_socket_message: Se obtuvo de nodo_socket_map[%s] el socket [%d]", next_node_name.c_str(), socket);		
+	sock_p2p = try_connection(vendedor.c_str());
+	sprintf(logBuffer, "Router: start_p2p_connect: Se obtuvo de try_connection el socket [%d]", sock_p2p);		
 	Tools::debug(logBuffer);
+		
+	send_to_socket_message(sock_p2p, mensaje_xml);
+}
+
+
+void Router::send_to_next_node_message(const void* msg)
+{
+	char logBuffer[BUFFER_SIZE];
+	Mensaje *mensaje = (Mensaje *)msg;	
+	std::string next_node_name = mensaje->get_next_node_name();
+	sprintf(logBuffer, "Router: send_to_next_node_message: Se obtuvo de mensaje->get_next_node_name el nombre [%s]", next_node_name.c_str());		
+	Tools::debug(logBuffer);	
 	
 	std::string mensaje_xml = mensaje->to_string();
-	sprintf(logBuffer, "Router: send_to_socket_message: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
+	sprintf(logBuffer, "Router: send_to_next_node_message: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
 	Tools::debug(logBuffer);
+	
+	int socket = nodo_socket_servidor_map[next_node_name];	
+	sprintf(logBuffer, "Router: send_to_next_node_message: Se obtuvo de nodo_socket_map[%s] el socket [%d]", next_node_name.c_str(), socket);		
+	Tools::debug(logBuffer);	
+	send_to_socket_message(socket, mensaje_xml);
+}
+
+
+void Router::send_to_socket_message(int socket, std::string mensaje_xml)
+{
+	char logBuffer[BUFFER_SIZE];
 	
 	if (socket != SOCK_ERRONEO)
 	{		

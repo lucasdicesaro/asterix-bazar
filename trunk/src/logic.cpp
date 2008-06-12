@@ -139,7 +139,7 @@ void Logic::on_send_look_up(std::string product_name, int cantidad)
 	add_nodo(mensaje, nombre_nodo);
 		
 	Event evRta;
-	evRta.id = FIRST_BROADCAST;
+	evRta.id = RT_FIRST_BROADCAST;
 	evRta.tag = Tools::duplicate(mensaje->to_string());
 	//evRta.tag = mensaje->clone();
 	Router::instance()->post_event(evRta, true);	
@@ -159,7 +159,7 @@ void Logic::on_send_look_up_forward(const void* msg)
 			Tools::debug("Logic: on_send_look_up_forward: Reenviando el LOOKUP");					
 			
 			Event evRta;
-			evRta.id = BROADCAST;
+			evRta.id = RT_BROADCAST;
 			//evRta.tag = Tools::duplicate(mensaje->to_string());
 			evRta.tag = mensaje->clone();
 			Router::instance()->post_event(evRta, true);					
@@ -187,7 +187,7 @@ void Logic::on_send_replay(const void* msg)
 		Tools::debug("Logic: on_send_replay: Enviando el REPLY");
 		
 		Event evRta;
-		evRta.id = SEND_TO_SOCKET;
+		evRta.id = RT_SEND_TO_SOCKET;
 		evRta.tag = mensaje->clone();
 		Router::instance()->post_event(evRta, true);					
 	}
@@ -206,7 +206,7 @@ void Logic::on_send_replay_forward(const void* msg)
 		less_nodo(mensaje);		
 		
 		Event evRta;
-		evRta.id = SEND_TO_SOCKET;
+		evRta.id = RT_SEND_TO_SOCKET;
 		evRta.tag = mensaje;
 		Router::instance()->post_event(evRta, true);					
 	}
@@ -227,12 +227,11 @@ void Logic::on_send_buy(const void* msg)
 	
 	Mensaje *mensaje_old = (Mensaje *)msg;		
 	Mensaje *mensaje = build_buy_msg(mensaje_old);
-	// TODO Preparar todo para iniciar un connect al vendedor
 			
-	//Event evRta;
-	//evRta.id = BROADCAST;
-	//evRta.tag = Tools::duplicate(mensaje->to_string());
-	//Router::instance()->post_event(evRta, true);
+	Event evRta;
+	evRta.id = RT_START_P2P_CONNECT;
+	evRta.tag = mensaje;
+	Router::instance()->post_event(evRta, true);
 }
 
 /**
@@ -363,12 +362,14 @@ void Logic::on_receive_buy(Mensaje *mensaje)
 	char logBuffer[BUFFER_SIZE];
 	
 	en_operacion = true;	
-	sprintf(logBuffer, "El comprador me eligio para la negociacion. Me pongo en estado de operacion. Mi nombre es [%s]", nombre_nodo);
+	sprintf(logBuffer, "El comprador inicio la negociacion conmigo. Me pongo en estado de operacion. Mi nombre es [%s]", nombre_nodo);
 	Tools::info(logBuffer);
 	
-	// TODO Preparar todo para recibir un connect del comprador.
-	// Cómo sé la cantidad de producto que "vendo"/"quiere el cliente"?
-	// Supongo que hay que mantener una lista de los lookups que respondi (yo, como vendedor)	
+	sprintf(logBuffer, "Voy a decrementar de mi Stock %d unidades de [%s]", mensaje->get_cantidad(), mensaje->get_product_name().c_str());
+	Tools::info(logBuffer);
+		
+	//TODO Verificar que condiciones se tienen que cumplir para empezar a decrementar el Stock
+	//Stock::instance()->decrement_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
 }
 
 

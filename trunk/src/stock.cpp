@@ -27,7 +27,7 @@ void Stock::load_stock()
 {    
 }
 
-void Stock::decrement_stock(char* product_name, int cantidad)
+void Stock::decrement_stock(const char* product_name, int cantidad)
 {
 	char logBuffer[BUFFER_SIZE];
 	if (mapa_stock.count(product_name) > 0 && mapa_stock[product_name] > cantidad) 
@@ -40,7 +40,7 @@ void Stock::decrement_stock(char* product_name, int cantidad)
 	}
 }
 
-void Stock::increment_stock(char* product_name, int cantidad)
+void Stock::increment_stock(const char* product_name, int cantidad)
 {
 	if (mapa_stock.count(product_name) > 0) 
 		mapa_stock[product_name] = mapa_stock[product_name] + cantidad;
