@@ -54,12 +54,15 @@ class Mensaje
 		std::string get_vendedor() const;		
 		int get_cantidad() const;
 		int get_hopcount() const;
+		int get_timestamp() const;		
 		
 		void set_code(std::string code);
 		void set_product_name(std::string product_name);
 		void set_vendedor(std::string vendedor);		
 		void set_cantidad(int cantidad = -1);
 		void set_hopcount(int hopcount = -1);
+		void set_timestamp(int timestamp);		
+		
 		Mensaje *clone();
 		std::string get_next_node_name();
 		std::string get_creator_node_name();
@@ -71,7 +74,7 @@ class Mensaje
 	protected:
 		Nodos nodos;
 		std::string code, product_name, vendedor;
-		int cantidad, hopcount;		
+		int cantidad, hopcount, timestamp;
 };
 
 
