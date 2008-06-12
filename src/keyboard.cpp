@@ -44,15 +44,15 @@ void Keyboard::on_event(const Event& ev)
 
 void Keyboard::get_key()
 {
-	Tools::debug("Keyboard: get_key");
    	Event ev, ev1;
 	char *buffer = new char[BUFFER_SIZE];
-	char key;
+	int key;
    	
 	key = getchar();   
    	ev.id = TECLA;
-	//ev.tag = key;
-	sprintf(buffer, "La tecla que apreto es %c", key);
+	sprintf(buffer,"%d", key);
+	ev.tag = buffer;
+	sprintf(buffer, "La tecla que apreto es %d", key);
    	Tools::debug(buffer);
 	Logic::instance()->post_event(ev, true);
 	ev1.id = INIT;
