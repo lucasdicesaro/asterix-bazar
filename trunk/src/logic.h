@@ -24,7 +24,7 @@ class Logic : public Runner
 		static int HOPCOUNT;
 		
 	protected:	
-		void start_buy();
+		//void start_buy();
 		void set_stock_product(std::string product_name, int cantidad);		
 		
 		void on_send_look_up(std::string product_name, int cantidad);
@@ -32,14 +32,21 @@ class Logic : public Runner
 		void on_send_replay(const void* msg);
 		void on_send_replay_forward(const void* msg);
 		void on_send_buy(const void* msg);
-				
+		void on_send_buy_reply_ok(const void* msg);		
+		void on_send_buy_reply_err(const void* msg);
+						
 		void on_receive_look_up(Mensaje *mensaje);
 		void on_receive_replay(Mensaje *mensaje);
 		void on_receive_buy(Mensaje *mensaje);
-	
+		void on_receive_buy_reply_ok(Mensaje *mensaje);
+		void on_receive_buy_reply_err(Mensaje *mensaje);						
+		
 		Mensaje *build_look_up_msg(std::string product_name, int cantidad);
 		Mensaje *build_reply_msg(Mensaje *mensaje);
 		Mensaje *build_buy_msg(Mensaje *mensaje);
+		Mensaje *build_buy_reply_ok_msg(Mensaje *mensaje);
+		Mensaje *build_buy_reply_err_msg(Mensaje *mensaje);
+						
 		void add_nodo(Mensaje *mensaje, const char*buffer);
 		void less_nodo(Mensaje *mensaje);
 		void less_hopcount(Mensaje *mensaje);				

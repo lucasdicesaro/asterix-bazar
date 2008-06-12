@@ -37,7 +37,10 @@ class Router : public Runner
 		char *get_handshake_msg();
 		void decode_rta_handshake_msg(const char *msg);
 				
-		void start_p2p_connect(const void* msg);				
+		void start_p2p_connect(const void* msg);
+		void close_p2p_connect(const void* msg);				
+		void send_to_p2p_socket_message(const void* msg);
+		
 		int try_connection(const char *nombre_nodo);
 		
 		std::string find_in_server_sockets_nodo_nombre(int id_socket);

@@ -69,17 +69,27 @@ void Logic::on_event(const Event& ev)
 		case DO_BUY:
 			Tools::debug("Logic: on_event: DO_BUY:");
 			on_send_buy(ev.tag);			
+			break;		
+									
+		case DO_BUY_REPLY_OK:
+			Tools::debug("Logic: on_event: DO_BUY_REPLY_OK:"); 
+			on_send_buy_reply_ok(ev.tag);
 			break;			
+			
+		case DO_BUY_REPLY_ERR:
+			Tools::debug("Logic: on_event: DO_BUY_REPLY_ERR:"); 
+			on_send_buy_reply_err(ev.tag);
+			break;						
 			
 		case CLIENT_MSG:
 			Tools::debug("Logic: on_event: CLIENT_MSG:");
 			on_client_msg(ev.tag);
 			break;			
 			
-		case DO_START_BUY:
-			Tools::debug("Logic: on_event: DO_START_BUY");
-			start_buy();
-			break;				
+		//case DO_START_BUY:
+		//	Tools::debug("Logic: on_event: DO_START_BUY");
+		//	start_buy();
+		//	break;				
 
 		case SET_STOCK_SAL:
 			Tools::debug("Logic: on_event: SET_STOCK_SAL");
@@ -97,15 +107,12 @@ void Logic::on_event(const Event& ev)
 
 
 
-
-
-// TODO despues cambiar el nombre del metodo a uno conveniente
-void Logic::start_buy()
-{
-	Event ev;
-	ev.id = DO_LOOKUP;
-	this->post_event(ev, true);	
-}
+//void Logic::start_buy()
+///{
+//	Event ev;
+//	ev.id = DO_LOOKUP;
+//	this->post_event(ev, true);	
+//}
 
 void Logic::set_stock_product(std::string product_name, int cantidad)
 {
@@ -116,7 +123,6 @@ void Logic::set_stock_product(std::string product_name, int cantidad)
 	Stock::instance()->set_stock(product_name, cantidad);
 	Stock::instance()->to_string();
 }
-
 
 
 void Logic::on_send_look_up(std::string product_name, int cantidad)
@@ -223,6 +229,48 @@ void Logic::on_send_buy(const void* msg)
 	Router::instance()->post_event(evRta, true);
 }
 
+
+void Logic::on_send_buy_reply_ok(const void* msg)
+{
+	Tools::debug("Logic::on_send_buy_reply_ok:");
+	char logBuffer[BUFFER_SIZE];
+	Mensaje *mensaje_old = (Mensaje *)msg;		
+	Mensaje *mensaje = build_buy_reply_ok_msg(mensaje_old);
+	
+	sprintf(logBuffer, "Le aviso al comprador que todo esta bien, que incremente lo suyo. Y saco mi estado 'en operacion'", nombre_nodo);
+	Tools::info(logBuffer);
+	en_operacion = false;	
+					
+	
+	Event evRta;
+//	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el vendedor. Solo el comprador cierra los sockets
+	evRta.id = RT_SEND_TO_P2P_SOCKET;
+	evRta.tag = mensaje;
+	Router::instance()->post_event(evRta, true);
+}
+
+void Logic::on_send_buy_reply_err(const void* msg)
+{
+	Tools::debug("Logic::on_send_buy_reply_err:");
+	char logBuffer[BUFFER_SIZE];
+	Mensaje *mensaje_old = (Mensaje *)msg;		
+	Mensaje *mensaje = build_buy_reply_err_msg(mensaje_old);
+	
+	sprintf(logBuffer, "Le aviso al comprador no se produjo la negociacion. Que no incremente lo suyo. Y saco mi estado 'en operacion'", nombre_nodo);
+	Tools::info(logBuffer);
+	en_operacion = false;	
+				
+	Event evRta;
+//	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el vendedor. Solo el comprador cierra los sockets
+	evRta.id = RT_SEND_TO_P2P_SOCKET;
+	evRta.tag = mensaje;
+	Router::instance()->post_event(evRta, true);
+}
+
+
+
+
+
 /**
  Client msg handlerd:
 */
@@ -251,6 +299,14 @@ void Logic::on_client_msg(const void* xml_tag)
 	{
 		on_receive_buy(mensaje);
 	}
+	else if (mensaje->get_code().compare(CODIGO_BUY_OK) == 0)
+	{
+		on_receive_buy_reply_ok(mensaje);
+	}	
+	else if (mensaje->get_code().compare(CODIGO_BUY_ERR) == 0)
+	{
+		on_receive_buy_reply_err(mensaje);
+	}	
 }
 
 void Logic::on_receive_look_up(Mensaje *mensaje)
@@ -259,7 +315,7 @@ void Logic::on_receive_look_up(Mensaje *mensaje)
 		
 	char logBuffer[BUFFER_SIZE];
 	memset(logBuffer, 0 , sizeof(logBuffer));
-	sprintf(logBuffer, "Logic: on_receive_look_up: Recibido del LookTengo [%d] unidades de [%s]?", 
+	sprintf(logBuffer, "Logic: on_receive_look_up: Recibido del Lookup: [%d] unidades de [%s]", 
 			mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 	Tools::debug(logBuffer);
 	
@@ -270,9 +326,14 @@ void Logic::on_receive_look_up(Mensaje *mensaje)
 	int cantidad_solicitada = mensaje->get_cantidad();
 	char* vendo = stock->get_vendo();
 	
-	if (producto_solicitado.compare(vendo))
+	memset(logBuffer, 0 , sizeof(logBuffer));
+	sprintf(logBuffer, "Logic: on_receive_look_up: Producto solicitado [%s] y vendo [%s]", 
+			mensaje->get_product_name().c_str(), stock->get_vendo());
+	Tools::debug(logBuffer);
+	
+	if (producto_solicitado.compare(vendo) == 0)
 	{
-		sprintf(logBuffer, "Yo [%s], vendo lo que me estan pidiendo", nombre_nodo, mensaje->get_product_name().c_str());
+		sprintf(logBuffer, "Yo [%s], vendo lo que me estan pidiendo [%s]", nombre_nodo, mensaje->get_product_name().c_str());
 		Tools::info(logBuffer);
 		if (stock->get_stock(producto_solicitado) >= cantidad_solicitada)
 		{
@@ -291,7 +352,7 @@ void Logic::on_receive_look_up(Mensaje *mensaje)
 	}
 	else 
 	{
-		sprintf(logBuffer, "Yo [%s], NO vendo lo que me estan pidiendo. Reenvio el mensaje", nombre_nodo, mensaje->get_product_name().c_str());
+		sprintf(logBuffer, "Yo [%s], NO vendo lo que me estan pidiendo [%s]. Reenvio el mensaje", nombre_nodo, mensaje->get_product_name().c_str());
 		Tools::info(logBuffer);
 		
 		ev.id = DO_LOOKUP_FORWARD;
@@ -353,22 +414,66 @@ void Logic::on_receive_buy(Mensaje *mensaje)
 	char logBuffer[BUFFER_SIZE];
 	
 	en_operacion = true;	
-	sprintf(logBuffer, "El comprador inicio la negociacion conmigo. Me pongo en estado de operacion. Mi nombre es [%s]", nombre_nodo);
+	sprintf(logBuffer, "El comprador inicio la negociacion conmigo. Me pongo en estado 'en operacion'. Mi nombre es [%s]", nombre_nodo);
 	Tools::info(logBuffer);
 		
+	Event ev;
 	if (Stock::instance()->get_stock(mensaje->get_product_name().c_str()) >= mensaje->get_cantidad())
 	{		
 		Stock::instance()->decrement_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
-		sprintf(logBuffer, "Decremente de mi stock de [%s] en %d unidades", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
+		sprintf(logBuffer, "Decremente de mi stock de [%s] en %d unidades. Le respondo exitosamente", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
 		Tools::info(logBuffer);		
+		ev.id = DO_BUY_REPLY_OK;
 	}		
 	else
 	{
-		sprintf(logBuffer, "No tengo stock suficiente como para vender [%s]. Tengo %d unidades y me piden %d unidades", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
-		Tools::info(logBuffer);		
+		sprintf(logBuffer, "No tengo stock suficiente como para vender [%s]. Tengo %d unidades y me piden %d unidades. Le respondo negativamente", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
+		Tools::info(logBuffer);	
+		ev.id = DO_BUY_REPLY_ERR;
 	}
 	Stock::instance()->to_string();	
+	
+	ev.tag = mensaje;
+	this->post_event(ev, true);		
 }
+
+
+void Logic::on_receive_buy_reply_ok(Mensaje *mensaje)
+{
+	Tools::debug("Logic: on_receive_buy_reply_ok:");
+	char logBuffer[BUFFER_SIZE];
+	
+	Stock::instance()->increment_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
+	sprintf(logBuffer, "Incremente mi stock de [%s] en %d unidades. Operacion finalizada. Salgo del estado 'en operacion'", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
+	Tools::info(logBuffer);	
+	
+	en_operacion = false;
+	
+	Stock::instance()->to_string();
+	
+	Event evRta;
+	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el comprador. debo cerrar el socket p2p
+	evRta.tag = mensaje;
+	Router::instance()->post_event(evRta, true);	
+}
+
+void Logic::on_receive_buy_reply_err(Mensaje *mensaje)
+{
+	Tools::debug("Logic: on_receive_buy_reply_err:");
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "El vendedor [%s] no pudo satisfacer mi pedido. No se modifica el stock. Operacion finalizada. Salgo del estado 'en operacion'", mensaje->get_vendedor().c_str(), mensaje->get_product_name().c_str(), mensaje->get_cantidad());
+	Tools::info(logBuffer);	
+	
+	en_operacion = false;
+	
+	Stock::instance()->to_string();
+					
+	Event evRta;
+	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el comprador. debo cerrar el socket p2p
+	evRta.tag = mensaje;
+	Router::instance()->post_event(evRta, true);	
+}
+
 
 
 Mensaje *Logic::build_look_up_msg(std::string product_name, int cantidad)
@@ -394,6 +499,7 @@ Mensaje *Logic::build_reply_msg(Mensaje *mensaje_old)
 		mensaje->set_product_name(mensaje_old->get_product_name());		
 		mensaje->set_cantidad(mensaje_old->get_cantidad());
 		mensaje->set_hopcount(-1);
+		mensaje->set_timestamp(mensaje->get_timestamp());		
 		mensaje->set_nodos(mensaje_old->get_nodos()); // Le paso el camino por donde debe vovler
 	}
 	else
@@ -415,6 +521,7 @@ Mensaje *Logic::build_buy_msg(Mensaje *mensaje_old)
 		mensaje->set_product_name(mensaje_old->get_product_name());		
 		mensaje->set_cantidad(mensaje_old->get_cantidad());
 		mensaje->set_hopcount(-1);
+		mensaje->set_timestamp(mensaje->get_timestamp());		
 	}
 	else
 	{
@@ -422,6 +529,50 @@ Mensaje *Logic::build_buy_msg(Mensaje *mensaje_old)
 	}
 	return mensaje;		
 }
+
+Mensaje *Logic::build_buy_reply_ok_msg(Mensaje *mensaje_old)
+{
+	Mensaje *mensaje = NULL;
+	Tools::debug("Logic: build_buy_ok_msg:");
+	if (mensaje_old != NULL)
+	{
+		mensaje = new Mensaje();
+		mensaje->set_code(CODIGO_BUY_OK);
+		mensaje->set_vendedor(mensaje_old->get_vendedor());
+		mensaje->set_product_name(mensaje_old->get_product_name());		
+		mensaje->set_cantidad(mensaje_old->get_cantidad());
+		mensaje->set_hopcount(-1);
+		mensaje->set_timestamp(mensaje->get_timestamp());			
+	}
+	else
+	{
+		Tools::error ("Logic: build_buy_msg: Mensaje recibido NULO");
+	}
+	return mensaje;		
+}
+
+
+Mensaje *Logic::build_buy_reply_err_msg(Mensaje *mensaje_old)
+{
+	Mensaje *mensaje = NULL;
+	Tools::debug("Logic: build_buy_ok_msg:");
+	if (mensaje_old != NULL)
+	{
+		mensaje = new Mensaje();
+		mensaje->set_code(CODIGO_BUY_ERR);
+		mensaje->set_vendedor(mensaje_old->get_vendedor());
+		mensaje->set_product_name(mensaje_old->get_product_name());		
+		mensaje->set_cantidad(mensaje_old->get_cantidad());
+		mensaje->set_hopcount(-1);
+		mensaje->set_timestamp(mensaje->get_timestamp());			
+	}
+	else
+	{
+		Tools::error ("Logic: build_buy_msg: Mensaje recibido NULO");
+	}
+	return mensaje;		
+}
+
 
 
 /**

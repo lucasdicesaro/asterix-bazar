@@ -36,6 +36,9 @@ class Listener : public Runner
 		
 		void add_socket(int id_socket);
 		void rm_socket(int id_socket);
+		
+		void add_socket_p2p(int id_socket);		
+		void rm_socket_p2p();
 				
 		void decode_handshake_msg(const char *msg);
 		char *get_rta_handshake_msg();		
@@ -61,6 +64,7 @@ class Listener : public Runner
 		char echoBuffer[BUFFER_SIZE];       // Buffer for echo string 		
 		
 	    int port;
+	    int sock_p2p;
 		IpMapping socket_ip_map;		
 		struct timeval timeout;		
 };
