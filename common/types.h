@@ -16,6 +16,9 @@
 
 #define SOCK_ERRONEO (-1)
 
+#define DEFAULT_WAIT_SECONDS (5)
+#define DEFAULT_WAIT_MILISECONDS (0)
+
 #define DEBUG_LEVEL "DEBUG"
 #define INFO_LEVEL "INFO"
 #define WARN_LEVEL "WARN"
@@ -29,6 +32,8 @@
 #define CODIGO_LOOKUP ("lookup")
 #define CODIGO_REPLY ("reply")
 #define CODIGO_BUY ("buy")
+#define CODIGO_BUY_OK ("buy_ok")
+#define CODIGO_BUY_ERR ("buy_err")
 
 //typedef std::basic_string<char> bstring;
 
@@ -44,6 +49,8 @@ typedef enum
 	DO_LOOKUP,
 	DO_REPLY,	
 	DO_BUY,
+	DO_BUY_REPLY_OK,
+	DO_BUY_REPLY_ERR,			
 	DO_LOOKUP_FORWARD,
 	DO_REPLY_FORWARD,
 	DO_START_BUY,
@@ -59,11 +66,15 @@ typedef enum
 	LS_LISTEN,
 	LS_CLOSE_CONNECTIONS,
 	LS_ADD_SOCKET,
+	LS_ADD_SOCKET_P2P,
 	LS_RM_SOCKET,
+	LS_RM_SOCKET_P2P,
 	RT_FIRST_BROADCAST,
 	RT_BROADCAST,
 	RT_SEND_TO_SOCKET,
-	RT_START_P2P_CONNECT,			
+	RT_START_P2P_CONNECT,
+	RT_CLOSE_P2P_CONNECT,
+	RT_SEND_TO_P2P_SOCKET,									
 	RT_ADD_NODO_CLIENTE,
 	RT_RM_NODO_CLIENTE,
 	RT_ADD_NODO_SERVIDOR,

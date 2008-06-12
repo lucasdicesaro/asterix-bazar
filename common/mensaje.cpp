@@ -192,9 +192,8 @@ bool Mensaje::load(xmlpp::Document* doc)
 			load_nodo(el);
 		}
 		else if (node_name == "timestamp" && text)
-		{
-			// Si se necesita declarar el atributo "timestamp"
-			//timestamp = atoi(text);
+		{			
+			timestamp = atoi(text);
 		}		
 	}
 	
@@ -258,6 +257,10 @@ int Mensaje::get_hopcount() const
 {
 	return hopcount;
 }
+int Mensaje::get_timestamp() const
+{
+	return timestamp;
+}
 
 void Mensaje::set_code(std::string code)
 {
@@ -279,6 +282,10 @@ void Mensaje::set_hopcount(int hopcount)
 {
 	this->hopcount = hopcount;
 }
+void Mensaje::set_timestamp(int timestamp)
+{
+	this->timestamp = timestamp;
+}
 
 unsigned int Mensaje::count() const
 {
@@ -297,9 +304,11 @@ Mensaje *Mensaje::clone()
 	//if (!this->vendedor.empty())	
 		mensaje->vendedor = Tools::duplicate (this->vendedor);			
 	//if (this->cantidad > 0)
-		mensaje->cantidad = this->cantidad;		
+		mensaje->cantidad = this->cantidad;
 	//if (this->hopcount > 0)
-		mensaje->hopcount = this->hopcount;				
+		mensaje->hopcount = this->hopcount;
+	
+		mensaje->timestamp = this->timestamp;	
 	
 	for (Nodos::iterator it = nodos.begin(); it != nodos.end(); it++)
 	{
