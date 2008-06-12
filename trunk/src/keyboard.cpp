@@ -50,9 +50,9 @@ void Keyboard::get_key()
    	
 	key = getchar();   
    	ev.id = TECLA;
-	sprintf(buffer,"%d", key);
+	sprintf(buffer,"%c", key);
 	ev.tag = buffer;
-	sprintf(buffer, "La tecla que apreto es %d", key);
+	sprintf(buffer, "La tecla que apreto es %c", key);
    	Tools::debug(buffer);
 	Logic::instance()->post_event(ev, true);
 	ev1.id = INIT;
