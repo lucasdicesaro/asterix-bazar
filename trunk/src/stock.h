@@ -27,7 +27,9 @@ class Stock
 		
 		char* get_vendo();
 		void set_vendo(char* product_name);
-			
+		
+		void to_string();
+		
 	protected:
 		Stock();
 		~Stock();

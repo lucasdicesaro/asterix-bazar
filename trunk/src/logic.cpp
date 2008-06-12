@@ -20,18 +20,6 @@ Logic::Logic()
 {
 	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
 	Logic::HOPCOUNT = reconnectParams->hopcount;
-	
-	Stock* stock = Stock::instance();
-	stock->load_stock();
-	
-	Tools* tools = Tools::instance();
-	Tools::debug_label_value("Logic: stock de sal:", stock->get_stock("sal"));
-	Tools::debug_label_value("Logic: stock de pescado:", stock->get_stock("pescado"));
-	Tools::debug_label_value("Logic: stock de verdura:", stock->get_stock("verdura"));
-	std::string str_compro = stock->get_compro();
-	std::string str_vendo = stock->get_vendo();
-	Tools::debug("Logic: compro: " + str_compro);
-	Tools::debug("Logic: vendo: " + str_vendo);
 }
 
 Logic::~Logic()
@@ -126,6 +114,7 @@ void Logic::set_stock_product(std::string product_name, int cantidad)
 	Tools::info(logBuffer);
 	
 	Stock::instance()->set_stock(product_name, cantidad);
+	Stock::instance()->to_string();
 }
 
 
@@ -334,6 +323,7 @@ void Logic::on_receive_replay(Mensaje *mensaje)
 			memset(logBuffer, 0 , sizeof(logBuffer));
 			sprintf(logBuffer, "El vendedor [%s] vende lo que necesito: [%d] unidades de [%s]", mensaje->get_vendedor().c_str(), mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 			Tools::info(logBuffer);
+			
 			ev.id = DO_BUY;
 			ev.tag = mensaje;
 			this->post_event(ev, true);				
@@ -349,6 +339,7 @@ void Logic::on_receive_replay(Mensaje *mensaje)
 		
 		memset(logBuffer, 0 , sizeof(logBuffer));
 		sprintf(logBuffer, "Se traspasa la respuesta de compra al nodo que origino el pedido: [%s]", mensaje->get_creator_node_name().c_str());
+		
 		ev.id = DO_REPLY_FORWARD;
 		ev.tag = mensaje;
 		this->post_event(ev, true);
@@ -364,12 +355,19 @@ void Logic::on_receive_buy(Mensaje *mensaje)
 	en_operacion = true;	
 	sprintf(logBuffer, "El comprador inicio la negociacion conmigo. Me pongo en estado de operacion. Mi nombre es [%s]", nombre_nodo);
 	Tools::info(logBuffer);
-	
-	sprintf(logBuffer, "Voy a decrementar de mi Stock %d unidades de [%s]", mensaje->get_cantidad(), mensaje->get_product_name().c_str());
-	Tools::info(logBuffer);
 		
-	//TODO Verificar que condiciones se tienen que cumplir para empezar a decrementar el Stock
-	//Stock::instance()->decrement_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
+	if (Stock::instance()->get_stock(mensaje->get_product_name().c_str()) >= mensaje->get_cantidad())
+	{		
+		Stock::instance()->decrement_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
+		sprintf(logBuffer, "Decremente de mi stock de [%s] en %d unidades", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
+		Tools::info(logBuffer);		
+	}		
+	else
+	{
+		sprintf(logBuffer, "No tengo stock suficiente como para vender [%s]. Tengo %d unidades y me piden %d unidades", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
+		Tools::info(logBuffer);		
+	}
+	Stock::instance()->to_string();	
 }
 
 

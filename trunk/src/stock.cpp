@@ -1,4 +1,8 @@
 #include "stock.h"
+#include "common/tools.h"
+#include <iostream>
+
+using namespace std;
 
 Stock* Stock::single_instance = NULL;
 
@@ -7,9 +11,9 @@ Stock* Stock::single_instance = NULL;
 */
 Stock::Stock()
 {
-	mapa_stock["sal"] = 0;
-	mapa_stock["pescado"] = 0;
-	mapa_stock["verdura"] = 10;
+	mapa_stock[PRODUCTO_SAL] = 0;
+	mapa_stock[PRODUCTO_PESCADO] = 0;
+	mapa_stock[PRODUCTO_VERDURA] = 10;
 }
 
 Stock::~Stock()
@@ -48,10 +52,15 @@ void Stock::increment_stock(const char* product_name, int cantidad)
 
 int Stock::get_stock(std::string product_name)
 {
+	char logBuffer[BUFFER_SIZE];
 	if (mapa_stock.count(product_name) > 0) 
 		return mapa_stock[product_name];
-	else
+	else 
+	{
+		sprintf(logBuffer, "Stock: get_stock: El producto [%s] no existe en el mapa de stock!", product_name.c_str());
+		Tools::warn(logBuffer);
 		return -1;
+	}	
 }
 
 
@@ -80,3 +89,16 @@ void Stock::set_vendo(char* product_name)
 {
         vendo = product_name;
 }
+
+void Stock::to_string()
+{
+	//load_stock();	
+	cout << "Stock Actual: " << endl;
+	cout << PRODUCTO_SAL << ": " << mapa_stock[PRODUCTO_SAL] << endl;
+	cout << PRODUCTO_PESCADO << ": " << mapa_stock[PRODUCTO_PESCADO] << endl;
+	cout << PRODUCTO_VERDURA << ": " << mapa_stock[PRODUCTO_VERDURA] << endl;
+	
+	cout << "Producto de venta actual: " << vendo << endl;
+	cout << "Producto de compra actual: " << compro << endl;	
+}
+
