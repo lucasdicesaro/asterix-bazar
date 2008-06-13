@@ -26,17 +26,11 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, sig_handler);
 	signal(SIGINT, sig_handler);
 	
-	Tools* tools = Tools::instance();
-	tools->Config_Parser("lista_participante.conf");
-	
-	nombre_nodo = new char[NOMBRE_NODO_SIZE];
-	nombre_nodo = tools->get_nombre_nodo();
-	std::string nombre_nodo_str = nombre_nodo;
-	Tools::info("Main: nombre_nodo [" + nombre_nodo_str + "]");	
-	
-	listener_port = tools->get_listener_port();
-	Tools::info_label_value("Main: listener_port", listener_port);
+	char logBuffer[BUFFER_SIZE];
 
+	//==========Levantando configuracion
+	Tools::instance()->Config_Parser("lista_participante.conf");
+	
 	// inicializa productos a comprar y vender segun parametros
 	if (argc > 2) 
 	{
@@ -44,6 +38,22 @@ int main(int argc, char *argv[])
 		stock->set_compro(argv[1]);
 		stock->set_vendo(argv[2]);
 	}
+	else 
+	{
+		sprintf(logBuffer, "Parametros invalidos. Usage: \n%s <producto_compra> <producto_venta>", argv[0]);
+		Tools::info(logBuffer);	
+		exit(1);
+	}	
+		
+	nombre_nodo = new char[NOMBRE_NODO_SIZE];
+	nombre_nodo = Tools::instance()->get_nombre_nodo();
+	std::string nombre_nodo_str = nombre_nodo;
+	Tools::info("Main: nombre_nodo [" + nombre_nodo_str + "]");	
+	
+	listener_port = Tools::instance()->get_listener_port();
+	Tools::info_label_value("Main: listener_port", listener_port);
+	
+	//==========Iniciando hilos
 	
 	Router* router = Router::instance();
 	Listener* listener = Listener::instance();		

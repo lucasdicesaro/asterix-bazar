@@ -41,7 +41,7 @@ class Router : public Runner
 		void close_p2p_connect(const void* msg);				
 		void send_to_p2p_socket_message(const void* msg);
 		
-		int try_connection(const char *nombre_nodo);
+		int try_connection(const char *nombre_nodo, bool socket_p2p = false);
 		
 		std::string find_in_server_sockets_nodo_nombre(int id_socket);
 		std::string find_in_client_sockets_nodo_nombre(int id_socket);			

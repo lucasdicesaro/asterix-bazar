@@ -84,7 +84,9 @@ void Listener::on_event(const Event& ev)
 			
 		case LS_RM_SOCKET_P2P:
 			Tools::debug("Listener: on_event: LS_RM_SOCKET_P2P:");
-			rm_socket_p2p();
+			socket = (char*)ev.tag;			
+			id_socket = atoi(socket.c_str());			
+			rm_socket_p2p(id_socket);
 			break;						
 			
 		default:
@@ -118,10 +120,9 @@ void Listener::client_connections_admin()
     timeout.tv_usec = DEFAULT_WAIT_MILISECONDS;	
 	
     read_fds = master; // copy it
-	//Tools::debug("Listener: client_connections_admin: antes del select");	
+	
 	int retornoSelect;
 	if ((retornoSelect = select(fdmax+1, &read_fds, NULL, NULL, &timeout)) == -1) 
-    //if ((retornoSelect = select(fdmax+1, &read_fds, NULL, NULL, NULL)) == -1) 
     {
         Tools::error("Listener: client_connections_admin: select");
         return;
@@ -177,27 +178,48 @@ void Listener::client_connections_admin()
 						// Recibo el nombre de nodo de mi vecino
 						memset(nombre_nodo_vecino, 0, BUFFER_SIZE);
 						nombre_nodo_vecino = SocketUtil::recibir_mensaje(newfd);						
-						decode_handshake_msg(nombre_nodo_vecino);
 						
+						Event evRouter;
+						char *buffer_nodo_socket_id = new char[BUFFER_SIZE];						
+						memset(buffer_nodo_socket_id, 0, BUFFER_SIZE);						
+						// determino si la nueva conexion es el socket p2p
+						if (strcmp(nombre_nodo_vecino, P2P_CONNECT) == 0)
+						{
+							sprintf(logBuffer, "Entro en el estado 'en operacion'");
+							Tools::info(logBuffer);							
+							en_operacion = true;
+							
+							sprintf(logBuffer, "Listener: client_connections_admin: La nueva conexion es un socket p2p");
+							Tools::debug(logBuffer);
+							
+							sock_p2p = newfd;
+							
+							memset(nombre_nodo_vecino, 0, BUFFER_SIZE);
+							nombre_nodo_vecino = SocketUtil::recibir_mensaje(newfd);						
+							decode_handshake_msg(nombre_nodo_vecino);
+							
+							sprintf(buffer_nodo_socket_id, "%d", newfd);								
+							
+							evRouter.id = RT_SET_SOCKET_P2P;							
+							evRouter.tag = Tools::duplicate(buffer_nodo_socket_id);									
+						}
+						else
+						{	
+							// La nueva conexion, no es la conexion p2p
+							decode_handshake_msg(nombre_nodo_vecino);
 						
-						// TODO Atencion aca debo detectar que si es una conexion directa (p2p), la que acepte!!!!!!!!!!!!
-						
+							sprintf(buffer_nodo_socket_id, "%s,%d", nombre_nodo_vecino, newfd);								
+							
+							evRouter.id = RT_ADD_NODO_SERVIDOR;							
+							evRouter.tag = Tools::duplicate(buffer_nodo_socket_id);											
+						}
 						
 						// Armo el mensaje con mi nombre de nodo y lo mando a mi vecino
 						char *rta_hndsk = get_rta_handshake_msg();
-						SocketUtil::enviar_mensaje(newfd, rta_hndsk);
-						
-						
-						// Transformo el socket de int a char*
-						char *buffer_nodo_socket_id = new char[BUFFER_SIZE];
-						memset(buffer_nodo_socket_id, 0, BUFFER_SIZE);
-						sprintf(buffer_nodo_socket_id, "%s,%d", nombre_nodo_vecino, newfd);
-							
-						Event broad_ev;
-						broad_ev.id = RT_ADD_NODO_SERVIDOR;
-						broad_ev.tag = Tools::duplicate(buffer_nodo_socket_id);
-						Router::instance()->post_event(broad_ev, true);						
-                    }
+						SocketUtil::enviar_mensaje(newfd, rta_hndsk);						
+										
+						Router::instance()->post_event(evRouter, true);
+                     }
                   }
 				  else 
 				  {
@@ -228,16 +250,19 @@ void Listener::client_connections_admin()
 								
 								memset(logBuffer, 0 , sizeof(logBuffer));
 						        sprintf(logBuffer, "Removiendo la IP [%s]", socket_ip_map[i].c_str());
-								Tools::info(logBuffer);								
+								Tools::debug(logBuffer);								
 								
-								// Transformo el socket de int a char*
-								char *buffer_socket_id = new char[10];
-								sprintf(buffer_socket_id, "%d", i);
+								// Solo envio este evento al Router, si no es el socket p2p, el que se cierra
+								if (i != sock_p2p)
+								{
+									char *buffer_socket_id = new char[10];
+									sprintf(buffer_socket_id, "%d", i);
 											
-								Event evRmClient;
-								evRmClient.id = RT_RM_NODO_SERVIDOR;
-								evRmClient.tag =  Tools::duplicate(buffer_socket_id);
-								Router::instance()->post_event(evRmClient, true);										
+									Event evRouter;
+									evRouter.id = RT_RM_NODO_SERVIDOR;
+									evRouter.tag =  Tools::duplicate(buffer_socket_id);
+									Router::instance()->post_event(evRouter, true);										
+								}
 							}
 							else								
 							{
@@ -262,17 +287,24 @@ void Listener::client_connections_admin()
 						// Si el sock_p2p no esta cerrada y el socket que se cierra es el sock_p2p
 						if (sock_p2p != SOCK_ERRONEO && i == sock_p2p)
 						{
-    		                sprintf(logBuffer, "Se cerro la conexion p2p. Socket %d", i);
-							Tools::info(logBuffer);							
-							rm_socket_p2p(); // Se borra la variable de control
+    		                sprintf(logBuffer, "Se cerro la conexion directa");
+							Tools::info(logBuffer);	
+									
+							// Se le avisa al Router que borre el socket_p2p
+							Event evRouter;
+							evRouter.id = RT_UNSET_SOCKET_P2P;
+							Router::instance()->post_event(evRouter, true);								
+							
+							// Se borra el socket_p2p del Listener
+							sock_p2p = SOCK_ERRONEO;
+							
+							sprintf(logBuffer, "Salgo del estado 'en operacion'");
+							Tools::info(logBuffer);								
+							en_operacion = false;
 						}
                     } 
                     else 
                     {// we got some data from a client
-                                            
-						//memset(logBuffer, 0 , sizeof(logBuffer));
-						//sprintf(logBuffer, "Listener: client_connections_admin: Paquete recibido del socker %d: [%s]", i, echoBuffer);
-						//Tools::debug(logBuffer);
 						
 						if (!en_operacion)
 						{
@@ -285,7 +317,7 @@ void Listener::client_connections_admin()
 						{
 							if (sock_p2p != SOCK_ERRONEO && i == sock_p2p)
 							{
-								sprintf(logBuffer, "Aunque estoy en operacion, recibo este paquete porque proviene del socket p2p");
+								sprintf(logBuffer, "Me encuentro 'en operacion', pero el mensaje proviene de la conexion directa, asi que lo tomo");
 								Tools::info(logBuffer);
 								
 								Event ev;
@@ -295,7 +327,8 @@ void Listener::client_connections_admin()
 							}
 							else
 							{
-								sprintf(logBuffer, "Se descarto el mensaje porque el nodo se encuentra en operacion. Mensaje [%s]", echoBuffer);
+								//sprintf(logBuffer, "Se recibio un mensaje y se descarto porque me encuentro en operacion. Mensaje [%s]", echoBuffer);
+								sprintf(logBuffer, "Me encuentro 'en operacion', se recibio un mensaje y no proviene de la conexion directa. Lo descarto");
 								Tools::info(logBuffer);
 							}
 						}																			
@@ -354,13 +387,14 @@ void Listener::add_socket_p2p(int id_socket)
 //	this->post_event(evRta, true); 	
 }
 
-void Listener::rm_socket_p2p()
+void Listener::rm_socket_p2p(int id_socket)
 {		
 	char logBuffer[BUFFER_SIZE];
 	sprintf(logBuffer, "Listener: rm_socket_p2p: Se remueve del conjunto de sockets de escucha, el socket p2p");
 	Tools::debug(logBuffer);		
-	
-	sock_p2p = SOCK_ERRONEO;
+			
+    FD_CLR(id_socket, &master);     // remove from master set
+	socket_ip_map.erase(id_socket); // Remuevo la ip del mapa de control interno	
 }
 
 void Listener::decode_handshake_msg(const char *msg)

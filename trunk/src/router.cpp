@@ -83,7 +83,22 @@ void Router::on_event(const Event& ev)
 		case RT_CLOSE_P2P_CONNECT:
 			Tools::debug("Router: on_event: RT_CLOSE_P2P_CONNECT:");
 			close_p2p_connect(ev.tag);
-			break;			
+			break;
+			
+		case RT_SET_SOCKET_P2P:
+			Tools::debug("Router: on_event: RT_SET_SOCKET_P2P:");						
+			nodo_socket = (char*)ev.tag;
+			sock_p2p = atoi(nodo_socket);
+			
+			sprintf(logBuffer, "Router: on_event: Se seteo el socket %d como socket_p2p", sock_p2p);
+			Tools::debug(logBuffer);			
+			break;
+			
+		case RT_UNSET_SOCKET_P2P:
+			Tools::debug("Router: on_event: RT_UNSET_SOCKET_P2P:");
+			sock_p2p = SOCK_ERRONEO;
+			Tools::debug("Router: on_event: Se desseteo el socket_p2p");
+			break;
 
 		case RT_ADD_NODO_SERVIDOR:		
 			Tools::debug("Router: on_event RT_ADD_NODO_SERVIDOR");
@@ -105,7 +120,7 @@ void Router::on_event(const Event& ev)
 			
 			nombre_nodo = find_in_server_sockets_nodo_nombre(id_socket);
 			
-			sprintf(logBuffer, "Router: start_connections: nombre_nodo [%s], retornado por find_nodo_nombre_from_id_socket", nombre_nodo.c_str());
+			sprintf(logBuffer, "Router: on_event: nombre_nodo [%s], retornado por find_nodo_nombre_from_id_socket", nombre_nodo.c_str());
 			Tools::debug(logBuffer);			
 			
 			rm_nodo_socket_from_server_map(nombre_nodo);
@@ -217,7 +232,7 @@ void Router::start_connections()
 }
 
 
-int Router::try_connection(const char *nombre_nodo) 
+int Router::try_connection(const char *nombre_nodo, bool socket_p2p) 
 {
 	int socket;
 	char logBuffer[BUFFER_SIZE];
@@ -234,8 +249,14 @@ int Router::try_connection(const char *nombre_nodo)
 	
 	socket = SocketUtil::cliente_abrir_conexion_tcp (vecino_config->ip, vecino_config->port);
 	if (socket != SOCK_ERRONEO)
-	{			
-		// Armo el mensaje con mi nombre de nodo y lo mando a mi vecino
+	{		
+		// Si es conexion p2p, le envio una señal al destinatario
+		if (socket_p2p)
+		{ 
+			Tools::debug("Router: try_connection: Se le indica al destinatario, que esta conexion es p2p");				
+			SocketUtil::enviar_mensaje(socket, P2P_CONNECT);		
+		}
+		// Armo el mensaje con mi nombre de nodo y lo mando a mi vecino		
 		std::string mensaje = get_handshake_msg();
 		SocketUtil::enviar_mensaje(socket, mensaje);		
 				
@@ -245,24 +266,25 @@ int Router::try_connection(const char *nombre_nodo)
 		nombre_nodo_vecino = SocketUtil::recibir_mensaje(socket);						
 		decode_rta_handshake_msg(nombre_nodo_vecino);
 		
+		if (!socket_p2p)
+		{
+			memset(socketBuffer, 0, BUFFER_SIZE);
+			sprintf(socketBuffer, "%d", socket);				
+			// Le envio al Listener el socket que tengo con el vecino (nueva conexion)
+			Event evListener;
+			evListener.id = LS_ADD_SOCKET;
+			evListener.tag = Tools::duplicate (socketBuffer);
+			Listener::instance()->post_event(evListener, true);
 		
-		memset(socketBuffer, 0, BUFFER_SIZE);
-		sprintf(socketBuffer, "%d", socket);				
-		// Le envio al Listener el socket que tengo con el vecino (nueva conexion)
-		Event evListener;
-		evListener.id = LS_ADD_SOCKET;
-		evListener.tag = Tools::duplicate (socketBuffer);
-		Listener::instance()->post_event(evListener, true);
-				
-		
-		char *buffer_nodo_socket_id = new char[BUFFER_SIZE];
-		memset(buffer_nodo_socket_id, 0, BUFFER_SIZE);
-		sprintf(buffer_nodo_socket_id, "%s,%d", nombre_nodo_vecino, socket);
-		// Le envio al Router (yo) el par "nombre_nodo_vecino,socket" para que lo agregue a su mapa
-		Event evRouter;
-		evRouter.id = RT_ADD_NODO_CLIENTE;
-		evRouter.tag = Tools::duplicate (buffer_nodo_socket_id);
-		this->post_event(evRouter, true);		
+			char *buffer_nodo_socket_id = new char[BUFFER_SIZE];
+			memset(buffer_nodo_socket_id, 0, BUFFER_SIZE);
+			sprintf(buffer_nodo_socket_id, "%s,%d", nombre_nodo_vecino, socket);
+			// Le envio al Router (yo) el par "nombre_nodo_vecino,socket" para que lo agregue a su mapa
+			Event evRouter;
+			evRouter.id = RT_ADD_NODO_CLIENTE;
+			evRouter.tag = Tools::duplicate (buffer_nodo_socket_id);
+			this->post_event(evRouter, true);					
+		}			
 	}
 	return socket;
 }
@@ -358,21 +380,26 @@ void Router::start_p2p_connect(const void* msg)
 	char socketBuffer[BUFFER_SIZE];	
 	Mensaje *mensaje = (Mensaje *)msg;
 	std::string vendedor = mensaje->get_vendedor();
-	//sprintf(logBuffer, "Router: start_p2p_connect:  [%s]", mensaje_xml.c_str());		
-	//Tools::debug(logBuffer);
 	std::string mensaje_xml = mensaje->to_string();
 	sprintf(logBuffer, "Router: start_p2p_connect: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
 	Tools::debug(logBuffer);
 	
-	sock_p2p = try_connection(vendedor.c_str());
+	sock_p2p = try_connection(vendedor.c_str(), true); //true: le indico que es una conexion p2p
 	if (sock_p2p != SOCK_ERRONEO)
-	{
-		sprintf(logBuffer, "Router: start_p2p_connect: Se obtuvo de try_connection el socket [%d]", sock_p2p);		
+	{				
+		sprintf(logBuffer, "Entro en el estado 'en operacion'");
+		Tools::info(logBuffer);
+		en_operacion = true;
+		
+		sprintf(logBuffer, "Router: start_p2p_connect: Se obtuvo de try_connection el socket p2p [%d]", sock_p2p);		
 		Tools::debug(logBuffer);
 			
 		memset(socketBuffer, 0, BUFFER_SIZE);
 		sprintf(socketBuffer, "%d", sock_p2p);				
-		// Le envio al Listener el socket p2p (nueva conexion)
+		
+		sprintf(logBuffer, "Router: start_p2p_connect: Le envio un evento al Listener para que agregue el socket p2p %d, en su set de escucha", sock_p2p);		
+		Tools::debug(logBuffer);		
+		
 		Event evListener;
 		evListener.id = LS_ADD_SOCKET_P2P;
 		evListener.tag = Tools::duplicate (socketBuffer);
@@ -380,9 +407,9 @@ void Router::start_p2p_connect(const void* msg)
 
 		sprintf(logBuffer, "Esperando respuesta del vendedor [%s]...", vendedor.c_str());		
 		Tools::info(logBuffer);		
-		sleep(DEFAULT_WAIT_SECONDS+1); // Solo para darle tiempo a que el listener, incorpore en su set de socket de escucha al socket p2p
+		//sleep(1); // Solo para darle tiempo a que el listener, incorpore en su set de socket de escucha al socket p2p
 		
-		send_to_socket_message(sock_p2p, mensaje_xml);
+		send_to_socket_message(sock_p2p, mensaje_xml);		
 	}		
 	else
 	{
@@ -395,22 +422,28 @@ void Router::start_p2p_connect(const void* msg)
 void Router::close_p2p_connect(const void* msg)
 {
 	char logBuffer[BUFFER_SIZE];
-	//Mensaje *mensaje = (Mensaje *)msg;
-	//std::string mensaje_xml = mensaje->to_string();
-	//sprintf(logBuffer, "Router: close_p2p_connect: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
-	//Tools::debug(logBuffer);
+	char socketBuffer[BUFFER_SIZE];
 	
-	//send_to_socket_message(sock_p2p, mensaje_xml);
+	memset(socketBuffer, 0, BUFFER_SIZE);
+	sprintf(socketBuffer, "%d", sock_p2p);	
 	
-	//sprintf(logBuffer, "Esperando que le llegue la respuesta al vendedor [%s], para asi cerrar el socket p2p...", mensaje->get_vendedor().c_str());
-	//Tools::info(logBuffer);
-	//sleep(DEFAULT_WAIT_SECONDS+1);
+	sprintf(logBuffer, "Router: close_p2p_connect: Le envio un evento al Listener para que remueva de su set de escucha el socket p2p %d", sock_p2p);		
+	Tools::debug(logBuffer);		
 	
-	sprintf(logBuffer, "Cerrando socket p2p [%d]", sock_p2p);		
+	Event evListener;
+	evListener.id = LS_RM_SOCKET_P2P;
+	evListener.tag = Tools::duplicate (socketBuffer);
+	Listener::instance()->post_event(evListener, true);				
+	
+	sprintf(logBuffer, "Cerrando conexion directa...");		
 	Tools::info(logBuffer);
 	
 	close(sock_p2p);
 	sock_p2p = SOCK_ERRONEO;
+	
+	sprintf(logBuffer, "Salgo del estado 'en operacion'");
+	Tools::info(logBuffer);		
+	en_operacion = false;
 }
 
 void Router::send_to_next_node_message(const void* msg)
@@ -438,7 +471,7 @@ void Router::send_to_p2p_socket_message(const void* msg)
 	Mensaje *mensaje = (Mensaje *)msg;	
 	
 	std::string mensaje_xml = mensaje->to_string();
-	sprintf(logBuffer, "Router: send_to_next_node_message: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
+	sprintf(logBuffer, "Router: send_to_p2p_socket_message: Se va a enviar el xml [%s]", mensaje_xml.c_str());		
 	Tools::debug(logBuffer);
 	
 	send_to_socket_message(sock_p2p, mensaje_xml);
@@ -470,7 +503,6 @@ void Router::send_to_socket_message(int socket, std::string mensaje_xml)
 char *Router::get_handshake_msg()
 {
 	char logBuffer[BUFFER_SIZE];
-	//memset(logBuffer, 0 , sizeof(logBuffer));
 	sprintf(logBuffer, "Enviando handshake [%s]", nombre_nodo);
 	Tools::info(logBuffer);			
 	return nombre_nodo;
@@ -513,8 +545,7 @@ std::string Router::find_in_client_sockets_nodo_nombre(int id_socket)
 		if (socket_aux == id_socket)
 		{
 			nombre_nodo = Tools::duplicate(it->first);			
-			encontrado = true;				
-			//memset(logBuffer, 0 , sizeof(logBuffer));
+			encontrado = true;
 			sprintf(logBuffer, "Router: find_in_client_sockets_nodo_nombre: nombre_nodo [%s]", nombre_nodo.c_str());
 			Tools::debug(logBuffer);				
 		}
@@ -545,8 +576,7 @@ std::string Router::find_in_server_sockets_nodo_nombre(int id_socket)
 		if (socket_aux == id_socket)
 		{
 			nombre_nodo = Tools::duplicate(it->first);			
-			encontrado = true;				
-			//memset(logBuffer, 0 , sizeof(logBuffer));
+			encontrado = true;
 			sprintf(logBuffer, "Router: find_in_server_sockets_nodo_nombre: nombre_nodo [%s]", nombre_nodo.c_str());
 			Tools::debug(logBuffer);				
 		}
@@ -565,7 +595,6 @@ void Router::add_nodo_socket_into_server_map(std::string nombre_nodo, int id_soc
 	if (!nombre_nodo.empty())
 	{
 		nodo_socket_servidor_map[nombre_nodo] = id_socket;
-		//memset(logBuffer, 0 , sizeof(logBuffer));
 		sprintf(logBuffer, "Router: add_nodo_socket_into_server_map: Se agrego el par [%s,%d]", nombre_nodo.c_str(), id_socket);
 		Tools::debug(logBuffer);
 	}
@@ -581,7 +610,6 @@ void Router::add_nodo_socket_into_client_map(std::string nombre_nodo, int id_soc
 	if (!nombre_nodo.empty())
 	{
 		nodo_socket_cliente_map[nombre_nodo] = id_socket;
-		//memset(logBuffer, 0 , sizeof(logBuffer));
 		sprintf(logBuffer, "Router: add_nodo_socket_into_client_map: Se agrego el par [%s,%d]", nombre_nodo.c_str(), id_socket);
 		Tools::debug(logBuffer);
 	}
@@ -598,7 +626,6 @@ void Router::rm_nodo_socket_from_server_map(std::string nombre_nodo)
 	if (!nombre_nodo.empty())
 	{
 		nodo_socket_servidor_map.erase(nombre_nodo);
-		//memset(logBuffer, 0 , sizeof(logBuffer));
 		sprintf(logBuffer, "Router: rm_nodo_socket_from_server_map: Se elimino nodo_socket_map.erase(%s)", nombre_nodo.c_str());
 		Tools::debug(logBuffer);	
 		sprintf(logBuffer, "Se retiro el nodo [%s]", nombre_nodo.c_str());
@@ -617,7 +644,6 @@ void Router::rm_nodo_socket_from_client_map(std::string nombre_nodo)
 	if (!nombre_nodo.empty())
 	{
 		nodo_socket_cliente_map.erase(nombre_nodo);
-		//memset(logBuffer, 0 , sizeof(logBuffer));
 		sprintf(logBuffer, "Router: rm_nodo_socket_from_client_map: Se elimino nodo_socket_map.erase(%s)", nombre_nodo.c_str());
 		Tools::debug(logBuffer);	
 		
@@ -637,10 +663,6 @@ void Router::close_TCP_connections()
 	// Inicia la rutina de salida
 	close(sock_vecino1);
 	close(sock_vecino2);
-	
-	//Event ev;
-	//ev.id  = QUIT;
-	//this->post_event(ev, true);
 }
 
 

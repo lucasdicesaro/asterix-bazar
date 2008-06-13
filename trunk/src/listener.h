@@ -38,7 +38,7 @@ class Listener : public Runner
 		void rm_socket(int id_socket);
 		
 		void add_socket_p2p(int id_socket);		
-		void rm_socket_p2p();
+		void rm_socket_p2p(int id_socket);
 				
 		void decode_handshake_msg(const char *msg);
 		char *get_rta_handshake_msg();		
