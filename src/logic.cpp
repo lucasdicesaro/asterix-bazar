@@ -9,17 +9,16 @@
 #include <assert.h>
 
 extern char *nombre_nodo;
-extern bool en_operacion;
 
 Logic* Logic::single_instance = NULL;
-int Logic::HOPCOUNT;
+
 /**
 * Constructors
 */
 Logic::Logic()
 {
 	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
-	Logic::HOPCOUNT = reconnectParams->hopcount;
+	set_hopcount(reconnectParams->hopcount);
 }
 
 Logic::~Logic()
@@ -46,7 +45,7 @@ void Logic::on_event(const Event& ev)
 			
 		case DO_LOOKUP:
 			Tools::debug("Logic: on_event: DO_LOOKUP:");
-			// Recibir la cantidad y producto(?) del teclado
+			// TODO Recibir la cantidad por teclado
 			cantidad = 2;
 			on_send_look_up(Stock::instance()->get_compro(), cantidad);			
 			break;
@@ -85,11 +84,6 @@ void Logic::on_event(const Event& ev)
 			Tools::debug("Logic: on_event: CLIENT_MSG:");
 			on_client_msg(ev.tag);
 			break;			
-			
-		//case DO_START_BUY:
-		//	Tools::debug("Logic: on_event: DO_START_BUY");
-		//	start_buy();
-		//	break;				
 
 		case SET_STOCK_SAL:
 			Tools::debug("Logic: on_event: SET_STOCK_SAL");
@@ -105,14 +99,6 @@ void Logic::on_event(const Event& ev)
 }
 
 
-
-
-//void Logic::start_buy()
-///{
-//	Event ev;
-//	ev.id = DO_LOOKUP;
-//	this->post_event(ev, true);	
-//}
 
 void Logic::set_stock_product(std::string product_name, int cantidad)
 {
@@ -136,7 +122,6 @@ void Logic::on_send_look_up(std::string product_name, int cantidad)
 	Event evRta;
 	evRta.id = RT_FIRST_BROADCAST;
 	evRta.tag = Tools::duplicate(mensaje->to_string());
-	//evRta.tag = mensaje->clone();
 	Router::instance()->post_event(evRta, true);	
 }
 
@@ -155,8 +140,7 @@ void Logic::on_send_look_up_forward(const void* msg)
 			
 			Event evRta;
 			evRta.id = RT_BROADCAST;
-			//evRta.tag = Tools::duplicate(mensaje->to_string());
-			evRta.tag = mensaje->clone();
+			evRta.tag = mensaje;
 			Router::instance()->post_event(evRta, true);					
 		}
 		else 
@@ -183,7 +167,7 @@ void Logic::on_send_replay(const void* msg)
 		
 		Event evRta;
 		evRta.id = RT_SEND_TO_SOCKET;
-		evRta.tag = mensaje->clone();
+		evRta.tag = mensaje;
 		Router::instance()->post_event(evRta, true);					
 	}
 	else
@@ -215,13 +199,12 @@ void Logic::on_send_buy(const void* msg)
 {
 	Tools::debug("Logic::on_send_buy:");
 	char logBuffer[BUFFER_SIZE];
-	
-	en_operacion = true;	
-	sprintf(logBuffer, "Voy a iniciar la negociacion. Me pongo en estado de operacion. Mi nombre es [%s]", nombre_nodo);
-	Tools::info(logBuffer);
-	
+
 	Mensaje *mensaje_old = (Mensaje *)msg;		
 	Mensaje *mensaje = build_buy_msg(mensaje_old);
+	
+	sprintf(logBuffer, "Voy a iniciar la negociacion con [%s]", mensaje->get_vendedor().c_str());
+	Tools::info(logBuffer);	
 			
 	Event evRta;
 	evRta.id = RT_START_P2P_CONNECT;
@@ -237,13 +220,10 @@ void Logic::on_send_buy_reply_ok(const void* msg)
 	Mensaje *mensaje_old = (Mensaje *)msg;		
 	Mensaje *mensaje = build_buy_reply_ok_msg(mensaje_old);
 	
-	sprintf(logBuffer, "Le aviso al comprador que todo esta bien, que incremente lo suyo. Y saco mi estado 'en operacion'", nombre_nodo);
-	Tools::info(logBuffer);
-	en_operacion = false;	
-					
+	sprintf(logBuffer, "Operacion existosa. Le aviso al comprador que incremente lo suyo");
+	Tools::info(logBuffer);					
 	
 	Event evRta;
-//	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el vendedor. Solo el comprador cierra los sockets
 	evRta.id = RT_SEND_TO_P2P_SOCKET;
 	evRta.tag = mensaje;
 	Router::instance()->post_event(evRta, true);
@@ -256,12 +236,10 @@ void Logic::on_send_buy_reply_err(const void* msg)
 	Mensaje *mensaje_old = (Mensaje *)msg;		
 	Mensaje *mensaje = build_buy_reply_err_msg(mensaje_old);
 	
-	sprintf(logBuffer, "Le aviso al comprador no se produjo la negociacion. Que no incremente lo suyo. Y saco mi estado 'en operacion'", nombre_nodo);
+	sprintf(logBuffer, "Operacion fallida. No tuve stock suficiente en el momento en que se realizo la negociacion. Le aviso al comprador que no incremente lo suyo", nombre_nodo);
 	Tools::info(logBuffer);
-	en_operacion = false;	
 				
 	Event evRta;
-//	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el vendedor. Solo el comprador cierra los sockets
 	evRta.id = RT_SEND_TO_P2P_SOCKET;
 	evRta.tag = mensaje;
 	Router::instance()->post_event(evRta, true);
@@ -271,9 +249,6 @@ void Logic::on_send_buy_reply_err(const void* msg)
 
 
 
-/**
- Client msg handlerd:
-*/
 void Logic::on_client_msg(const void* xml_tag)
 {		
 	assert(xml_tag);
@@ -399,8 +374,9 @@ void Logic::on_receive_replay(Mensaje *mensaje)
 		Tools::debug("Logic: on_codigo_replay: Sigue quedando mas de un nodo en el mensaje. Se reenvia");
 		
 		memset(logBuffer, 0 , sizeof(logBuffer));
-		sprintf(logBuffer, "Se traspasa la respuesta de compra al nodo que origino el pedido: [%s]", mensaje->get_creator_node_name().c_str());
-		
+		sprintf(logBuffer, "Se traspasa la respuesta de compra hasta llegar a [%s] (nodo que origino el pedido)", mensaje->get_creator_node_name().c_str());
+		Tools::info (logBuffer);
+			
 		ev.id = DO_REPLY_FORWARD;
 		ev.tag = mensaje;
 		this->post_event(ev, true);
@@ -413,21 +389,20 @@ void Logic::on_receive_buy(Mensaje *mensaje)
 	Tools::debug("Logic: on_receive_buy:");
 	char logBuffer[BUFFER_SIZE];
 	
-	en_operacion = true;	
-	sprintf(logBuffer, "El comprador inicio la negociacion conmigo. Me pongo en estado 'en operacion'. Mi nombre es [%s]", nombre_nodo);
+	sprintf(logBuffer, "El comprador inicio la negociacion conmigo");
 	Tools::info(logBuffer);
 		
 	Event ev;
 	if (Stock::instance()->get_stock(mensaje->get_product_name().c_str()) >= mensaje->get_cantidad())
 	{		
 		Stock::instance()->decrement_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
-		sprintf(logBuffer, "Decremente de mi stock de [%s] en %d unidades. Le respondo exitosamente", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
+		sprintf(logBuffer, "Decremente de mi stock de [%s] en %d unidades. Operacion Exitosa. Le comunico al comprador", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
 		Tools::info(logBuffer);		
 		ev.id = DO_BUY_REPLY_OK;
 	}		
 	else
 	{
-		sprintf(logBuffer, "No tengo stock suficiente como para vender [%s]. Tengo %d unidades y me piden %d unidades. Le respondo negativamente", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
+		sprintf(logBuffer, "No tengo stock suficiente para vender [%s]. Tengo %d unidades y me piden %d unidades. Le respondo negativamente", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
 		Tools::info(logBuffer);	
 		ev.id = DO_BUY_REPLY_ERR;
 	}
@@ -444,11 +419,9 @@ void Logic::on_receive_buy_reply_ok(Mensaje *mensaje)
 	char logBuffer[BUFFER_SIZE];
 	
 	Stock::instance()->increment_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
-	sprintf(logBuffer, "Incremente mi stock de [%s] en %d unidades. Operacion finalizada. Salgo del estado 'en operacion'", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
+	sprintf(logBuffer, "Incremente mi stock de [%s] en %d unidades. Operacion finalizada", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
 	Tools::info(logBuffer);	
-	
-	en_operacion = false;
-	
+
 	Stock::instance()->to_string();
 	
 	Event evRta;
@@ -461,10 +434,8 @@ void Logic::on_receive_buy_reply_err(Mensaje *mensaje)
 {
 	Tools::debug("Logic: on_receive_buy_reply_err:");
 	char logBuffer[BUFFER_SIZE];
-	sprintf(logBuffer, "El vendedor [%s] no pudo satisfacer mi pedido. No se modifica el stock. Operacion finalizada. Salgo del estado 'en operacion'", mensaje->get_vendedor().c_str(), mensaje->get_product_name().c_str(), mensaje->get_cantidad());
+	sprintf(logBuffer, "El vendedor [%s] no pudo satisfacer mi pedido. No se modifica el stock. Operacion finalizada", mensaje->get_vendedor().c_str(), mensaje->get_product_name().c_str(), mensaje->get_cantidad());
 	Tools::info(logBuffer);	
-	
-	en_operacion = false;
 	
 	Stock::instance()->to_string();
 					
@@ -483,7 +454,7 @@ Mensaje *Logic::build_look_up_msg(std::string product_name, int cantidad)
 	mensaje->set_code(CODIGO_LOOKUP);
 	mensaje->set_product_name(product_name);
 	mensaje->set_cantidad(cantidad);
-	mensaje->set_hopcount(HOPCOUNT);
+	mensaje->set_hopcount(get_hopcount());
 	return mensaje;
 }
 
@@ -500,7 +471,7 @@ Mensaje *Logic::build_reply_msg(Mensaje *mensaje_old)
 		mensaje->set_cantidad(mensaje_old->get_cantidad());
 		mensaje->set_hopcount(-1);
 		mensaje->set_timestamp(mensaje->get_timestamp());		
-		mensaje->set_nodos(mensaje_old->get_nodos()); // Le paso el camino por donde debe vovler
+		mensaje->set_nodos(mensaje_old->get_nodos()); // Le paso el camino por donde debe volver
 	}
 	else
 	{
@@ -575,15 +546,12 @@ Mensaje *Logic::build_buy_reply_err_msg(Mensaje *mensaje_old)
 
 
 
-/**
- Locked Add Nodo
-*/
+
 void Logic::add_nodo(Mensaje *mensaje, const char*buffer)
 {
 	Tools::debug("Logic: add_nodo:");
 	Nodo* nodo = new Nodo;
 	nodo->name = Tools::duplicate(buffer);
-	//clients[nodo->name] = nodo;
 	mensaje->get_nodos().push_back(nodo);
 }
 
@@ -607,4 +575,14 @@ void Logic::less_hopcount(Mensaje *mensaje)
 	Tools::debug("Logic: less_hopcount:");
 	mensaje->set_hopcount(mensaje->get_hopcount()-1);
 }
+
+void Logic::set_hopcount(int hopcount)
+{
+	this->hopcount = hopcount;
+}
+int Logic::get_hopcount()
+{
+	return hopcount;
+}
+
 
