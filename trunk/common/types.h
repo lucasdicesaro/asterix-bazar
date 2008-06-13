@@ -24,6 +24,7 @@
 #define WARN_LEVEL "WARN"
 #define ERROR_LEVEL "ERROR"
 
+#define P2P_CONNECT "p2p_connect"
 
 #define PRODUCTO_SAL ("sal")
 #define PRODUCTO_PESCADO ("pescado")
@@ -34,14 +35,6 @@
 #define CODIGO_BUY ("buy")
 #define CODIGO_BUY_OK ("buy_ok")
 #define CODIGO_BUY_ERR ("buy_err")
-
-//typedef std::basic_string<char> bstring;
-
-//typedef struct
-//{
-//	int sock;
-//	char ip[32];
-//}ConnectDS;
 
 typedef enum
 {
@@ -79,6 +72,8 @@ typedef enum
 	RT_RM_NODO_CLIENTE,
 	RT_ADD_NODO_SERVIDOR,
 	RT_RM_NODO_SERVIDOR,	
+	RT_SET_SOCKET_P2P,
+	RT_UNSET_SOCKET_P2P,
 	KB_SHOW_MENU
 } EventID;
 
@@ -102,14 +97,7 @@ typedef struct
         int			  port;
         char		  vecino1[NOMBRE_NODO_SIZE];
         char		  vecino2[NOMBRE_NODO_SIZE];        
-}ConfigDS;
-
-//typedef struct
-//{
-//    char nombre_nodo[NOMBRE_NODO_SIZE];
-//    int id_socket;
-//} RouterDS;
-
+} ConfigDS;
 
 
 #endif //_TYPES_H_

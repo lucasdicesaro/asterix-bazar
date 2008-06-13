@@ -62,8 +62,8 @@ class Tools
 		*/
 		int Open_Log (char* FileName);
 		void Write_Log (char* strData);
-		void Close_Log ();	
-		
+		void Close_Log ();		
+				
 	protected:
 		Tools();
 		~Tools();
@@ -75,11 +75,12 @@ class Tools
 		ListaConfig listaConfig;
 		ReconnectParamsDS *reconnectParams;
 		char *nombre_nodo;
-		int listener_port;
+		int listener_port;	
+		
 		bool debug_level;
 		bool info_level;
 		bool warn_level;				
-		bool error_level;		
+		bool error_level;						
 };
 
 #endif //_TOOLS_H_
