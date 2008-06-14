@@ -113,12 +113,14 @@ void Keyboard::procesar_submenu1()
 
 		case 2:
 			Tools::debug("Keyboard: get_key: Tecla 2");
-			// TODO setear id
+			ev.id = SET_STOCK_PESCADO; 
+			product_name = PRODUCTO_PESCADO;
 			break;
 			
 		case 3:
 			Tools::debug("Keyboard: get_key: Tecla 3");
-			// TODO setear id
+			ev.id = SET_STOCK_VERDURA; 
+			product_name = PRODUCTO_VERDURA;
 			break;
 	}	
 	
