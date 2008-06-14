@@ -91,6 +91,28 @@ void Logic::on_event(const Event& ev)
 			cantidad = atoi(buffer);		
 			set_stock_product(PRODUCTO_SAL, cantidad);
 			break;			
+
+		case SET_STOCK_PESCADO:
+			Tools::debug("Logic: on_event: SET_STOCK_PESCADO");
+			buffer = (char*) ev.tag;		
+			cantidad = atoi(buffer);		
+			set_stock_product(PRODUCTO_PESCADO, cantidad);
+			break;			
+
+		case SET_STOCK_VERDURA:
+			Tools::debug("Logic: on_event: SET_STOCK_VERDURA");
+			buffer = (char*) ev.tag;		
+			cantidad = atoi(buffer);		
+			set_stock_product(PRODUCTO_VERDURA, cantidad);
+			break;			
+
+
+	   case KB_SHOW_STOCK:
+			Tools::debug("Logic: on_event: KB_SHOW_STOCK");
+		  	Stock::instance()->to_string();
+		  	break;			
+		  
+
 		  
 		default:
 			Tools::debug("Logic: on event: *UNKNOWN*.");
