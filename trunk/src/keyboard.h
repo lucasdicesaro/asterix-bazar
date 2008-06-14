@@ -22,6 +22,7 @@ class Keyboard : public Runner
 		void get_key();	
 		void procesar_submenu1();		
 		void procesar_lanzar();
+		void showstock();
 		int elegir_producto();
 
 	protected:	
