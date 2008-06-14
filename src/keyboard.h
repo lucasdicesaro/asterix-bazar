@@ -19,11 +19,19 @@ class Keyboard : public Runner
 		virtual void on_event(const Event& ev);
 
 	protected:		
-		void get_key();	
-		void procesar_submenu1();		
-		void procesar_lanzar();
+		void elegir_accion();
+		
+		void procesar_add_stock();
+		void procesar_set_producto_compra();		
+		void procesar_set_producto_venta();		
+		void procesar_lanzar();		
 		void showstock();
+		void try_reconnect();
+
 		int elegir_producto();
+				
+		char *obtener_cadena(const char*mensaje_prompt);
+		int obtener_tecla();
 
 	protected:	
 	
