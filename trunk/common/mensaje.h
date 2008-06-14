@@ -9,6 +9,8 @@
 #include <iostream>
 #include <list>
 #include <libxml++/libxml++.h>
+#include <time.h>
+#include <sys/time.h>
 
 /**
 Mensaje.
@@ -50,18 +52,27 @@ class Mensaje
 		std::string to_string(bool formated = false);		
 		
 		std::string get_code() const;
-		std::string get_product_name() const;
-		std::string get_vendedor() const;		
-		int get_cantidad() const;
-		int get_hopcount() const;
-		int get_timestamp() const;		
-		
 		void set_code(std::string code);
+		
+		std::string get_product_name() const;
 		void set_product_name(std::string product_name);
+				
+		std::string get_vendedor() const;		
 		void set_vendedor(std::string vendedor);		
+				
+		int get_cantidad() const;
 		void set_cantidad(int cantidad = -1);
+		
+		int get_hopcount() const;
 		void set_hopcount(int hopcount = -1);
-		void set_timestamp(int timestamp);		
+		
+		int get_timestamp_seconds() const;		
+		void set_timestamp_seconds(int timestamp_seconds);		
+		
+		int get_timestamp_microseconds() const;		
+		void set_timestamp_microseconds(int timestamp_microseconds);		
+		
+		char *get_timestamp_converted() const;
 		
 		Mensaje *clone();
 		std::string get_next_node_name();
@@ -74,7 +85,10 @@ class Mensaje
 	protected:
 		Nodos nodos;
 		std::string code, product_name, vendedor;
-		int cantidad, hopcount, timestamp;
+		int cantidad, hopcount;
+		int timestamp_seconds;
+		int timestamp_microseconds;		
+		struct timeval tv;
 };
 
 

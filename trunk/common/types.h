@@ -26,6 +26,8 @@
 
 #define P2P_CONNECT "p2p_connect"
 
+#define SEPARADOR ("|")
+
 #define PRODUCTO_SAL ("sal")
 #define PRODUCTO_PESCADO ("pescado")
 #define PRODUCTO_VERDURA ("verdura")
@@ -77,6 +79,13 @@ typedef enum
 	KB_SHOW_MENU, 
    	KB_SHOW_STOCK
 } EventID;
+
+
+typedef enum
+{
+	LOOKUP_ENVIADO=0,
+	REPLY_RECIBIDO
+} EstadoPedidoID;
 
 typedef struct
 {
