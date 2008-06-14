@@ -53,7 +53,7 @@ void Keyboard::get_key()
     {
 		cout<<"MENU: " << endl;
 		cout<<"1.Llenar stock " << endl;
-		cout<<"2.submenu2 " << endl;
+		cout<<"2.Mostrar Stock " << endl;
 		cout<<"3.submenu2 " << endl;
 		cout<<"4.Lanzar compra " << endl;
 		cout<<"8.Salir" << endl;
@@ -68,7 +68,9 @@ void Keyboard::get_key()
 					Tools::debug("Keyboard: get_key: Tecla 1");
 					procesar_submenu1();
 					break;
-				//case 2:delrecord();break;
+				
+				case 2:showstock();break;
+				  
 				//case 3:modrecord();break;
 				case 4:
 					Tools::debug("Keyboard: get_key: Tecla 4");			
@@ -172,4 +174,10 @@ int Keyboard::elegir_producto()
 	return tecla;
 }
 
+void Keyboard::showstock()
+{
+	Event ev;
+	ev.id = KB_SHOW_STOCK;
+	Logic::instance()->post_event(ev, true);
 
+}
