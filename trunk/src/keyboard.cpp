@@ -7,6 +7,8 @@ using namespace std;
 
 Keyboard* Keyboard::single_instance = NULL;
 
+extern bool en_operacion;
+
 /**
 * Constructors
 */
@@ -57,33 +59,31 @@ void Keyboard::get_key()
 		cout<<"8.Salir" << endl;
 		cout<<" Haga su eleccion:  " << endl;
 		cin>>tecla;
-
-		switch(tecla)
+		
+		if (!en_operacion)
 		{
-			case 1:
-				Tools::debug("Keyboard: get_key: Tecla 1");
-				procesar_submenu1();
-				break;
-			//case 2:delrecord();break;
-			//case 3:modrecord();break;
-			case 4:
-				Tools::debug("Keyboard: get_key: Tecla 4");			
-				procesar_lanzar();
-				break;
+			switch(tecla)
+			{
+				case 1:
+					Tools::debug("Keyboard: get_key: Tecla 1");
+					procesar_submenu1();
+					break;
+				//case 2:delrecord();break;
+				//case 3:modrecord();break;
+				case 4:
+					Tools::debug("Keyboard: get_key: Tecla 4");			
+					procesar_lanzar();
+					break;
+			}
+		}
+		else
+		{
+			Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado");	
 		}
 	} while (tecla != 8);
 
-	if (tecla != 8)
-	{
-		Event ev;
-		ev.id = KB_SHOW_MENU;
-		this->post_event(ev, true);
-	}
-	else 
-	{
-		// Fuerzo la salida
-		raise(SIGINT);
-	}
+	// Fuerzo la salida
+	raise(SIGINT);
 }
 
 void Keyboard::procesar_submenu1()
@@ -93,7 +93,14 @@ void Keyboard::procesar_submenu1()
 	char *buffer = new char[BUFFER_SIZE];	
 	memset(buffer, 0, BUFFER_SIZE);
 	
-	int tecla = elegir_producto();
+	int tecla = elegir_producto();	
+	
+	if (en_operacion)
+	{
+		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
+	}
+	
 	Event ev;
 	std::string product_name;
 	switch(tecla)
@@ -119,8 +126,15 @@ void Keyboard::procesar_submenu1()
 	int ch;
 	while ((ch = getchar()) != '\n' && ch != EOF);
 
+	
 	cout<<"Ingrese la cantidad de [" << product_name << "] que quiere setear en el stock" << endl;
 	fgets(buffer, BUFFER_SIZE, stdin);
+	if (en_operacion)
+	{
+		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
+	}
+	
 	sprintf(logBuffer, "Se apreto [%s]", buffer);	
    	Tools::debug(logBuffer);
 	ev.tag = Tools::instance ()->duplicate(buffer);
@@ -145,6 +159,11 @@ int Keyboard::elegir_producto()
 		cout<<"3." << PRODUCTO_VERDURA << endl;
 		cout<<" Haga su eleccion:  " << endl;
 		cin>>tecla;
+		if (en_operacion)
+		{
+			Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+			return -1;
+		}
 
 	} while (tecla != 1 && tecla != 2 && tecla != 3);
 
