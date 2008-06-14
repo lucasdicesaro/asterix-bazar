@@ -403,7 +403,7 @@ void Listener::decode_handshake_msg(const char *msg)
 	if (msg != NULL)
 	{
 		sprintf(logBuffer, "Recibiendo handshake [%s]", msg);
-		Tools::info(logBuffer);	
+		Tools::debug(logBuffer);	
 	}   
 	else
 	{
@@ -415,7 +415,7 @@ char *Listener::get_rta_handshake_msg()
 {
 	char logBuffer[BUFFER_SIZE];
 	sprintf(logBuffer, "Enviando respuesta handshake [%s]", nombre_nodo);
-	Tools::info(logBuffer);			
+	Tools::debug(logBuffer);			
 	return nombre_nodo;	
 }
 

@@ -69,7 +69,8 @@ class Router : public Runner
 		NodoMapping nodo_socket_cliente_map;
 		NodoMapping nodo_socket_servidor_map;
 			
-		bool show_menu;		
+		bool show_menu;
+		bool show_reconexion_agotada;				
 };
 
 #endif //_ROUTER_H_

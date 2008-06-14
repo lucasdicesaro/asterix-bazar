@@ -29,6 +29,7 @@ Router::Router()
 	sock_vecino2 = SOCK_ERRONEO;	
 	sock_p2p = SOCK_ERRONEO;	
 	show_menu = false;
+	show_reconexion_agotada= false;
 }
 
 Router::~Router()
@@ -169,20 +170,30 @@ void Router::start_connections()
 	if (sock_vecino1 == SOCK_ERRONEO)
 	{
 		sock_vecino1 = try_connection(my_config->vecino1);
+		if (sock_vecino1 != SOCK_ERRONEO)
+		{
+			sprintf(logBuffer, "Logre conectarme con el vecino [%s]", my_config->vecino1);
+			Tools::info(logBuffer);
+		}
 	}
 	else
 	{
-		sprintf(logBuffer, "Router: start_connections: El vecino [%s], ya tiene socket", my_config->vecino1);
-		Tools::debug(logBuffer);
+		sprintf(logBuffer, "Ya estoy conectado con el vecino [%s]", my_config->vecino1);
+		Tools::info(logBuffer);
 	}
 	
 	if (sock_vecino2 == SOCK_ERRONEO)
 	{
 		sock_vecino2 = try_connection(my_config->vecino2);
+		if (sock_vecino2 != SOCK_ERRONEO)
+		{
+			sprintf(logBuffer, "Logre conectarme con el vecino [%s]", my_config->vecino2);
+			Tools::info(logBuffer);
+		}
 	}
 	else
 	{
-		sprintf(logBuffer, "Router: start_connections: El vecino [%s], ya tiene socket", my_config->vecino2);
+		sprintf(logBuffer, "Ya estoy conectado con el vecino [%s]", my_config->vecino2);
 		Tools::debug(logBuffer);
 	}
 	
@@ -192,9 +203,6 @@ void Router::start_connections()
 		// No se pudo lograr la comunicacion con al menos uno de los dos vecinos
 		sprintf(logBuffer, "Router: start_connections: Intento de reconexion nro %d. Se espera un delay de %d", intentos_reconexion, delay_reconexion);
 		Tools::debug(logBuffer);
-		sprintf(logBuffer, "Intento de reconexion nro %d. Se espera un delay de %d", intentos_reconexion, delay_reconexion);
-		Tools::debug(logBuffer);
-		
 		
 		intentos_reconexion--;
 		sleep(delay_reconexion);
@@ -209,9 +217,13 @@ void Router::start_connections()
 		{
 			if (sock_vecino1 == SOCK_ERRONEO && sock_vecino2 == SOCK_ERRONEO)				
 			{
-				// No se establecio conexion con ninguno de los dos vecinos
+				Tools::info("No se establecio conexion con ninguno de los dos vecinos");				
 				Tools::debug("Router: start_connections: Se agotaron los intentos de reconexion");				
-				Tools::info("Se agotaron los intentos de reconexion. Presiones Ctrl+C e intente mas tarde.");
+				if (show_reconexion_agotada)
+				{
+					show_reconexion_agotada = false;
+					Tools::info("Se agotaron los intentos de reconexion");
+				}	
 			}
 		}
 		if (!conexiones_incompletas) 
@@ -224,6 +236,10 @@ void Router::start_connections()
 		if (!show_menu)
 		{
 			show_menu = true;
+			Event evLogic;
+			evLogic.id = KB_SHOW_STOCK;
+			Logic::instance()->post_event(evLogic, true);			
+			
 			Event ev;
 			ev.id = KB_SHOW_MENU;		
 			Keyboard::instance()->post_event(ev, true);
@@ -504,7 +520,7 @@ char *Router::get_handshake_msg()
 {
 	char logBuffer[BUFFER_SIZE];
 	sprintf(logBuffer, "Enviando handshake [%s]", nombre_nodo);
-	Tools::info(logBuffer);			
+	Tools::debug(logBuffer);			
 	return nombre_nodo;
 }
 
@@ -514,7 +530,7 @@ void Router::decode_rta_handshake_msg(const char *msg)
 	if (msg != NULL)
 	{
 		sprintf(logBuffer, "Recibiendo respuesta handshake [%s]", msg);		
-		Tools::info(logBuffer);
+		Tools::debug(logBuffer);
 	}
 	else
 	{

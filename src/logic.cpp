@@ -45,9 +45,9 @@ void Logic::on_event(const Event& ev)
 			
 		case DO_LOOKUP:
 			Tools::debug("Logic: on_event: DO_LOOKUP:");
-			// TODO Recibir la cantidad por teclado
-			cantidad = 2;
-			on_send_look_up(Stock::instance()->get_compro(), cantidad);			
+			buffer = (char*) ev.tag;		
+			cantidad = atoi(buffer);
+			on_send_look_up(cantidad);			
 			break;
 			
 		case DO_LOOKUP_FORWARD:
@@ -106,13 +106,10 @@ void Logic::on_event(const Event& ev)
 			set_stock_product(PRODUCTO_VERDURA, cantidad);
 			break;			
 
-
 	   case KB_SHOW_STOCK:
 			Tools::debug("Logic: on_event: KB_SHOW_STOCK");
 		  	Stock::instance()->to_string();
 		  	break;			
-		  
-
 		  
 		default:
 			Tools::debug("Logic: on event: *UNKNOWN*.");
@@ -133,13 +130,22 @@ void Logic::set_stock_product(std::string product_name, int cantidad)
 }
 
 
-void Logic::on_send_look_up(std::string product_name, int cantidad)
+void Logic::on_send_look_up(int cantidad)
 {
 	char logBuffer[BUFFER_SIZE];
 	
 	// Obtiene producto a comprar de clase STOCK
-	Mensaje *mensaje = build_look_up_msg(product_name, cantidad);
+	Mensaje *mensaje = build_look_up_msg(Stock::instance()->get_compro(), cantidad);
+
+	sprintf(logBuffer, "Se inicia la compra: %d unidades de [%s]. Timestamp: %s", cantidad, mensaje->get_product_name().c_str(), mensaje->get_timestamp_converted());
+	Tools::info(logBuffer);	
+	
 	add_nodo(mensaje, nombre_nodo);
+	
+	// Se llena el mapa de control de pedidos
+	mapaPedidos[mensaje->get_timestamp_converted()] = LOOKUP_ENVIADO;
+	sprintf(logBuffer, "Se inicia en estado LOOKUP_ENVIADO el mensaje con timestamp [%s]", mensaje->get_timestamp_converted());
+	Tools::debug(logBuffer);	
 		
 	Event evRta;
 	evRta.id = RT_FIRST_BROADCAST;
@@ -158,7 +164,7 @@ void Logic::on_send_look_up_forward(const void* msg)
 		{			
 			less_hopcount(mensaje);
 			add_nodo(mensaje, nombre_nodo);					
-			Tools::debug("Logic: on_send_look_up_forward: Reenviando el LOOKUP");					
+			Tools::info("Reenviando el LOOKUP");					
 			
 			Event evRta;
 			evRta.id = RT_BROADCAST;
@@ -185,7 +191,7 @@ void Logic::on_send_replay(const void* msg)
 	Mensaje *mensaje = build_reply_msg(mensaje_old);
 	if (mensaje != NULL)
 	{
-		Tools::debug("Logic: on_send_replay: Enviando el REPLY");
+		Tools::info("Respondo con un REPLY");
 		
 		Event evRta;
 		evRta.id = RT_SEND_TO_SOCKET;
@@ -203,7 +209,7 @@ void Logic::on_send_replay_forward(const void* msg)
 	Mensaje *mensaje = (Mensaje *)msg;
 	if (mensaje != NULL)
 	{
-		Tools::debug("Logic: on_send_replay_forward: Reenviando el REPLY");
+		Tools::info("Reenviando el REPLY");
 		less_nodo(mensaje);		
 		
 		Event evRta;
@@ -242,7 +248,7 @@ void Logic::on_send_buy_reply_ok(const void* msg)
 	Mensaje *mensaje_old = (Mensaje *)msg;		
 	Mensaje *mensaje = build_buy_reply_ok_msg(mensaje_old);
 	
-	sprintf(logBuffer, "Operacion existosa. Le aviso al comprador que incremente lo suyo");
+	sprintf(logBuffer, "Le aviso al comprador que incremente lo suyo");
 	Tools::info(logBuffer);					
 	
 	Event evRta;
@@ -258,7 +264,7 @@ void Logic::on_send_buy_reply_err(const void* msg)
 	Mensaje *mensaje_old = (Mensaje *)msg;		
 	Mensaje *mensaje = build_buy_reply_err_msg(mensaje_old);
 	
-	sprintf(logBuffer, "Operacion fallida. No tuve stock suficiente en el momento en que se realizo la negociacion. Le aviso al comprador que no incremente lo suyo", nombre_nodo);
+	sprintf(logBuffer, "Le aviso al comprador que NO incremente lo suyo", nombre_nodo);
 	Tools::info(logBuffer);
 				
 	Event evRta;
@@ -311,7 +317,10 @@ void Logic::on_receive_look_up(Mensaje *mensaje)
 	Stock* stock = Stock::instance();
 		
 	char logBuffer[BUFFER_SIZE];
+	char logBuffer2[BUFFER_SIZE];
 	memset(logBuffer, 0 , sizeof(logBuffer));
+	memset(logBuffer2, 0 , sizeof(logBuffer));	
+	
 	sprintf(logBuffer, "Logic: on_receive_look_up: Recibido del Lookup: [%d] unidades de [%s]", 
 			mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 	Tools::debug(logBuffer);
@@ -330,26 +339,23 @@ void Logic::on_receive_look_up(Mensaje *mensaje)
 	
 	if (producto_solicitado.compare(vendo) == 0)
 	{
-		sprintf(logBuffer, "Yo [%s], vendo lo que me estan pidiendo [%s]", nombre_nodo, mensaje->get_product_name().c_str());
-		Tools::info(logBuffer);
+		sprintf(logBuffer, "Yo [%s], vendo lo que me piden: [%s]. Tengo (%d) unidades", nombre_nodo, mensaje->get_product_name().c_str(), stock->get_stock(producto_solicitado));
 		if (stock->get_stock(producto_solicitado) >= cantidad_solicitada)
 		{
-			sprintf(logBuffer, "y tengo la cantidad (%d) que me piden %d. Respondo el mensaje", stock->get_stock(producto_solicitado), mensaje->get_cantidad());			
-			Tools::info(logBuffer);
-			
+			sprintf(logBuffer2, ", suficientes para satisfacer la cantidad que me piden: %d", mensaje->get_cantidad());			
 			ev.id = DO_REPLY;
 		}
 		else
 		{
-			sprintf(logBuffer, ", pero NO tengo la cantidad (%d) que me piden %d. Reenvio el mensaje", stock->get_stock(producto_solicitado), mensaje->get_cantidad());			
-			Tools::info(logBuffer);
-			
-			ev.id = DO_LOOKUP_FORWARD;
+			sprintf(logBuffer2, ", por lo que NO puedo satisfacer la cantidad que me piden %d", mensaje->get_cantidad());								
+			ev.id = DO_LOOKUP_FORWARD;		
 		}
+		strcat(logBuffer, logBuffer2);
+		Tools::info(logBuffer);				
 	}
 	else 
 	{
-		sprintf(logBuffer, "Yo [%s], NO vendo lo que me estan pidiendo [%s]. Reenvio el mensaje", nombre_nodo, mensaje->get_product_name().c_str());
+		sprintf(logBuffer, "Yo [%s], NO vendo lo que me estan pidiendo [%s]", nombre_nodo, mensaje->get_product_name().c_str());
 		Tools::info(logBuffer);
 		
 		ev.id = DO_LOOKUP_FORWARD;
@@ -382,9 +388,24 @@ void Logic::on_receive_replay(Mensaje *mensaje)
 			sprintf(logBuffer, "El vendedor [%s] vende lo que necesito: [%d] unidades de [%s]", mensaje->get_vendedor().c_str(), mensaje->get_cantidad(), mensaje->get_product_name().c_str());
 			Tools::info(logBuffer);
 			
-			ev.id = DO_BUY;
-			ev.tag = mensaje;
-			this->post_event(ev, true);				
+			// Verifico si recibi el REPLY del pedido
+			if (mapaPedidos[mensaje->get_timestamp_converted()] != REPLY_RECIBIDO)
+			{
+				sprintf(logBuffer, "Se pasa a estado REPLY_RECIBIDO el mensaje con timestamp [%s]", mensaje->get_timestamp_converted());
+				Tools::debug(logBuffer);	
+				
+				// Actualizo el estado del pedido
+				mapaPedidos[mensaje->get_timestamp_converted()] = REPLY_RECIBIDO;
+				
+				ev.id = DO_BUY;
+				ev.tag = mensaje;
+				this->post_event(ev, true);					
+			}			
+			else
+			{
+				sprintf(logBuffer, "Me llego un REPLY (timestamp=[%s]) de un pedido que ya empece a negociar con otro nodo. Descarto el mensaje", mensaje->get_timestamp_converted());
+				Tools::info(logBuffer);				
+			}
 		}
 		else
 		{
@@ -417,14 +438,22 @@ void Logic::on_receive_buy(Mensaje *mensaje)
 	Event ev;
 	if (Stock::instance()->get_stock(mensaje->get_product_name().c_str()) >= mensaje->get_cantidad())
 	{		
-		Stock::instance()->decrement_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad());
-		sprintf(logBuffer, "Decremente de mi stock de [%s] en %d unidades. Operacion Exitosa. Le comunico al comprador", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
-		Tools::info(logBuffer);		
-		ev.id = DO_BUY_REPLY_OK;
+		if (Stock::instance()->decrement_stock(mensaje->get_product_name().c_str(), mensaje->get_cantidad()))
+		{
+			sprintf(logBuffer, "Operacion exitosa. Decremente mi stock de [%s] en %d unidades", mensaje->get_product_name().c_str(), mensaje->get_cantidad());		
+			Tools::info(logBuffer);		
+			ev.id = DO_BUY_REPLY_OK;
+		}
+		else
+		{
+			sprintf(logBuffer, "Operacion fallida. No tengo stock suficiente para vender [%s]. Tengo %d unidades y me piden %d unidades", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
+			Tools::info(logBuffer);	
+			ev.id = DO_BUY_REPLY_ERR;
+		}
 	}		
 	else
 	{
-		sprintf(logBuffer, "No tengo stock suficiente para vender [%s]. Tengo %d unidades y me piden %d unidades. Le respondo negativamente", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
+		sprintf(logBuffer, "Operacion fallida. No tengo stock suficiente para vender [%s]. Tengo %d unidades y me piden %d unidades", mensaje->get_product_name().c_str(), Stock::instance()->get_stock(mensaje->get_product_name().c_str()), mensaje->get_cantidad());
 		Tools::info(logBuffer);	
 		ev.id = DO_BUY_REPLY_ERR;
 	}
@@ -446,6 +475,11 @@ void Logic::on_receive_buy_reply_ok(Mensaje *mensaje)
 
 	Stock::instance()->to_string();
 	
+	// Actualizo el pedido. Se finaliza
+	//mapaPedidos[mensaje->get_timestamp_converted()] = FINALIZADO;
+	//sprintf(logBuffer, "Se pasa a estado FINALIZADO el mensaje con timestamp [%s]", mensaje->get_timestamp_converted());
+	//Tools::info(logBuffer);	
+
 	Event evRta;
 	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el comprador. debo cerrar el socket p2p
 	evRta.tag = mensaje;
@@ -460,7 +494,12 @@ void Logic::on_receive_buy_reply_err(Mensaje *mensaje)
 	Tools::info(logBuffer);	
 	
 	Stock::instance()->to_string();
-					
+	
+	// Actualizo el pedido. Se finaliza
+	//mapaPedidos[mensaje->get_timestamp_converted()] = FINALIZADO;
+	//sprintf(logBuffer, "Se pasa a estado FINALIZADO el mensaje con timestamp [%s]", mensaje->get_timestamp_converted());
+	//Tools::info(logBuffer);	
+		
 	Event evRta;
 	evRta.id = RT_CLOSE_P2P_CONNECT; // En esta instancia soy el comprador. debo cerrar el socket p2p
 	evRta.tag = mensaje;
@@ -482,6 +521,7 @@ Mensaje *Logic::build_look_up_msg(std::string product_name, int cantidad)
 
 Mensaje *Logic::build_reply_msg(Mensaje *mensaje_old)
 {
+	char logBuffer[BUFFER_SIZE];
 	Mensaje *mensaje = NULL;
 	Tools::debug("Logic: build_reply_msg:");
 	if (mensaje_old != NULL)
@@ -492,8 +532,11 @@ Mensaje *Logic::build_reply_msg(Mensaje *mensaje_old)
 		mensaje->set_product_name(mensaje_old->get_product_name());		
 		mensaje->set_cantidad(mensaje_old->get_cantidad());
 		mensaje->set_hopcount(-1);
-		mensaje->set_timestamp(mensaje->get_timestamp());		
+		mensaje->set_timestamp_seconds(mensaje_old->get_timestamp_seconds());
+		mensaje->set_timestamp_microseconds(mensaje_old->get_timestamp_microseconds());		
 		mensaje->set_nodos(mensaje_old->get_nodos()); // Le paso el camino por donde debe volver
+		sprintf(logBuffer, "Logic: build_reply_msg: Transfiriendo timestamp. Valores %d|%d", mensaje->get_timestamp_seconds(), mensaje->get_timestamp_microseconds());
+		Tools::debug(logBuffer);		
 	}
 	else
 	{
@@ -504,6 +547,7 @@ Mensaje *Logic::build_reply_msg(Mensaje *mensaje_old)
 
 Mensaje *Logic::build_buy_msg(Mensaje *mensaje_old)
 {
+	char logBuffer[BUFFER_SIZE];
 	Mensaje *mensaje = NULL;
 	Tools::debug("Logic: build_buy_msg:");
 	if (mensaje_old != NULL)
@@ -514,7 +558,10 @@ Mensaje *Logic::build_buy_msg(Mensaje *mensaje_old)
 		mensaje->set_product_name(mensaje_old->get_product_name());		
 		mensaje->set_cantidad(mensaje_old->get_cantidad());
 		mensaje->set_hopcount(-1);
-		mensaje->set_timestamp(mensaje->get_timestamp());		
+		mensaje->set_timestamp_seconds(mensaje_old->get_timestamp_seconds());
+		mensaje->set_timestamp_microseconds(mensaje_old->get_timestamp_microseconds());		
+		sprintf(logBuffer, "Logic: build_buy_msg: Transfiriendo timestamp. Valores %d|%d", mensaje->get_timestamp_seconds(), mensaje->get_timestamp_microseconds());
+		Tools::debug(logBuffer);		
 	}
 	else
 	{
@@ -525,8 +572,9 @@ Mensaje *Logic::build_buy_msg(Mensaje *mensaje_old)
 
 Mensaje *Logic::build_buy_reply_ok_msg(Mensaje *mensaje_old)
 {
+	char logBuffer[BUFFER_SIZE];
 	Mensaje *mensaje = NULL;
-	Tools::debug("Logic: build_buy_ok_msg:");
+	Tools::debug("Logic: build_buy_reply_ok_msg:");
 	if (mensaje_old != NULL)
 	{
 		mensaje = new Mensaje();
@@ -535,11 +583,14 @@ Mensaje *Logic::build_buy_reply_ok_msg(Mensaje *mensaje_old)
 		mensaje->set_product_name(mensaje_old->get_product_name());		
 		mensaje->set_cantidad(mensaje_old->get_cantidad());
 		mensaje->set_hopcount(-1);
-		mensaje->set_timestamp(mensaje->get_timestamp());			
+		mensaje->set_timestamp_seconds(mensaje_old->get_timestamp_seconds());
+		mensaje->set_timestamp_microseconds(mensaje_old->get_timestamp_microseconds());		
+		sprintf(logBuffer, "Logic: build_buy_reply_ok_msg: Transfiriendo timestamp. Valores %d|%d", mensaje->get_timestamp_seconds(), mensaje->get_timestamp_microseconds());
+		Tools::debug(logBuffer);			
 	}
 	else
 	{
-		Tools::error ("Logic: build_buy_msg: Mensaje recibido NULO");
+		Tools::error ("Logic: build_buy_reply_ok_msg: Mensaje recibido NULO");
 	}
 	return mensaje;		
 }
@@ -547,8 +598,9 @@ Mensaje *Logic::build_buy_reply_ok_msg(Mensaje *mensaje_old)
 
 Mensaje *Logic::build_buy_reply_err_msg(Mensaje *mensaje_old)
 {
+	char logBuffer[BUFFER_SIZE];
 	Mensaje *mensaje = NULL;
-	Tools::debug("Logic: build_buy_ok_msg:");
+	Tools::debug("Logic: build_buy_reply_err_msg:");
 	if (mensaje_old != NULL)
 	{
 		mensaje = new Mensaje();
@@ -557,11 +609,14 @@ Mensaje *Logic::build_buy_reply_err_msg(Mensaje *mensaje_old)
 		mensaje->set_product_name(mensaje_old->get_product_name());		
 		mensaje->set_cantidad(mensaje_old->get_cantidad());
 		mensaje->set_hopcount(-1);
-		mensaje->set_timestamp(mensaje->get_timestamp());			
+		mensaje->set_timestamp_seconds(mensaje_old->get_timestamp_seconds());
+		mensaje->set_timestamp_microseconds(mensaje_old->get_timestamp_microseconds());		
+		sprintf(logBuffer, "Logic: build_buy_reply_err_msg: Transfiriendo timestamp. Valores %d|%d", mensaje->get_timestamp_seconds(), mensaje->get_timestamp_microseconds());
+		Tools::debug(logBuffer);			
 	}
 	else
 	{
-		Tools::error ("Logic: build_buy_msg: Mensaje recibido NULO");
+		Tools::error ("Logic: build_buy_reply_err_msg: Mensaje recibido NULO");
 	}
 	return mensaje;		
 }

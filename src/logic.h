@@ -8,6 +8,7 @@
 class Logic : public Runner
 {
 	public:
+		typedef std::map<std::string, EstadoPedidoID> MapaPedidos;
 		
 		/**
 		Singleton
@@ -23,7 +24,7 @@ class Logic : public Runner
 	protected:	
 		void set_stock_product(std::string product_name, int cantidad);		
 		
-		void on_send_look_up(std::string product_name, int cantidad);
+		void on_send_look_up(int cantidad);
 		void on_send_look_up_forward(const void* msg);		
 		void on_send_replay(const void* msg);
 		void on_send_replay_forward(const void* msg);
@@ -54,6 +55,7 @@ class Logic : public Runner
 		~Logic();
 		static Logic* single_instance;
 		int hopcount;
+		MapaPedidos mapaPedidos;
 };
 
 #endif //_LOGIC_H_
