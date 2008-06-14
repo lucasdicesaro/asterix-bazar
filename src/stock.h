@@ -19,8 +19,8 @@ class Stock
 		int get_stock(std::string product_name);
 		void set_stock(std::string product_name, int cantidad);
 		
-		void decrement_stock(const char* product_name, int cantidad);
-		void increment_stock(const char* product_name, int cantidad);
+		bool decrement_stock(const char* product_name, int cantidad);
+		bool increment_stock(const char* product_name, int cantidad);
 		
 		char* get_compro();
 		void set_compro(char* product_name);

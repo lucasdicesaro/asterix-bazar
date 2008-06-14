@@ -31,36 +31,60 @@ void Stock::load_stock()
 {    
 }
 
-void Stock::decrement_stock(const char* product_name, int cantidad)
-{
+bool Stock::decrement_stock(const char* product_name, int cantidad)
+{	
+	bool operacion_exitosa = false;
 	char logBuffer[BUFFER_SIZE];
-	if (mapa_stock.count(product_name) > 0 && mapa_stock[product_name] > cantidad) 
+	if (mapa_stock.count(product_name) > 0 && mapa_stock[product_name] >= cantidad) 
+	{
+		operacion_exitosa = true;
 		mapa_stock[product_name] = mapa_stock[product_name]-cantidad;
+	}
 	else
 	{
-		//TODO: Como levantar el error si decrementa a menos de 0?	
-		sprintf(logBuffer, "Stock: decrement_stock: No se puede decrementar el %s en %d unidades, sabiendo que tengo %d unidades", product_name, cantidad, mapa_stock[product_name]);
+		if (mapa_stock.count(product_name) > 0)
+		{
+			sprintf(logBuffer, "Stock: decrement_stock: El producto %s no existe dentro de los productos posibles", product_name);
+		}
+		else
+		{
+			sprintf(logBuffer, "Stock: decrement_stock: No se puede decrementar el %s en %d unidades, sabiendo que tengo %d unidades", product_name, cantidad, mapa_stock[product_name]);
+		}
 		Tools::warn(logBuffer);
 	}
+	return operacion_exitosa;
 }
 
-void Stock::increment_stock(const char* product_name, int cantidad)
+bool Stock::increment_stock(const char* product_name, int cantidad)
 {
+	char logBuffer[BUFFER_SIZE];
+	bool operacion_exitosa = false;
 	if (mapa_stock.count(product_name) > 0) 
+	{
+		operacion_exitosa = true;		
 		mapa_stock[product_name] = mapa_stock[product_name] + cantidad;
+	}
+	else
+	{
+		sprintf(logBuffer, "Stock: decrement_stock: El producto %s no existe dentro de los productos posibles", product_name);
+		Tools::warn(logBuffer);
+	}
+	return operacion_exitosa;
 }
 
 int Stock::get_stock(std::string product_name)
 {
 	char logBuffer[BUFFER_SIZE];
+	int cantidad_producto = 0;
 	if (mapa_stock.count(product_name) > 0) 
-		return mapa_stock[product_name];
+		cantidad_producto = mapa_stock[product_name];
 	else 
 	{
 		sprintf(logBuffer, "Stock: get_stock: El producto [%s] no existe en el mapa de stock!", product_name.c_str());
 		Tools::warn(logBuffer);
-		return -1;
+		cantidad_producto = -1;
 	}	
+	return cantidad_producto;
 }
 
 
@@ -72,33 +96,34 @@ void Stock::set_stock(std::string product_name, int cantidad)
 
 char* Stock::get_compro()
 {
-        return compro;
+	return compro;
 }
 
 void Stock::set_compro(char* product_name)
 {
-        compro = product_name;
+	compro = product_name;
 }
 
 char* Stock::get_vendo()
 {
-        return vendo;
+	return vendo;
 }
 
 void Stock::set_vendo(char* product_name)
 {
-        vendo = product_name;
+	vendo = product_name;
 }
 
 void Stock::to_string()
 {
-	//load_stock();	
+
+	cout << "=======================================================" << endl;	
 	cout << "Stock Actual: " << endl;
 	cout << PRODUCTO_SAL << ": " << mapa_stock[PRODUCTO_SAL] << endl;
 	cout << PRODUCTO_PESCADO << ": " << mapa_stock[PRODUCTO_PESCADO] << endl;
-	cout << PRODUCTO_VERDURA << ": " << mapa_stock[PRODUCTO_VERDURA] << endl;
-	
+	cout << PRODUCTO_VERDURA << ": " << mapa_stock[PRODUCTO_VERDURA] << endl;	
 	cout << "Producto de venta actual: " << vendo << endl;
-	cout << "Producto de compra actual: " << compro << endl;	
+	cout << "Producto de compra actual: " << compro << endl;
+	cout << "=======================================================" << endl;	
 }
 
