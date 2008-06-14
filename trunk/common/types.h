@@ -74,7 +74,8 @@ typedef enum
 	RT_RM_NODO_SERVIDOR,	
 	RT_SET_SOCKET_P2P,
 	RT_UNSET_SOCKET_P2P,
-	KB_SHOW_MENU
+	KB_SHOW_MENU, 
+   	KB_SHOW_STOCK
 } EventID;
 
 typedef struct
