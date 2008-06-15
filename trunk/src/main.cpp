@@ -21,7 +21,7 @@ char *nombre_nodo;
 int listener_port;
 bool en_operacion = false;
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {				
 	signal(SIGTERM, sig_handler);
 	signal(SIGINT, sig_handler);
