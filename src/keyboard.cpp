@@ -162,13 +162,87 @@ void Keyboard::procesar_add_stock()
 
 void Keyboard::procesar_set_producto_compra()
 {
-	Tools::error("Keyboard: procesar_set_producto_compra: No implementado");
+	Tools::debug("Keyboard: procesar_set_producto_compra:");	
+	char *logBuffer = new char[BUFFER_SIZE];		
+	char *buffer = new char[BUFFER_SIZE];	
+	memset(buffer, 0, BUFFER_SIZE);
+	
+	int tecla = elegir_producto();	
+	
+	if (en_operacion)
+	{
+		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
+	}
+	
+	Event ev;
+	std::string product_name;
+	switch(tecla)
+	{
+		case 1:
+			Tools::debug("Keyboard: procesar_set_producto_compra: Tecla 1");
+			ev.id = SET_CUR_PROD_COMPRA; 
+			product_name = PRODUCTO_SAL;
+			break;
+		case 2:
+			Tools::debug("Keyboard: procesar_set_producto_compra: Tecla 2");
+			ev.id = SET_CUR_PROD_COMPRA; 
+			product_name = PRODUCTO_PESCADO;
+			break;
+		case 3:
+			Tools::debug("Keyboard: procesar_set_producto_compra: Tecla 3");
+			ev.id = SET_CUR_PROD_COMPRA; 
+			product_name = PRODUCTO_VERDURA;
+			break;
+	}
+	
+	sprintf(logBuffer, "Keyboard: procesar_set_producto_compra: Se eligio [%s]", product_name.c_str());	
+   	Tools::debug(logBuffer);
+	ev.tag = Tools::instance ()->duplicate(product_name);
+	Logic::instance()->post_event(ev, true);
+	
 }
-
 
 void Keyboard::procesar_set_producto_venta()
 {
-	Tools::error("Keyboard: procesar_set_producto_venta: No implementado");
+	Tools::debug("Keyboard: procesar_set_producto_venta:");	
+	char *logBuffer = new char[BUFFER_SIZE];		
+	char *buffer = new char[BUFFER_SIZE];	
+	memset(buffer, 0, BUFFER_SIZE);
+	
+	int tecla = elegir_producto();	
+	
+	if (en_operacion)
+	{
+		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
+	}
+	
+	Event ev;
+	std::string product_name;
+	switch(tecla)
+	{
+		case 1:
+			Tools::debug("Keyboard: procesar_set_producto_venta: Tecla 1");
+			ev.id = SET_CUR_PROD_VENTA; 
+			product_name = PRODUCTO_SAL;
+			break;
+		case 2:
+			Tools::debug("Keyboard: procesar_set_producto_venta: Tecla 2");
+			ev.id = SET_CUR_PROD_VENTA; 
+			product_name = PRODUCTO_PESCADO;
+			break;
+		case 3:
+			Tools::debug("Keyboard: procesar_set_producto_venta: Tecla 3");
+			ev.id = SET_CUR_PROD_VENTA; 
+			product_name = PRODUCTO_VERDURA;
+			break;
+	}
+	
+	sprintf(logBuffer, "Keyboard: procesar_set_producto_venta: Se eligio [%s]", product_name.c_str());	
+   	Tools::debug(logBuffer);
+	ev.tag = Tools::instance ()->duplicate(product_name);
+	Logic::instance()->post_event(ev, true);	
 }
 
 void Keyboard::procesar_lanzar()

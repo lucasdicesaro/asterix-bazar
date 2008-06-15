@@ -35,6 +35,7 @@ Logic* Logic::instance()
 void Logic::on_event(const Event& ev)
 {	
 	char *buffer = new char[BUFFER_SIZE];
+	const char* prod;
 	int cantidad;	
 	switch (ev.id)
 	{
@@ -85,6 +86,18 @@ void Logic::on_event(const Event& ev)
 			on_client_msg(ev.tag);
 			break;			
 
+		case SET_CUR_PROD_COMPRA:
+			Tools::debug("Logic: on_event: SET_CUR_PROD_COMPRA");
+			prod = (const char*) ev.tag;
+			set_cur_prod_compra(prod);
+			break;	
+			
+		case SET_CUR_PROD_VENTA:
+			Tools::debug("Logic: on_event: SET_CUR_PROD_VENTA");
+			prod = (const char*) ev.tag;
+			set_cur_prod_venta(prod);
+			break;	
+		
 		case SET_STOCK_SAL:
 			Tools::debug("Logic: on_event: SET_STOCK_SAL");
 			buffer = (char*) ev.tag;		
@@ -129,6 +142,23 @@ void Logic::set_stock_product(std::string product_name, int cantidad)
 	Stock::instance()->to_string();
 }
 
+void Logic::set_cur_prod_compra(std::string product_name)
+{
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Se setea %s como producto de compra actual", product_name.c_str());
+	Tools::info(logBuffer);
+	Stock::instance()->set_compro(product_name.c_str());
+	Stock::instance()->to_string();
+}
+
+void Logic::set_cur_prod_venta(std::string product_name)
+{
+	char logBuffer[BUFFER_SIZE];
+	sprintf(logBuffer, "Se setea %s como producto de venta actual", product_name.c_str());
+	Tools::info(logBuffer);
+	Stock::instance()->set_vendo(product_name.c_str());
+	Stock::instance()->to_string();
+}
 
 void Logic::on_send_look_up(int cantidad)
 {
@@ -330,7 +360,7 @@ void Logic::on_receive_look_up(Mensaje *mensaje)
 	ev.tag = mensaje;	
 	std::string producto_solicitado = mensaje->get_product_name();
 	int cantidad_solicitada = mensaje->get_cantidad();
-	char* vendo = stock->get_vendo();
+	const char* vendo = stock->get_vendo();
 	
 	memset(logBuffer, 0 , sizeof(logBuffer));
 	sprintf(logBuffer, "Logic: on_receive_look_up: Producto solicitado [%s] y vendo [%s]", 

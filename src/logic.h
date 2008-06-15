@@ -22,6 +22,8 @@ class Logic : public Runner
 		void on_client_msg(const void* msg);
 				
 	protected:	
+		void set_cur_prod_compra(std::string product_name);
+		void set_cur_prod_venta(std::string product_name);
 		void set_stock_product(std::string product_name, int cantidad);		
 		
 		void on_send_look_up(int cantidad);
