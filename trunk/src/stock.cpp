@@ -11,8 +11,8 @@ Stock* Stock::single_instance = NULL;
 */
 Stock::Stock()
 {
-	mapa_stock[PRODUCTO_SAL] = 0;
-	mapa_stock[PRODUCTO_PESCADO] = 0;
+	mapa_stock[PRODUCTO_SAL] = 10;
+	mapa_stock[PRODUCTO_PESCADO] = 10;
 	mapa_stock[PRODUCTO_VERDURA] = 10;
 }
 
@@ -94,22 +94,22 @@ void Stock::set_stock(std::string product_name, int cantidad)
 	mapa_stock[product_name] = cantidad;
 }
 
-char* Stock::get_compro()
+const char* Stock::get_compro()
 {
-	return compro;
+	return compro.c_str();
 }
 
-void Stock::set_compro(char* product_name)
+void Stock::set_compro(const char* product_name)
 {
 	compro = product_name;
 }
 
-char* Stock::get_vendo()
+const char* Stock::get_vendo()
 {
-	return vendo;
+	return vendo.c_str();
 }
 
-void Stock::set_vendo(char* product_name)
+void Stock::set_vendo(const char* product_name)
 {
 	vendo = product_name;
 }

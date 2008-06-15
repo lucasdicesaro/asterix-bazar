@@ -22,11 +22,11 @@ class Stock
 		bool decrement_stock(const char* product_name, int cantidad);
 		bool increment_stock(const char* product_name, int cantidad);
 		
-		char* get_compro();
-		void set_compro(char* product_name);
+		const char* get_compro();
+		void set_compro(const char* product_name);
 		
-		char* get_vendo();
-		void set_vendo(char* product_name);
+		const char* get_vendo();
+		void set_vendo(const char* product_name);
 		
 		void to_string();
 		
@@ -35,8 +35,8 @@ class Stock
 		~Stock();
 		static Stock* single_instance;
 		std::map<std::string, int> mapa_stock;
-        char* compro;
-        char* vendo;
+		std::string compro;
+		std::string vendo;
 };
 
 #endif //_STOCK_H_
