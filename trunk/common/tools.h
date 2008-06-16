@@ -46,6 +46,7 @@ class Tools
 		
 		ConfigDS *get_info_nodo(const char *nombre);
 		ReconnectParamsDS *get_reconnect_params();
+		CurrentStockDS *get_current_stock();		
 
 		void DieWithError(const char *errorMessage);
 
@@ -74,13 +75,15 @@ class Tools
 		FILE* LOG_FILE;
 		ListaConfig listaConfig;
 		ReconnectParamsDS *reconnectParams;
+		CurrentStockDS *currentStock;
 		char *nombre_nodo;
 		int listener_port;	
 		
 		bool debug_level;
 		bool info_level;
 		bool warn_level;				
-		bool error_level;						
+		bool error_level;
 };
 
 #endif //_TOOLS_H_
+

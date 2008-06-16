@@ -12,6 +12,7 @@ Tools* Tools::single_instance = NULL;
 */
 Tools::Tools()
 {
+	
 }
 
 Tools::~Tools()
@@ -131,6 +132,7 @@ int Tools::Config_Parser (const char* FileName)
 	char* vecino1;	
 	char* vecino2;
 	reconnectParams = new ReconnectParamsDS();
+	currentStock = new CurrentStockDS();	
 
 
 	/* abro archivo 
@@ -173,11 +175,16 @@ int Tools::Config_Parser (const char* FileName)
 			memset(nombre_nodo, 0, NOMBRE_NODO_SIZE);
 			strcpy(nombre_nodo,  Value);
 		}
-
-		//if  (strcmp(Param, "listener_port") == 0)
-		//{
-		//	listener_port = atoi(Value);
-		//}		
+		
+		if (strcmp(Param, "producto_compra") == 0)
+		{
+			currentStock->producto_compra = Value;
+		}
+		if (strcmp(Param, "producto_venta") == 0)
+		{
+			currentStock->producto_venta = Value;
+		}
+			
 		if  (strcmp(Param, "intentos_reconexion") == 0)
 		{
 			reconnectParams->intentos_reconexion = atoi(Value);
@@ -263,38 +270,21 @@ char *Tools::get_IP_De_Participante(const char *nombre) {
 ConfigDS *Tools::get_info_nodo(const char *nombre) {
 	
 	char *key = duplicate(nombre);
-	//memset(key, 0, NOMBRE_NODO_SIZE);
-	//strcpy(key, nombre);
 	
 	ConfigDS* elementoConfig = NULL;
 	for (ListaConfig::iterator it = listaConfig.begin(); it != listaConfig.end() && elementoConfig == NULL; it++)
 	{
 		ConfigDS tmp = *it;
-		//printf("tmp.nombre: {%s} - key: {%s} - strcm %d\n", tmp.nombre, key, strcmp(tmp.nombre, key));
 		if (strcmp(tmp.nombre, key) == 0) {
-			//printf("-> tmp.nombre: {%s}\n", tmp.nombre);			
-			//elementoConfig->nombre = new char[]
-			//memset(elementoConfig->nombre, 0, NOMBRE_NODO_SIZE);
 			elementoConfig = new ConfigDS();
 			strcpy(elementoConfig->nombre, tmp.nombre);
 			strcpy(elementoConfig->ip, tmp.ip);
 			elementoConfig->port = tmp.port;
 			strcpy(elementoConfig->vecino1, tmp.vecino1);
 			strcpy(elementoConfig->vecino2, tmp.vecino2);
-			//elementoConfig = &tmp;
-			//strcpy(elementoConfig->nombre, tmp.nombre);
-			//strcpy(elementoConfig->ip, tmp.ip);
-			//elementoConfig->port = tmp.port;
-										   
-			//strcpy(elementoConfig->ip = &(tmp.ip));			
-			//printf("-> elementoConfig->nombre: {%s}\n", elementoConfig->nombre);
 		}
 	}	
-	//printf("elementoConfig: nombre: [%s], ip: [%s], puerto: [%d]\n", elementoConfig->nombre, elementoConfig->ip, elementoConfig->port);
-	//char*nombre_nodo = duplicate (elementoConfig->nombre);
-	//printf("nombre_nodo: [%s] \n",nombre_nodo);
-	//strcpy(elementoConfig->nombre, nombre_nodo);
-	//printf("elementoConfig->nombre: [%s] \n",elementoConfig->nombre);	
+	
 	return elementoConfig;
 }
 
@@ -313,6 +303,11 @@ int Tools::get_listener_port()
 ReconnectParamsDS *Tools::get_reconnect_params()
 {
 	return reconnectParams;
+}
+
+CurrentStockDS *Tools::get_current_stock()
+{
+	return currentStock;
 }
 
 

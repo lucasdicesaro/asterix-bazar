@@ -12,7 +12,7 @@
 
 #define BUFFER_SIZE 2000
 
-#define NOMBRE_NODO_SIZE (30)
+#define NOMBRE_NODO_SIZE (20)
 
 #define SOCK_ERRONEO (-1)
 
@@ -99,6 +99,12 @@ typedef struct
     int delay_reconexion;
     int hopcount;
 } ReconnectParamsDS;
+
+typedef struct
+{
+    std::string producto_compra;
+    std::string producto_venta;
+} CurrentStockDS;
 
 typedef struct
 {
