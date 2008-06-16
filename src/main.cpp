@@ -32,18 +32,18 @@ int main(int argc, const char *argv[])
 	Tools::instance()->Config_Parser("lista_participante.conf");
 	
 	// inicializa productos a comprar y vender segun parametros
-	if (argc > 2) 
-	{
-		Stock* stock = Stock::instance();
-		stock->set_compro(argv[1]);
-		stock->set_vendo(argv[2]);
-	}
-	else 
-	{
-		sprintf(logBuffer, "Parametros invalidos. Usage: \n%s <producto_compra> <producto_venta>", argv[0]);
-		Tools::info(logBuffer);	
-		exit(1);
-	}	
+	//if (argc > 2) 
+	//{
+	//	Stock* stock = Stock::instance();
+	//	stock->set_compro(argv[1]);
+	//	stock->set_vendo(argv[2]);
+	//}
+	//else 
+	//{
+	//	sprintf(logBuffer, "Parametros invalidos. Usage: \n%s <producto_compra> <producto_venta>", argv[0]);
+	//	Tools::info(logBuffer);	
+	//	exit(1);
+	//}	
 		
 	nombre_nodo = new char[NOMBRE_NODO_SIZE];
 	nombre_nodo = Tools::instance()->get_nombre_nodo();

@@ -19,6 +19,10 @@ Logic::Logic()
 {
 	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
 	set_hopcount(reconnectParams->hopcount);
+
+	CurrentStockDS *currentStock = Tools::instance()->get_current_stock();
+	Stock::instance()->set_compro(currentStock->producto_compra.c_str());
+	Stock::instance()->set_vendo(currentStock->producto_venta.c_str());	
 }
 
 Logic::~Logic()
