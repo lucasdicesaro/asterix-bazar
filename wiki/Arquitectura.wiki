@@ -71,4 +71,4 @@ En caso de que no existiera esta restricción, una buena solución que se aplica
 === Transaccionalidad ===
 En el momento de la negociación, interactúan dos nodos. Dichos nodos, deben modificar su stock. Para eso hay que aplicar un mecanismo de transacciones para evitar inconsistencias por error en la comunicacion. Para eso, se utiliza un flag global ('en operacion') que indica si un usuario esta en negociación o no. Una vez finalizada la negociación se setean estos flags a sus estados originales. 
 
-Esto también logra un efecto de aislamiento hacia el resto de la red, no respondiendo, ni reenviando mensajes de y hacia la red. Esta técnica es de gran ayuda para mantener la consistencia del stock de cada nodo
+Esto también logra un efecto de aislamiento hacia el resto de la red, rechazando cualquier tipo de mensaje proveniente de la red, excepto del nodo con el cual se estableció la negociación. Esta técnica es de gran ayuda para mantener la consistencia del stock de cada nodo.
