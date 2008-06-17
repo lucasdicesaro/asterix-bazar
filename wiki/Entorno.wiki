@@ -18,6 +18,6 @@ El entorno requiere los siguientes paquetes:
 
 Con el Synaptic instale los paquetes, necesarios para la autogeneracion, configuracio del makefile y la posterior compilacion del proyecto:
   * *autogen*
-  * **autoconf
+  * *autoconf*
   * *libtool*
   * *automake*
