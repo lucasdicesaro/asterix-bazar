@@ -1,4 +1,5 @@
 #summary Relación entre aspectos funcionales y técnicos
+#labels Comerciante,Nodo,Comprador,Vendedor,Funcionales
 
 == Introducción ==
 
@@ -8,7 +9,7 @@ En la sección [http://code.google.com/p/asterix-bazar/wiki/Arquitectura], se de
 == Relación entre aspectos funcionales y técnicos ==
 
 La aplicacion representa a un comerciante dentro de un Bazar donde se realizan compras y ventas de "boca en boca". Es decir, un comerciante "publica" sus necesidades a los comerciantes más próximos y éstos "propagan" dicha necesidad. Este perfil, se denomina *Comprador*.
-El mensaje va atravezando todo el Bazar hasta encontrar a algun comerciante que venda el producto que requiere el Comprador y responde al Comprador con otro mensaje. Este perfil, se denomina "Vendedor".
+El mensaje va atravesando el Bazar hasta encontrar a algun comerciante que venda el producto que requiere el Comprador. Por último, el mismo responde al Comprador con otro mensaje. Este perfil, se denomina "Vendedor".
 Cada comerciante (Vendedor o Comprador), es representado mediante un nodo y su pedido de compra o respuesta, es representado mediante un vínculo de un nodo con otro, formando asi una red de nodos.
 La topologia de red es versatil. Ésta puede conformarse de cualquier manera. No posee restricciones. 
 
