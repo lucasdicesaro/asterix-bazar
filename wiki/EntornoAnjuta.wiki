@@ -11,46 +11,45 @@ Esta sección describe la utilización del Entorno Interado de Desarrollo (IDE) 
 Después de instalar Anjuta, subversion y Rapid-svn
 
 
-Uso en Anjuta porque es una herramienta comoda para programar en C++. Ademas te organiza toda la configuracion del makefile, build del proyecto e incluso ejecucion. Algunos pasos basicos:
+Usamos Anjuta porque es una herramienta cómoda para programar en C++. Organiza toda la configuracion del makefile, build del proyecto e incluso ejecución. Algunos pasos basicos:
 
 
 Pasos para preparar un proyecto
-1. New->Project
-2. En la solapa C++-> Generic C++
-3. Elejir la ubicacion en el filesystem (antes conviene crear una carpeta, sino te desparrama varios archivos de configuracion del Anjuta)
-4. Poner todo en No
-5. Siguiente, y listo. Crea automaticamente el proyecto.
+  # New->Project
+  # En la solapa C++-> Generic C++
+  # Elejir la ubicacion en el filesystem (antes conviene crear una carpeta, sino te desparrama varios archivos de configuracion del Anjuta)
+  # Poner todo en No
+  # Siguiente, y listo. Crea automaticamente el proyecto.
 
 
 Pasos para agregar archivos al proyecto
-1. Se paras en la solapa Project (abajo a la izquierda)
+  # Se paras en la solapa Project (abajo a la izquierda)
 Nota: el anjuta organiza el proyecto como un conjunto de targets (ejecutables) y los archivos fuentes que dependen de el (codigo que vamos a escribir).
 Por eso siempre que creemos nuevos archivos, tenemos que indicar a qué target va a pertenecer. Si no existe un target, hay que crearlo y luego crear el achivo.
 Los targets tienen un iconito en forma de rombo gris.
-2. Para agregar un target tenemos que estar parados en alguna carpeta del proyecto. Boton derecho->Add Target, le ponenos un nombre y listo.
-3. Para agregar un archivo New->File, indicamos nombre de archivo y Tipo (va a ser .cpp). Indicamos a qué target queremos que pertenezca. Add.
+  # Para agregar un target tenemos que estar parados en alguna carpeta del proyecto. Boton derecho->Add Target, le ponenos un nombre y listo.
+  # Para agregar un archivo New->File, indicamos nombre de archivo y Tipo (va a ser .cpp). Indicamos a qué target queremos que pertenezca. Add.
 
 
 Pasos para compilar un proyecto
-1. En el menu Build-> Build Project
-2. Verificar en la consola que todo haya salido bien.
+  # En el menu Build-> Build Project
+  # Verificar en la consola que todo haya salido bien.
 
 
 Pasos para ejecutar un proyecto
-1. Una vez Buildeado, Build->Execute Program...
-2. Te va a listar todos los targets que hay en el proyecto. Se elige uno y OK.
+  # Una vez Buildeado, Build->Execute Program...
+  # Te va a listar todos los targets que hay en el proyecto. Se elige uno y OK.
 
 
 Pasos para empaquetar el proyecto para presentarlo en el laboratorio.
-1. En el menu Build->Run Autogenerate...
-2. En el menu Build->Run Configure...
-3. En el menu Build->Build Tarball. Esto genera un archivo .tar.gz (Archivo comprimido)
+  # En el menu Build->Run Autogenerate...
+  # En el menu Build->Run Configure...
+  # En el menu Build->Build Tarball. Esto genera un archivo .tar.gz (Archivo comprimido)
 
 
 Para cuando probemos en el lab:
-1. Copiamos el .tar.gz y le hacemos
-tar xzvf <nombre_archivo>.tar.gz
-2. Entramos al directorio <nombre_archivo>
-3. Ejecutamos ./configure
-4. Ejecutamos make install (Por ahora en mi maquina tengo que ejecutar "sudo make install" porque necesita permisos, voy a ver como lo corrijo)
-5. Por ultimo entramos a la carpeta src (donde estan los ejecutables) y ejecutamos el target, mediante ./<nombre_target>
+  # Copiamos el .tar.gz y le hacemos: tar xzvf <nombre_archivo>.tar.gz
+  # Entramos al directorio <nombre_archivo>
+  # Ejecutamos ./configure
+  # Ejecutamos make install (Por ahora en mi maquina tengo que ejecutar "sudo make install" porque necesita permisos, voy a ver como lo corrijo)
+  # Por ultimo entramos a la carpeta src (donde estan los ejecutables) y ejecutamos el target, mediante ./<nombre_target>
