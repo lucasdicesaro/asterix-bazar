@@ -1,12 +1,12 @@
-#summary Armado del entorno
-#labels Entorno,Anjuta,Rapid-svn
+#summary Paquetes Básicos
+#labels Entorno,Anjuta,Rapid-svn,Paquetes,Basicos
 
-= Introducción =
+== Introducción ==
 
 Esta sección describe el armado del entorno donde se desarrollo la aplicación
 
 
-= Detalles =
+== Paquetes ==
 El entorno requiere de lo siguiente:
   * Ubuntu 8.04,
   * Anjuta para desarrollar en C/C++,
