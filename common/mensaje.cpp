@@ -58,14 +58,14 @@ std::string Mensaje::to_string(bool formated /*= false*/)
 		node->set_attribute("vendedor", this->vendedor);
 	}	
 	
-	if (this->cantidad > 0)
+	if (this->cantidad >= 0)
 	{
 		memset(buffer, 0, sizeof(buffer));
 		sprintf(buffer, "%i",this->cantidad);
 		node->set_attribute("cantidad", buffer);	
 	}
 
-	if (this->hopcount > 0)
+	if (this->hopcount >= 0)
 	{
 		memset(buffer, 0, sizeof(buffer));
 		sprintf(buffer, "%i",this->hopcount);
