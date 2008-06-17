@@ -17,13 +17,22 @@ Este trabajo es una aplicación basada en multi-threading, donde cada thread es 
   * Un thread *Logic*, que es el responsable de todo el negocio de la aplicación. Es el úcleo de la aplición. El mismo interpreta los mensajes provenientes del _Listener_, toma decisiones y arma nuevos mensajes para enviarle al _Router_. 
 
 
+=== Flooding ===
+
+El mensaje de REPLY vuelve solo por el camino por donde paso el LOOKUP. 
+Para implementar esto, en el mensaje viaja los nombres de los nodos por donde paso el LOOKUP. Cada nodo al transpasar un LOOKUP (ademas de decrementar su HOPCOUNT), se agrega en la lista de nodos que indica por donde ya paso el mensaje.
+
+Por el contratrio, cuando se incia un mensaje de REPLY, al atravezar el camino inverso, cada nodo va quitando su nombre de la lista, hasta llegar a tener único nodo que coincide con el nodo que originó el mensaje.
+
 === Timestamp ===
 
 Un Comprador publica su necesidad de compra mediante un LOOKUP. Cuando un Vendedor detecta, que sus productos son requeridos por algun comerciante, el mismo lanza un REPLY por el mismo camino por donde vino el LOOKUP.
 
-==== Múltiples respuestas ===== El problema de las Múltiples respuestas aparece cuando hay mas de un Vendedor que responde a un pedido, pues el Comprador va a recibir más de un REPLY. Seria un error iniciar la negociación con ambos Vendedores. 
+==== Múltiples respuestas ===== 
+El problema de las Múltiples respuestas aparece cuando hay mas de un Vendedor que responde a un pedido, pues el Comprador va a recibir más de un REPLY. Seria un error iniciar la negociación con ambos Vendedores. 
 
-==== Respuesta tardía ===== Otro problema aparece cuando llega una respuesta tardia. Ya habiendo hecho la negociación, al Comprador le puede llegar un REPLY e iniciar una nueva negociación
+==== Respuesta tardía ===== 
+Otro problema aparece cuando llega una respuesta tardia. Ya habiendo hecho la negociación, al Comprador le puede llegar un REPLY e iniciar una nueva negociación
 
 
 Para solucionar estos problemas de sistemas distribuidos se planteó un esquema de *timestamp*, donde cada comprador tiene un mapa de los mensajes de pedido de compra que él mismo inicia. 
@@ -32,4 +41,11 @@ Dicho mapa se conforma de la siguiente manera:
 || Clave || Valor ||
 || Timestamp || Estado del Mensaje ||
 
-de un campo clave que es el timestamp del mensaje
+Timestamp: Conformado por los segundos, mas los microsegundos del sistema.
+Estado del mensaje: LOOKUP_ENVIADO/REPLY_RECIBIDO
+Estos estados indican que el pedido fue iniciado y el mismo fue respondido, respectivamente.
+
+Durante el desarrollo se detectó que la aplicación, al ser un sistema distribuido, el timestamp podia coincidir con el de otro nodo. De esta manera, podria darse el caso en que estoy pasando un mensaje REPLY que no me corresponde, pero por tener un timestamp que genere yo, lo doy como respondido en mi mapa, generando un estado de inconsistencia en el nodo.
+
+Gracias a lo que se explica en Flooding, este problema no podria darse ya que el mensaje de REPLY vuelve le llega a un unico nodo. 
+En caso de que no existiera esta restricción, una buena solución que se aplica a sistemas distribuidos es la de concatenar el timestamp con el nombre del nodo.
