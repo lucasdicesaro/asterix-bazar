@@ -5,7 +5,7 @@
 
 Esta sección explica cómo esta pensada la aplicación desde el punto de vista de la arquitectura. En el mismo, se tuvieron que desarrollar diferentes técnicas para afrontar diversos problemas que se presentaron durante la etapa de diseño y desarrollo. Tales como, la transaccionalidad y la identificación de mensajes de manera unívoca mediante timestamp en sistemas distribuidos.
 
-= Detalles =
+== Detalles Técnicos ==
 
 Este trabajo es una aplicación basada en multi-threading, donde cada thread es responsable de una tarea. Los threads son los siguientes:
   * Un thread *Listener*, que es el responsable de aceptar nuevas conexiones, darlas de baja, y recibir paquetes de provenientes de la red.
