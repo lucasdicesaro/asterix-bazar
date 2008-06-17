@@ -22,6 +22,19 @@ Este trabajo es una aplicación basada en multi-threading, donde cada thread es 
   * Un thread *Logic*, que es el responsable de todo el negocio de la aplicación. Es el úcleo de la aplición. El mismo interpreta los mensajes provenientes del _Listener_, toma decisiones y arma nuevos mensajes para enviarle al _Router_. 
 
 
+=== Paso de mensajes ===
+
+Para el paso de mensajes entre los nodos, se utiliza el standard XML. 
+Abajo se decribe el protocolo de mensajes utilizado entre los nodos.
+
+|| *Code* || Vendedor ||*Product_Name* || *Cantidad* || *Hopcount* || *Timestamp* ||
+|| LOOKUP || - || sal/pescado/verdura || 0..n || 0..n || segundos|microsegundos ||
+|| REPLY || nombre_nodo || sal/pescado/verdura || 0..n || - || segundos|microsegundos ||
+|| BUY || nombre_nodo || sal/pescado/verdura || 0..n || - || segundos|microsegundos ||
+|| BUY_OK || nombre_nodo || sal/pescado/verdura || 0..n || - || segundos|microsegundos ||
+|| BUY_ERR || nombre_nodo || sal/pescado/verdura || 0..n || - || segundos|microsegundos ||
+
+
 === Flooding ===
 
 El mensaje de REPLY vuelve solo por el camino por donde paso el LOOKUP. 
