@@ -3,12 +3,12 @@
 
 == Introducción ==
 
-Add your content here.
+Esta sección describe la utilización del Entorno Interado de Desarrollo (IDE) para C/C++: Anjuta
 
 
 == Detalles ==
 
-Despues de instalar Anjuta, subversion y Rapid-svn
+Después de instalar Anjuta, subversion y Rapid-svn
 
 
 Uso en Anjuta porque es una herramienta comoda para programar en C++. Ademas te organiza toda la configuracion del makefile, build del proyecto e incluso ejecucion. Algunos pasos basicos:
