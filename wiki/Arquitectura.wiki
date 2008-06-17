@@ -1,4 +1,4 @@
-#summary Asterix en el bazar
+#summary Detalles Técnicos
 #labels Arquitectura,Threads
 
 == Introducción ==
