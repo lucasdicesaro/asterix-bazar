@@ -8,8 +8,8 @@ Esta sección explica cómo esta pensada la aplicación desde el punto de vista 
 = Detalles =
 
 Este trabajo es una aplicación basada en multi-threading, donde cada thread es responsable de una tarea. Los threads son los siguientes:
-1. Un thread *Listener*, que es el responsable de aceptar nuevas conexiones, darlas de baja, y recibir paquetes de provenientes de la red.
-2. Un thread *Router*, que es el responsable de perdir conexiones a sus dos vecinos asignados
+   1. Un thread *Listener*, que es el responsable de aceptar nuevas conexiones, darlas de baja, y recibir paquetes de provenientes de la red.
+   2. Un thread *Router*, que es el responsable de perdir conexiones a sus dos vecinos asignados
 (mediante el archivo de configuración) y de enviar los paquetes a la red.
-3. Un thread *Keyboard*, se responsabiliza de tomar la entrada del usuario. El detalle de este thread se explica en otra sección.
-4. Un thread *Logic*, que es el responsable de todo el negocio de la aplicación. Es el úcleo de la aplición. El mismo interpreta los mensajes provenientes del _Listener_, toma decisiones y arma nuevos mensajes para enviarle al _Router_. 
+   3. Un thread *Keyboard*, se responsabiliza de tomar la entrada del usuario. El detalle de este thread se explica en otra sección.
+   4. Un thread *Logic*, que es el responsable de todo el negocio de la aplicación. Es el úcleo de la aplición. El mismo interpreta los mensajes provenientes del _Listener_, toma decisiones y arma nuevos mensajes para enviarle al _Router_. 
