@@ -1,0 +1,26 @@
+#summary Pasos para usar el rapid-svn
+#labels rapid,svn,pasos
+
+== Pasos para el Rapid-svn ==
+  # Crear una carpeta donde van a poner el proyecto (La mia: bazar)
+  # Abran una consola y situense en esa carpeta y ejecuten lo siguiente:
+  * svn checkout https://asterix-bazar.googlecode.com/svn/trunk/ asterix-bazar --username <nombre_usuario_gmail>
+  # Les va a pedir contraseña. Entren aca para generar su contraseña:
+http://code.google.com/hosting/settings
+  # Deberia aparecer el mensaje:
+  * Checked out revision 1.
+  # Abren el rapid-svn
+  # Sobre Bookmarks -> boton derecho -> Add existing working copy...
+  # Busquen la carpeta donde hicieron "svn checkout" (En mi caso /home/usuario/bazar/asterix-bazar)
+
+
+== Update, Commit, Delete == 
+En este punto ya podemos trabajar concurrentemente. Pueden hacer un Update del proyecto o bien pueden commitear un archivo o bien eliminarlo.
+  * Para hacer un update del proyecto, boton derecho sobre el repositorio (hoja del Bookmark) ->  Update (pide usr y pass)
+
+  * Para commitear un archivo, simplemente, boton derecho sobre el archivo -> commit. Te va a aparecer una ventana de comentario. Siempre hay que poner una comentario de lo que commiteaste para futuros ratreos.
+  * Hay que tener en cuenta que cuando el archivo (o carpeta) es nuevo para el repositorio, antes commitearlo hay que agregarlo. Para eso, boton derecho -> Add. Luego, se puede commitear.
+
+
+Seria ideal que hagan el siguiente ejercicio. Se hagan un Update del proyecto. Les va a aparecer un archivo que se llama miembros.txt.
+Editan el archivo, lo guardan, y por ultimo lo commitean. Para ver si todos vemos los cambios de todos.
