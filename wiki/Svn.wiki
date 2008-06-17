@@ -3,12 +3,10 @@
 
 == Pasos para el Rapid-svn ==
   # Crear una carpeta donde van a poner el proyecto (La mia: bazar)
-  # Abran una consola y situense en esa carpeta y ejecuten lo siguiente:
-  $ svn checkout https://asterix-bazar.googlecode.com/svn/trunk/ asterix-bazar --username <nombre_usuario_gmail>
+  # Abran una consola y situense en esa carpeta y ejecuten lo siguiente: svn checkout https://asterix-bazar.googlecode.com/svn/trunk/ asterix-bazar --username <nombre_usuario_gmail>
   # Les va a pedir contraseña. Entren aca para generar su contraseña:
 http://code.google.com/hosting/settings
-  # Deberia aparecer el mensaje:
-  $ Checked out revision 1.
+  # Deberia aparecer el mensaje: Checked out revision 1.
   # Abren el rapid-svn
   # Sobre Bookmarks -> boton derecho -> Add existing working copy...
   # Busquen la carpeta donde hicieron "svn checkout" (En mi caso /home/usuario/bazar/asterix-bazar)
