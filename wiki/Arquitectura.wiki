@@ -21,14 +21,14 @@ Este trabajo es una aplicación basada en multi-threading, donde cada thread es 
 
 Un Comprador publica su necesidad de compra mediante un LOOKUP. Cuando un Vendedor detecta, que sus productos son requeridos por algun comerciante, el mismo lanza un REPLY por el mismo camino por donde vino el LOOKUP.
 
-==== Múltiples respuestas =====
-El problema de las Múltiples respuestas aparece cuando hay mas de un Vendedor que responde a un pedido, pues el Comprador va a recibir más de un REPLY. Seria un error iniciar la negociación con ambos Vendedores. 
+==== Múltiples respuestas ===== El problema de las Múltiples respuestas aparece cuando hay mas de un Vendedor que responde a un pedido, pues el Comprador va a recibir más de un REPLY. Seria un error iniciar la negociación con ambos Vendedores. 
 
-==== Respuesta tardía =====
-Otro problema aparece cuando llega una respuesta tardia. Ya habiendo hecho la negociación, al Comprador le puede llegar un REPLY e iniciar una nueva negociación
+==== Respuesta tardía ===== Otro problema aparece cuando llega una respuesta tardia. Ya habiendo hecho la negociación, al Comprador le puede llegar un REPLY e iniciar una nueva negociación
 
 
-Para solucionar estos problemas de sistemas distribuidos se planteó un esquema de *timestamp*, donde cada comprador tiene un mapa de los mensajes de pedido de compra que él mismo inicia. Dicho mapa se conforma de la siguiente manera:
+Para solucionar estos problemas de sistemas distribuidos se planteó un esquema de *timestamp*, donde cada comprador tiene un mapa de los mensajes de pedido de compra que él mismo inicia. 
+
+Dicho mapa se conforma de la siguiente manera:
 || Clave || Valor ||
 || Timestamp || Estado del Mensaje ||
 
