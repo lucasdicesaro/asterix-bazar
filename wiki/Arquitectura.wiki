@@ -67,3 +67,8 @@ Durante el desarrollo se detectó que la aplicación, al ser un sistema distribu
 
 Gracias a lo que se explica en Flooding, este problema no podria darse ya que el mensaje de REPLY vuelve le llega a un unico nodo. 
 En caso de que no existiera esta restricción, una buena solución que se aplica a sistemas distribuidos es la de concatenar el timestamp con el nombre del nodo.
+
+=== Transaccionalidad ===
+En el momento de la negociación, interactúan dos nodos. Dichos nodos, deben modificar su stock. Para eso hay que aplicar un mecanismo de transacciones para evitar inconsistencias por error en la comunicacion. Para eso, se utiliza un flag global ('en operacion') que indica si un usuario esta en negociación o no. Una vez finalizada la negociación se setean estos flags a sus estados originales. 
+
+Esto también logra un efecto de aislamiento hacia el resto de la red, no respondiendo, ni reenviando mensajes de y hacia la red. Esta técnica es de gran ayuda para mantener la consistencia del stock de cada nodo
