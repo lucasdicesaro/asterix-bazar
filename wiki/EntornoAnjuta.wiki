@@ -8,12 +8,9 @@ Esta sección describe la utilización del Entorno Interado de Desarrollo (IDE) 
 
 == Detalles ==
 
-Después de instalar Anjuta, subversion y Rapid-svn
-
 Usamos Anjuta porque es una herramienta cómoda para programar en C++. Organiza toda la configuracion del makefile, build del proyecto e incluso ejecución. Algunos pasos basicos:
 
-
-Pasos para preparar un proyecto
+=== Pasos para preparar un proyecto === 
   # New->Project
   # En la solapa C++-> Generic C++
   # Elejir la ubicacion en el filesystem (antes conviene crear una carpeta, sino te desparrama varios archivos de configuracion del Anjuta)
@@ -21,7 +18,7 @@ Pasos para preparar un proyecto
   # Siguiente, y listo. Crea automaticamente el proyecto.
 
 
-Pasos para agregar archivos al proyecto
+=== Pasos para agregar archivos al proyecto ===
   # Se paras en la solapa Project (abajo a la izquierda)
 Nota: el anjuta organiza el proyecto como un conjunto de targets (ejecutables) y los archivos fuentes que dependen de el (codigo que vamos a escribir).
 Por eso siempre que creemos nuevos archivos, tenemos que indicar a qué target va a pertenecer. Si no existe un target, hay que crearlo y luego crear el achivo.
@@ -30,23 +27,23 @@ Los targets tienen un iconito en forma de rombo gris.
   # Para agregar un archivo New->File, indicamos nombre de archivo y Tipo (va a ser .cpp). Indicamos a qué target queremos que pertenezca. Add.
 
 
-Pasos para compilar un proyecto
+=== Pasos para compilar un proyecto === 
   # En el menu Build-> Build Project
   # Verificar en la consola que todo haya salido bien.
 
 
-Pasos para ejecutar un proyecto
+=== Pasos para ejecutar un proyecto === 
   # Una vez Buildeado, Build->Execute Program...
   # Te va a listar todos los targets que hay en el proyecto. Se elige uno y OK.
 
 
-Pasos para empaquetar el proyecto para presentarlo en el laboratorio.
+=== Pasos para empaquetar el proyecto para presentarlo en el laboratorio === 
   # En el menu Build->Run Autogenerate...
   # En el menu Build->Run Configure...
   # En el menu Build->Build Tarball. Esto genera un archivo .tar.gz (Archivo comprimido)
 
 
-Para cuando probemos en el lab:
+=== Para cuando probemos en el lab === 
   # Copiamos el .tar.gz y le hacemos: tar xzvf <nombre_archivo>.tar.gz
   # Entramos al directorio <nombre_archivo>
   # Ejecutamos ./configure
