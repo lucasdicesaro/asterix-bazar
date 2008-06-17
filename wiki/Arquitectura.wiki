@@ -1,0 +1,14 @@
+#summary Lucas Dicésaro
+
+= Introducción =
+
+Esta sección explica cómo esta pensada la aplicación desde el punto de vista de la arquitectura. En el mismo, se tuvieron que desarrollar diferentes técnicas para afrontar diversos problemas que se presentaron durante la etapa de diseño y desarrollo. Tales como, la transaccionalidad y la identificación de mensajes de manera unívoca mendiante timestamp en sistemas distribuidos.
+
+= Detalles =
+
+Este trabajo es una aplicación basada en multi-threading, donde cada thread es responsable de una tarea. 
+Los mis
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
