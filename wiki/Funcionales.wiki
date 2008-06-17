@@ -1,9 +1,9 @@
-#summary Asterix en el bazar
+#summary Relación entre aspectos funcionales y técnicos
 
 == Introducción ==
 
 Esta sección tiene por objetivo explicar los aspectos de la aplicación primero desde el punto de vista global, pasando luego a los aspectos técnicos.
-En la sección [http://code.google.com/p/asterix-bazar/Arquitectura], se describen los detalles técnicos.
+En la sección [http://code.google.com/p/asterix-bazar/wiki/Arquitectura], se describen los detalles técnicos.
 
 == Relación entre aspectos funcionales y técnicos ==
 
@@ -13,4 +13,4 @@ Cada comerciante (Vendedor o Comprador), es representado mediante un nodo y su p
 La topologia de red es versatil. Ésta puede conformarse de cualquier manera. No posee restricciones. 
 
 
-El detalle de como se conecta cada nodo con otro se describe en [http://code.google.com/p/asterix-bazar/Arquitectura]
+El detalle de como se conecta cada nodo con otro se describe en [http://code.google.com/p/asterix-bazar/wiki/Arquitectura]
