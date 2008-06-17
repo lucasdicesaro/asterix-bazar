@@ -41,7 +41,7 @@ Usamos Anjuta porque es una herramienta cómoda para programar en C++. Organiza 
 
 
 === Para cuando probemos en el lab === 
-  # Copiamos el .tar.gz y le hacemos: tar xzvf <nombre_archivo>.tar.gz
+  # Copiamos el .tar.gz y le hacemos: *tar xzvf <nombre_archivo>.tar.gz*
   # Entramos al directorio <nombre_archivo>
   # Ejecutamos ./configure
   # Ejecutamos make install (Por ahora en mi maquina tengo que ejecutar "sudo make install" porque necesita permisos, voy a ver como lo corrijo)
