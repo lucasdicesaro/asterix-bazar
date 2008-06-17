@@ -13,11 +13,11 @@ El entorno requiere los siguientes paquetes:
   * Rapid-svn para el versionado,
   * Pidgin (es el messenger del Ubuntu 8.04) para comunicarnos.
 
-  * Para bajarte el svn deberias entrar al Synaptic (System->Administracion) y marcar todos los paquetes que que comiencen con subversion en su nombre de paquete y ademas todos los paquetes que que comiencen con rapid-svn en su nombre de paquete (para tener un entorno agradable de administracion).
-  * Si no tenes el Anjuta, ya que estas en el Synaptic, selecciona todos los paquetes que comiencen con anjuta en su nombre de paquete.
+  * Para bajarte el svn deberias entrar al Synaptic (System->Administracion) y marcar todos los paquetes que que comiencen con *subversion* en su nombre de paquete y ademas todos los paquetes que que comiencen con *rapid-svn* en su nombre de paquete (para tener un entorno agradable de administracion).
+  * Si no tenes el Anjuta, ya que estas en el Synaptic, selecciona todos los paquetes que comiencen con *anjuta* en su nombre de paquete.
 
 Con el Synaptic instale los paquetes, necesarios para la autogeneracion, configuracio del makefile y la posterior compilacion del proyecto:
-  * autogen
-  * autoconf
-  * libtool
-  * automake
+  * *autogen*
+  * **autoconf
+  * *libtool*
+  * *automake*
