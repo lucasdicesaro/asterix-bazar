@@ -21,3 +21,12 @@ Con el Synaptic instale los paquetes, necesarios para la autogeneracion, configu
   * *autoconf*
   * *libtool*
   * *automake*
+
+
+Paquetes basicos para utilizar librerias de C
+  * *libc6-dev*
+
+Paquetes necesarios para la interpretacion y armado de XML's
+  * *libxml-2.0*
+  * *libxml++-2.6*
+  * *glibmm-2.4*
