@@ -27,7 +27,7 @@ Este trabajo es una aplicación basada en multi-threading, donde cada thread es 
 Para el paso de mensajes entre los nodos, se utiliza el standard XML. 
 Abajo se decribe el protocolo de mensajes utilizado entre los nodos.
 
-|| *Code* || *Vendedor* || <center>*Product*</center> || *Cantidad* || *Hopcount* || *Timestamp* ||
+|| *Code* || *Vendedor* || <c>*Product*</c> || *Cantidad* || *Hopcount* || *Timestamp* ||
 || LOOKUP || - || sal/pescado/verdura || 0..n || 0..n || segundos|microsegundos ||
 || REPLY || nombre_nodo || sal/pescado/verdura || 0..n || - || segundos|microsegundos ||
 || BUY || nombre_nodo || sal/pescado/verdura || 0..n || - || segundos|microsegundos ||
