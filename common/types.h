@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#define ABSTRACT 0
+
 #define INFINITE (-1)
 
 #define PORT_TCP (2552)
@@ -77,7 +79,13 @@ typedef enum
 	RT_SET_SOCKET_P2P,
 	RT_UNSET_SOCKET_P2P,
 	KB_SHOW_MENU, 
-   	KB_SHOW_STOCK
+   	KB_SHOW_STOCK,
+   	OUTPUT_STATUS_DEBUG,
+   	OUTPUT_STATUS_INFO,
+   	OUTPUT_STATUS_WARN,
+   	OUTPUT_STATUS_ERROR,
+   	OUTPUT_STOCK,
+   	OUTPUT_MENU
 } EventID;
 
 
