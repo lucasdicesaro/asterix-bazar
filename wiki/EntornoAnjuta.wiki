@@ -19,10 +19,7 @@ Usamos Anjuta porque es una herramienta cómoda para programar en C++. Organiza 
 
 
 === Pasos para agregar archivos al proyecto ===
-  # Se paras en la solapa Project (abajo a la izquierda)
-Nota: el anjuta organiza el proyecto como un conjunto de targets (ejecutables) y los archivos fuentes que dependen de el (codigo que vamos a escribir).
-Por eso siempre que creemos nuevos archivos, tenemos que indicar a qué target va a pertenecer. Si no existe un target, hay que crearlo y luego crear el achivo.
-Los targets tienen un iconito en forma de rombo gris.
+  # Pararse en la solapa Project (abajo a la izquierda). Nota: el anjuta organiza el proyecto como un conjunto de targets (ejecutables) y los archivos fuentes que dependen de el (codigo que vamos a escribir). Por eso siempre que creemos nuevos archivos, tenemos que indicar a qué target va a pertenecer. Si no existe un target, hay que crearlo y luego crear el achivo. Los targets tienen un iconito en forma de rombo gris.
   # Para agregar un target tenemos que estar parados en alguna carpeta del proyecto. Boton derecho->Add Target, le ponenos un nombre y listo.
   # Para agregar un archivo New->File, indicamos nombre de archivo y Tipo (va a ser .cpp). Indicamos a qué target queremos que pertenezca. Add.
 
