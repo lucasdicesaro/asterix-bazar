@@ -10,7 +10,6 @@ Esta sección describe la utilización del Entorno Interado de Desarrollo (IDE) 
 
 Después de instalar Anjuta, subversion y Rapid-svn
 
-
 Usamos Anjuta porque es una herramienta cómoda para programar en C++. Organiza toda la configuracion del makefile, build del proyecto e incluso ejecución. Algunos pasos basicos:
 
 
