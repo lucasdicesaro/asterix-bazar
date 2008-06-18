@@ -4,7 +4,7 @@
 == Introducción ==
 
 Esta sección tiene por objetivo explicar los aspectos de la aplicación primero desde el punto de vista global, pasando luego a los aspectos técnicos.
-En la sección [http://code.google.com/p/asterix-bazar/wiki/Arquitectura], se describen los detalles técnicos.
+
 
 == Relación entre aspectos funcionales y técnicos ==
 
