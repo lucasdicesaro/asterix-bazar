@@ -17,7 +17,7 @@ Para crear un link simbólico hay que ejecutar el siguiente comando dentro de la
  $ ln -s <ubicacion_del_ejecutable> <etiqueta_del_link_simbolico>
 }}}
 ===== Ejemplo de creación de link simbólico =====
-Dentro de la carpeta _LaPetisita_, ejecutar:
+Dentro de la carpeta _`LaPetisita`_, ejecutar:
 {{{
  $ ln -s /home/usuario/asterix-bazar/src/asterix-bazar asterix
 }}}
