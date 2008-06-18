@@ -1,4 +1,4 @@
-#summary Creación del proyecto, utilización del Anjuta
+#summary (Información Técnica) Creación del proyecto, utilización del Anjuta
 #labels Anjuta,Rapid-svn,Compilar,Ejecutar
 
 == Introducción ==
