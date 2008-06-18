@@ -1,4 +1,4 @@
-#summary Relación entre aspectos funcionales y técnicos
+#summary (Información Funcional) Relación entre aspectos funcionales y técnicos
 #labels Comerciante,Nodo,Comprador,Vendedor,Funcionales
 
 == Introducción ==
