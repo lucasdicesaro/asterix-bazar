@@ -1,11 +1,28 @@
 #summary Pasos para ponerlo en funcionamiento
-#labels Featured
+#labels Instrucciones,link,simbolico,archivo,configuracion
 
-= Introducción =
+=== Intrucciones para poner en funcionamiento la aplicacion ===
 
-Se debe correr cada nodo en una carpeta con su archivo de configuración, que le indica cómo se llama, ip y puerto, así como los de los otros nodos.
+Según lo explicado en [EntornoAnjuta], una vez compilado y en funcionamiento la aplicación, para realizar la simulación de ejecución en varias maquinas, debe ejecutarse cada nodo en una carpeta diferente. Para tener más claridad, es conveniente nombrar a la carpeta con el nombre, cuyo nodo va a contener. Ej, si se ejecuta el nombre de nodo "LaPetisita", es conveniente nombrar a la carpeta como "LaPetisita"
 
-= Detalles =
+Dentro de cada carpeta, solo debe existir dos cosas. 
+  * Un link simbólico al ejecutable
+  * Un archivo de configuración
+
+==== Link simbólico al ejecutable ==== 
+Para crear un link simbólico hay que ejecutar el siguiente comando:
+{{{
+ $ ln -s <ubicacion_del_ejecutable> <etiqueta_del_link_simbolico>
+}}}
+Ejemplo
+{{{
+ $ ln -s /home/usuario/asterix-bazar/src/asterix-bazar asterix
+}}}
+
+
+==== Archivo de configuración ====
+El archivo de configuración va a contener: 
+
 
 Ejemplo:
 
