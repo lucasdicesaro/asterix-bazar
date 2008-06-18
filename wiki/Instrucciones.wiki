@@ -12,15 +12,19 @@ Dentro de cada carpeta, solo debe existir dos cosas.
 
 
 ==== Link simbólico al ejecutable ==== 
-Para crear un link simbólico hay que ejecutar el siguiente comando:
+Para crear un link simbólico hay que ejecutar el siguiente comando dentro de la carpeta que va a contener el nodo:
 {{{
  $ ln -s <ubicacion_del_ejecutable> <etiqueta_del_link_simbolico>
 }}}
 ===== Ejemplo de creación de link simbólico =====
+Dentro de la carpeta _LaPetisita_, ejecutar:
 {{{
  $ ln -s /home/usuario/asterix-bazar/src/asterix-bazar asterix
 }}}
-
+, para luego ejecutar:
+{{{
+ $ ./asterix
+}}}
 
 
 
