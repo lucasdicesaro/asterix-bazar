@@ -1,4 +1,4 @@
-#summary Pasos para ponerlo en funcionamiento
+#summary (Información Técnica de configuración) Pasos para ponerlo en funcionamiento
 #labels Instrucciones,link,simbolico,archivo,configuracion
 
 === Intrucciones para poner en funcionamiento la aplicacion ===
