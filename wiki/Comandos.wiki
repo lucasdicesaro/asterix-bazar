@@ -1,6 +1,6 @@
-#summary Descripción de los comandos por teclado
+#summary (Manual de usuario) Descripción de los comandos por teclado
 #labels teclado,menu,pantalla
-
+ 
 ==== Introducción ====
 
 Se describe los comandos por teclado.
