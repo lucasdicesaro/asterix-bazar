@@ -29,18 +29,23 @@ Dentro de la carpeta _LaPetisita_, ejecutar:
 
 
 ==== Archivo de configuración ====
-El archivo de configuración va a contener el nombre del nodo, valores por defecto, qué va a comprar, qué va a vender, y un mapa de los participantes posibles en la red (no significa que estén ejecutandose en ese momento), los vecinos a los cuales debe conectarse. Como restricción, los vecinos con los que me conecto, deben existir en el mapa de participantes, ya que este último contiene la informacion de los nodos: IP y puerto.
+El archivo de configuración va a contener el nombre del nodo, valores por defecto, qué va a comprar, qué va a vender, y un mapa de los participantes posibles en la red (no significa que estén ejecutandose en ese momento), los vecinos a los cuales debe conectarse. Como restricción, los vecinos con los que me conecto, deben existir en el mapa de participantes, ya que este último contiene la informacion de los nodos: IP y puerto. Si el mismo no existe, la conexion va a fallar, aunque esto no impide el funcionamiento del nodo.
 
 ===== Ejemplo de archivo de configuración =====
 {{{
 nombre_nodo=LaPetisita
-listener_port=2552
+producto_compra=sal
+producto_venta=verdura
 intentos_reconexion=2;
-delay_reconexion=7;
-hopcount=3;
+delay_reconexion=5;
+hopcount=2;
 participante=LaPetisita,127.0.0.1:2552,ElNegro,ElRuso
-participante=ElNegro,127.0.0.1:2553,LaPetisita,ElTurco
-participante=ElRuso,127.0.0.1:2554,ElNegro,ElTurco
+participante=ElNegro,127.0.0.1:2553,ElTano,ElTurco
+participante=ElRuso,127.0.0.1:2554,ElTano,ElTurco
 participante=ElTurco,127.0.0.1:2555,LaPetisita,ElNegro
 participante=ElTano,127.0.0.1:2556,ElTurco,ElNegro
+DEBUG=0
+INFO=1
+WARN=1
+ERROR=1
 }}}
