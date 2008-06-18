@@ -11,7 +11,8 @@ Esta sección explica cómo esta pensada la aplicación desde el punto de vista 
 
 Los nodos se interconectan de una manera particular.
 Se sabe, según la consigna, que cada nodo tiene dos vecinos. Por una decisión de diseño, se implemento la idea armar por separado las conexiones de los vecinos (conexiones de salida), de las conexiones que acepto de otros vecinos (conexiones de entrada). De esta manera, se logra organizar los mensajes y se evita el manejo de la colisión de mensajes.
-
+Ejemplo de una topología:
+[http://code.google.com/p/asterix-bazar/source/browse/trunk/doc/topologia.JPG]
 
 === Threading ===
 
