@@ -21,11 +21,10 @@ Al iniciarse cada nodo, se presenta el siguiente menu:
 
   * *Opción 1:* sirve para cargar el stock propio con un producto determinado. Al elegir esta opción se presenta el siguiente submenu, donde se indica el producto y por último la cantidad de unidades a cargar:
 {{{
-  1. Sal 
+  1. Sal
   2. Verdura
   3. Pescado
 }}}
-
   * *Opción 2:* sirve para elegir el producto que se desea comprar. Se presenta el mismo submenu que la opción *1*.
   * *Opción 3:* sirve para elegir el producto que se desea vender. Se presenta el mismo submenu que la opción *1*.
   * *Opción 4:* una de las funciones más importantes, inicia una compra con el producto elegido previamente (o por default). Esta opción requiere que se especifique la cantidad de unidades de producto a comprar.
