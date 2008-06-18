@@ -48,10 +48,10 @@ Un ejemplo de la estructura XML del mensaje LOOKUP es la siguiente:
 Un ejemplo de la estructura XML del mensaje REPLY es la siguiente:
 {{{
 <mensaje>
-	<body code="reply" vendedor="ElNegro" product_name="sal" cantidad="3" />
+	<body code="reply" vendedor="ElTano" product_name="sal" cantidad="3" />
         <timestamp>834435|42366</timestamp>
 	<nodo name="LaPetisita"/>
-	<nodo name="ElFlaco"/>
+	<nodo name="ElNegro"/>
 	<nodo name="ElTano"/>
 </mensaje>
 }}}
@@ -60,7 +60,7 @@ Un ejemplo de la estructura XML del mensaje REPLY es la siguiente:
 Un ejemplo de la estructura XML del mensaje BUY es la siguiente:
 {{{
 <mensaje>
-	<body code="buy" vendedor="ElNegro" product_name="sal" cantidad="3" />
+	<body code="buy" vendedor="ElTano" product_name="sal" cantidad="3" />
         <timestamp>834435|42366</timestamp>
 </mensaje>
 }}}
