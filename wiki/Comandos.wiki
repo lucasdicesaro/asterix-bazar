@@ -21,6 +21,7 @@ Al iniciarse cada nodo, se presenta el siguiente menu:
 
   * *Opción 1:* sirve para cargar el stock propio con un producto determinado. Al elegir esta opción se presenta el siguiente submenu, donde se indica el producto y por último la cantidad de unidades a cargar:
 {{{
+  SUBMENU:
   1. Sal
   2. Verdura
   3. Pescado
