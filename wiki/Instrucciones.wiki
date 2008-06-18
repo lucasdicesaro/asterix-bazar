@@ -7,7 +7,7 @@ Según lo explicado en [EntornoAnjuta], una vez compilado y en funcionamiento la
 
 Dentro de cada carpeta, solo debe existir dos cosas. 
   * Un link simbólico al ejecutable
-  * Un archivo de configuración
+  * Un archivo de configuración llamado _lista_participante.conf_
 
 
 
@@ -35,13 +35,13 @@ El archivo de configuración va a contener el nombre del nodo, valores por defec
 {{{
 nombre_nodo=LaPetisita
 producto_compra=sal
-producto_venta=verdura
-intentos_reconexion=2;
-delay_reconexion=5;
+producto_venta=pescado
+intentos_reconexion=1;
+delay_reconexion=3;
 hopcount=2;
-participante=LaPetisita,127.0.0.1:2552,ElNegro,ElRuso
-participante=ElNegro,127.0.0.1:2553,ElTano,ElTurco
-participante=ElRuso,127.0.0.1:2554,ElTano,ElTurco
+participante=LaPetisita,127.0.0.1:2552,ElNegro,ElTurco
+participante=ElNegro,127.0.0.1:2553,ElRuso,ElTurco
+participante=ElRuso,127.0.0.1:2554,ElTurco,ElTurco
 participante=ElTurco,127.0.0.1:2555,LaPetisita,ElNegro
 participante=ElTano,127.0.0.1:2556,ElTurco,ElNegro
 DEBUG=0
