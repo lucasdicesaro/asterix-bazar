@@ -1,4 +1,4 @@
-#summary Detalles Técnicos
+#summary (Información Técnica y Funcional) Detalles
 #labels Arquitectura,Threads
 
 == Introducción ==
