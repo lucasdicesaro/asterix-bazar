@@ -21,27 +21,9 @@ Ejemplo
 
 
 ==== Archivo de configuración ====
-El archivo de configuración va a contener: 
+El archivo de configuración va a contener el nombre del nodo, valores por defecto, qué va a comprar, qué va a vender, y un mapa de los participantes posibles en la red (no significa que estén ejecutandose en ese momento), los vecinos a los cuales debe conectarse. Como restricción, los vecinos con los que me conecto, deben existir en el mapa de participantes, ya que este último contiene la informacion de los nodos: IP y puerto.
 
-
-Ejemplo:
-
-{{{
-/1/
-   asterix_bazar <-- link simbólico al binario
-   lista_participante.conf <-- LaPetisita 127.0.0.1:2552
-/2/
-   asterix_bazar <-- link simbólico al binario
-   lista_participante.conf <-- ElNegro 127.0.0.1:2553
-/3/
-   asterix_bazar <-- link simbólico al binario
-   lista_participante.conf <-- ElRuso 127.0.0.1:2554
-/4/
-   asterix_bazar <-- link simbólico al binario
-   lista_participante.conf <-- ElTurco 127.0.0.1:2555
-}}}
-
-= Archivo de configuración =
+===== Ejemplo de archivo de configuración =====
 {{{
 nombre_nodo=LaPetisita
 listener_port=2552
