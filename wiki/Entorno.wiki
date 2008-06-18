@@ -1,4 +1,4 @@
-#summary Paquetes Necesarios
+#summary (Información Técnica) Paquetes Necesarios
 #labels Entorno,Anjuta,Rapid-svn,Paquetes,Necesarios
 
 == Introducción ==
