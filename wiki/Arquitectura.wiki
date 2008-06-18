@@ -87,8 +87,9 @@ Otro problema aparece cuando llega una respuesta tardia. Ya habiendo hecho la ne
 Para solucionar estos problemas de sistemas distribuidos se planteó un esquema de *timestamp*, donde cada comprador tiene un mapa de los mensajes de pedido de compra que él mismo inicia. 
 
 Dicho mapa se conforma de la siguiente manera:
-|| Clave || Valor ||
-|| Timestamp || Estado del Mensaje ||
+|| *Clave=Timestamp* || *Valor=Estado del Mensaje* ||
+|| Timestamp || LOOKUP_ENVIADO/REPLY_RECIBIDO ||
+
 
 Timestamp: Conformado por los segundos, mas los microsegundos del sistema.
 Estado del mensaje: LOOKUP_ENVIADO/REPLY_RECIBIDO
