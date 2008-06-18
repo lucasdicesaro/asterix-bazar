@@ -1,5 +1,5 @@
 #summary (Manual de usuario) Descripción de los comandos por teclado
-#labels teclado,menu,pantalla
+#labels teclado,menu,pantalla,stock
  
 ==== Introducción ====
 
@@ -8,7 +8,7 @@ Se describe los comandos por teclado.
 
 ==== Detalles ====
 
-Al iniciarse cada nodo, se presenta el siguiente menu:
+Al iniciarse cada nodo, programa y luego de establecer las conexiones con los nodos vecinos se presenta el siguiente menu:
 {{{
   MENU:
   1. Llenar el stock
@@ -26,8 +26,21 @@ Al iniciarse cada nodo, se presenta el siguiente menu:
   2. Verdura
   3. Pescado
 }}}
+
   * *Opción 2:* sirve para elegir el producto que se desea comprar. Se presenta el mismo submenu que la opción *1*.
+
   * *Opción 3:* sirve para elegir el producto que se desea vender. Se presenta el mismo submenu que la opción *1*.
+
   * *Opción 4:* una de las funciones más importantes, inicia una compra con el producto elegido previamente (o por default). Esta opción requiere que se especifique la cantidad de unidades de producto a comprar.
-  * *Opción 5:* sirve para mostrar el stock actual en pantalla
+
+  * *Opción 5:* sirve para mostrar el stock actual en pantalla:
+{{{
+Stock Actual: 
+sal: 3 
+pescado: 10 
+verdura: 10 
+Producto de venta actual: sal
+Producto de compra actual:verdura 
+}}}
+
   * *Opción 6:* sirve para intentar reconectarse con los vecinos designados en el archivo de configuración. Esta función es útil para los casos en que un nodo inicio la ejecución antes que su vecino y agotó sus intentos de reconexión.
