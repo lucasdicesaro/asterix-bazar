@@ -1,0 +1,30 @@
+#summary Descripción de los comandos por teclado
+
+==== Introducción ====
+
+Se describe los comandos por teclado.
+
+
+==== Detalles ====
+
+Al iniciarse cada nodo, se presenta el siguiente menu:
+{{{
+  MENU:
+  1. Llenar el stock
+  2. Elegir el producto de compra
+  3. Elegir el producto de venta
+  4. Lanzar una compra
+  5. Mostrar el stock actual
+  6. Intentar reconectarse
+}}}
+
+  # Opción para cargar el stock propio con un producto determinado. Al elegir esta opción se presenta el siguiente submenu, donde se indica el producto y por último la cantidad de unidades a cargar:
+{{{
+  1. Sal 
+  2. Verdura
+  3. Pescado
+}}}
+
+  # Opción para elegir el producto que se desea comprar. Al igual que la opción *1*, se presenta el mismo submenu. 
+
+
