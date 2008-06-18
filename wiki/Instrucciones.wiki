@@ -9,15 +9,19 @@ Dentro de cada carpeta, solo debe existir dos cosas.
   * Un link simbólico al ejecutable
   * Un archivo de configuración
 
+
+
 ==== Link simbólico al ejecutable ==== 
 Para crear un link simbólico hay que ejecutar el siguiente comando:
 {{{
  $ ln -s <ubicacion_del_ejecutable> <etiqueta_del_link_simbolico>
 }}}
-===== Ejemplo de creación de link simbolico =====
+===== Ejemplo de creación de link simbólico =====
 {{{
  $ ln -s /home/usuario/asterix-bazar/src/asterix-bazar asterix
 }}}
+
+
 
 
 ==== Archivo de configuración ====
