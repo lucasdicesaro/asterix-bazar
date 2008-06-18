@@ -1,4 +1,4 @@
-#summary Pasos para usar el rapid-svn
+#summary (Información Técnica) Pasos para usar el rapid-svn
 #labels Rapid,Svn
 
 == Pasos para el Rapid-svn ==
