@@ -3,7 +3,7 @@
 
 === Intrucciones para poner en funcionamiento la aplicacion ===
 
-Según lo explicado en [EntornoAnjuta], una vez compilado y en funcionamiento la aplicación, para realizar la simulación de ejecución en varias maquinas, debe ejecutarse cada nodo en una carpeta diferente. Para tener más claridad, es conveniente nombrar a la carpeta con el nombre, cuyo nodo va a contener. Ej, si se ejecuta el nombre de nodo _LaPetisita_, es conveniente nombrar a la carpeta como _LaPetisita_
+Según lo explicado en [EntornoAnjuta], una vez compilado y en funcionamiento la aplicación, para realizar la simulación de ejecución en varias maquinas, debe ejecutarse cada nodo en una carpeta diferente. Para tener más claridad, es conveniente nombrar a la carpeta con el nombre, cuyo nodo va a contener. Ej, si se ejecuta el nombre de nodo _`LaPetisita`_, es conveniente nombrar a la carpeta como _`LaPetisita`_
 
 Dentro de cada carpeta, solo debe existir dos cosas. 
   * Un link simbólico al ejecutable
