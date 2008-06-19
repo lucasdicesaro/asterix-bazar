@@ -171,14 +171,14 @@ void Logic::on_send_look_up(int cantidad)
 	// Obtiene producto a comprar de clase STOCK
 	Mensaje *mensaje = build_look_up_msg(Stock::instance()->get_compro(), cantidad);
 
-	sprintf(logBuffer, "Se inicia la compra: %d unidades de [%s]. Timestamp: %s", cantidad, mensaje->get_product_name().c_str(), mensaje->get_timestamp_converted());
+	sprintf(logBuffer, "Se inicia el pedido de compra: %d unidades de [%s]. Timestamp: %s", cantidad, mensaje->get_product_name().c_str(), mensaje->get_timestamp_converted());
 	Tools::info(logBuffer);	
 	
 	add_nodo(mensaje, nombre_nodo);
 	
 	// Se llena el mapa de control de pedidos
 	mapaPedidos[mensaje->get_timestamp_converted()] = LOOKUP_ENVIADO;
-	sprintf(logBuffer, "Se inicia en estado LOOKUP_ENVIADO el mensaje con timestamp [%s]", mensaje->get_timestamp_converted());
+	sprintf(logBuffer, "Se agrega una entrada al mapa con clave: timestamp=[%s] y valor: estado=LOOKUP_ENVIADO", mensaje->get_timestamp_converted());
 	Tools::debug(logBuffer);	
 		
 	Event evRta;
@@ -425,7 +425,7 @@ void Logic::on_receive_replay(Mensaje *mensaje)
 			// Verifico si recibi el REPLY del pedido
 			if (mapaPedidos[mensaje->get_timestamp_converted()] != REPLY_RECIBIDO)
 			{
-				sprintf(logBuffer, "Se pasa a estado REPLY_RECIBIDO el mensaje con timestamp [%s]", mensaje->get_timestamp_converted());
+				sprintf(logBuffer, "Se actualiza la entrada en el mapa con clave: timestamp=[%s] al valor:estado=REPLY_RECIBIDO", mensaje->get_timestamp_converted());				
 				Tools::debug(logBuffer);	
 				
 				// Actualizo el estado del pedido
