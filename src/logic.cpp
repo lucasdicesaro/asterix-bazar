@@ -3,10 +3,10 @@
 #include "common/tools.h"
 #include "common/logger.h"
 #include "common/types.h"
+#include "asterix_config_data.h"
 #include "logic.h"
 #include "router.h"
 #include "stock.h"
-#include "common/tools.h"
 #include <assert.h>
 
 extern char *nombre_nodo;
@@ -18,10 +18,10 @@ Logic* Logic::single_instance = NULL;
 */
 Logic::Logic()
 {
-	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
+	ReconnectParamsDS *reconnectParams = AsterixConfigData::instance()->get_reconnect_params();
 	set_hopcount(reconnectParams->hopcount);
 
-	CurrentStockDS *currentStock = Tools::instance()->get_current_stock();
+	CurrentStockDS *currentStock = AsterixConfigData::instance()->get_current_stock();
 	Stock::instance()->set_compro(currentStock->producto_compra.c_str());
 	Stock::instance()->set_vendo(currentStock->producto_venta.c_str());	
 }

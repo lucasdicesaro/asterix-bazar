@@ -4,6 +4,7 @@
 #include "common/logger.h"
 #include "common/types.h"
 #include "common/socket_util.h"
+#include "asterix_config_data.h"
 #include "router.h"
 #include "logic.h"
 #include "listener.h"
@@ -23,7 +24,7 @@ extern bool en_operacion;
 */
 Router::Router()
 {
-	ReconnectParamsDS *reconnectParams = Tools::instance()->get_reconnect_params();
+	ReconnectParamsDS *reconnectParams = AsterixConfigData::instance()->get_reconnect_params();
 	intentos_reconexion = reconnectParams->intentos_reconexion;
 	delay_reconexion = reconnectParams->delay_reconexion;
 	sock_vecino1 = SOCK_ERRONEO;
@@ -166,7 +167,7 @@ void Router::start_connections()
 	char logBuffer[BUFFER_SIZE];
 	char *echoBuffer = new char[BUFFER_SIZE];
 	
-	ConfigDS* my_config = Tools::instance()->get_info_nodo(nombre_nodo);
+	ConfigDS* my_config = AsterixConfigData::instance()->get_info_nodo(nombre_nodo);
 	
 	if (sock_vecino1 == SOCK_ERRONEO)
 	{
@@ -256,7 +257,7 @@ int Router::try_connection(const char *nombre_nodo, bool socket_p2p)
 	char socketBuffer[BUFFER_SIZE];
 	char *nombre_nodo_vecino = NULL;
 
-	ConfigDS* vecino_config = Tools::instance()->get_info_nodo(nombre_nodo);		
+	ConfigDS* vecino_config = AsterixConfigData::instance()->get_info_nodo(nombre_nodo);
 	if (vecino_config == NULL) 
 	{
 		sprintf(logBuffer, "Router: try_connection: El nombre de nodo %s, no existe en el archivo de configuracion", nombre_nodo);

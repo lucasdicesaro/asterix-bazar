@@ -27,7 +27,9 @@ asterix_bazar_SOURCES = \
 	keyboard.h       \
 	logger.properties       \
 	asterix_file_config_parser.cpp       \
-	asterix_file_config_parser.h
+	asterix_file_config_parser.h       \
+	asterix_config_data.h       \
+	asterix_config_data.cpp
 
 asterix_bazar_LDFLAGS = \
 	-lSDL
