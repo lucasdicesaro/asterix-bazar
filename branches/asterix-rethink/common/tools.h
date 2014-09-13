@@ -14,7 +14,6 @@
 class Tools
 {
 	public:
-		typedef std::list<ConfigDS> ListaConfig;
 		/**
 		Singleton
 		*/
@@ -22,26 +21,12 @@ class Tools
 
 		char static *duplicate(const std::string& str);
 		
-		/**
-		Obtengo un participante
-		*/
-		char *get_IP_De_Participante(const char *nombre);
-		
-		ConfigDS *get_info_nodo(const char *nombre);
-
 		void DieWithError(const char *errorMessage);
 
 		/**
 		Retorna el valor del atributo o un string vacio si no existe:
 		*/
 		std::string static get_attr_value(xmlpp::Element* el, const char* attr_name);
-
-		ReconnectParamsDS *get_reconnect_params();
-		void set_reconnect_params(ReconnectParamsDS *reconnectParamsDS);
-		CurrentStockDS *get_current_stock();		
-		void set_current_stock(CurrentStockDS *currentStockDS);
-
-		void set_lista_config(std::list<ConfigDS> listaConfig); 
 
 		/**
 		Log rutines:
@@ -58,10 +43,6 @@ class Tools
 		Log rutines:
 		*/
 		FILE* LOG_FILE;
-		ListaConfig listaConfig;
-		ReconnectParamsDS *reconnectParams;
-		CurrentStockDS *currentStock;
-
 };
 
 #endif //_TOOLS_H_

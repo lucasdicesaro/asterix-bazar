@@ -66,7 +66,7 @@ class Logger
 
 		int getLevel();
 		void setLevel(int level);
-		int parseConfigFile ();
+		void parseConfigFile ();
 
 	protected:
 		Logger();

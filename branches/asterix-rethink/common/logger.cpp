@@ -111,8 +111,7 @@ void Logger::info_label_value(std::string label, int value)
 }
 
 
-#define BUFFER_STR 128
-int Logger::parseConfigFile ()
+void Logger::parseConfigFile ()
 {
 	FileConfigReader::parseConfigFile(new LoggerFileConfigParser());
 }

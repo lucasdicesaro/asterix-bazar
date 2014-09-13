@@ -6,8 +6,7 @@
 #include "stock.h"
 #include "common/tools.h"
 #include "common/logger.h"
-#include "common/file_config_reader.h"
-#include "asterix_file_config_parser.h"
+#include "asterix_config_data.h"
 #include <iostream>
 #include <pthread.h>
 #include <signal.h>
@@ -32,12 +31,7 @@ int main(int argc, const char *argv[])
 	char logBuffer[BUFFER_SIZE];
 
 	//==========Levantando configuracion
-	AsterixFileConfigParser *asterixFileConfigParser = new AsterixFileConfigParser();
-	FileConfigReader::parseConfigFile(asterixFileConfigParser);
-
-	Tools::instance()->set_lista_config(asterixFileConfigParser->get_lista_config());
-	Tools::instance()->set_reconnect_params(asterixFileConfigParser->get_reconnect_params());
-	Tools::instance()->set_current_stock(asterixFileConfigParser->get_current_stock());
+	AsterixConfigData::instance()->parseConfigFile();
 
 	//==========Levantando configuracion de log
 	Logger::instance()->parseConfigFile();
@@ -63,11 +57,11 @@ int main(int argc, const char *argv[])
 	//}	
 
 	nombre_nodo = new char[NOMBRE_NODO_SIZE];
-	nombre_nodo = asterixFileConfigParser->get_nombre_nodo();
+	nombre_nodo = AsterixConfigData::instance()->get_nombre_nodo();
 	std::string nombre_nodo_str = nombre_nodo;
 	Logger::info("Main: nombre_nodo [" + nombre_nodo_str + "]");	
 	
-	listener_port = asterixFileConfigParser->get_listener_port();
+	listener_port = AsterixConfigData::instance()->get_listener_port();
 	Logger::info_label_value("Main: listener_port", listener_port);
 	
 	//==========Iniciando hilos
