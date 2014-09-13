@@ -5,6 +5,9 @@
 #include "keyboard.h"
 #include "stock.h"
 #include "common/tools.h"
+#include "common/logger.h"
+#include "common/file_config_reader.h"
+#include "asterix_file_config_parser.h"
 #include <iostream>
 #include <pthread.h>
 #include <signal.h>
@@ -29,8 +32,22 @@ int main(int argc, const char *argv[])
 	char logBuffer[BUFFER_SIZE];
 
 	//==========Levantando configuracion
-	Tools::instance()->Config_Parser("lista_participante.conf");
-	
+	AsterixFileConfigParser *asterixFileConfigParser = new AsterixFileConfigParser();
+	FileConfigReader::parseConfigFile(asterixFileConfigParser);
+
+	Tools::instance()->set_lista_config(asterixFileConfigParser->get_lista_config());
+	Tools::instance()->set_reconnect_params(asterixFileConfigParser->get_reconnect_params());
+	Tools::instance()->set_current_stock(asterixFileConfigParser->get_current_stock());
+
+	//==========Levantando configuracion de log
+	Logger::instance()->parseConfigFile();
+	/*
+	Logger::debug("Main: probando debug");
+	Logger::info("Main: probando info");
+	Logger::warn("Main: probando warn");
+	Logger::error("Main: probando error");
+	*/
+
 	// inicializa productos a comprar y vender segun parametros
 	//if (argc > 2) 
 	//{
@@ -41,17 +58,17 @@ int main(int argc, const char *argv[])
 	//else 
 	//{
 	//	sprintf(logBuffer, "Parametros invalidos. Usage: \n%s <producto_compra> <producto_venta>", argv[0]);
-	//	Tools::info(logBuffer);	
+	//	Logger::info(logBuffer);	
 	//	exit(1);
 	//}	
-		
+
 	nombre_nodo = new char[NOMBRE_NODO_SIZE];
-	nombre_nodo = Tools::instance()->get_nombre_nodo();
+	nombre_nodo = asterixFileConfigParser->get_nombre_nodo();
 	std::string nombre_nodo_str = nombre_nodo;
-	Tools::info("Main: nombre_nodo [" + nombre_nodo_str + "]");	
+	Logger::info("Main: nombre_nodo [" + nombre_nodo_str + "]");	
 	
-	listener_port = Tools::instance()->get_listener_port();
-	Tools::info_label_value("Main: listener_port", listener_port);
+	listener_port = asterixFileConfigParser->get_listener_port();
+	Logger::info_label_value("Main: listener_port", listener_port);
 	
 	//==========Iniciando hilos
 	
@@ -71,19 +88,19 @@ int main(int argc, const char *argv[])
 	pthread_join(thr_listener, NULL);
 	pthread_join(thr_logic, NULL);
 
-	Tools::debug("Main: Finished");
+	Logger::debug("Main: Finished");
 }
 
 void sig_handler(int id)
 {
-	Tools::debug("Main: sig_handler: Termination Signal arrived");
+	Logger::debug("Main: sig_handler: Termination Signal arrived");
 	if (id == SIGINT) 
 	{
-		Tools::debug("Main: sig_handler: Se recibio la señal SIGINT");
+		Logger::debug("Main: sig_handler: Se recibio la señal SIGINT");
 	} 
 	else if (id == SIGTERM) 
 	{
-		Tools::debug("Main: sig_handler: Se recibio la señal SIGTERM");
+		Logger::debug("Main: sig_handler: Se recibio la señal SIGTERM");
 	}
 	
 	Listener::instance()->close_TCP_connections();
@@ -100,7 +117,7 @@ void sig_handler(int id)
 
 void* proc_logic(void* param)
 {
-	Tools::debug("Main: proc_logic: enter.");
+	Logger::debug("Main: proc_logic: enter.");
 
 	try
 	{	
@@ -112,14 +129,14 @@ void* proc_logic(void* param)
 		exit(2);
 	}
 
-	Tools::debug("Main: proc_logic: leave.");
+	Logger::debug("Main: proc_logic: leave.");
 	return NULL;
 }
 
 
 void* proc_router(void* param)
 {
-	Tools::debug("Main: proc_router: enter.");
+	Logger::debug("Main: proc_router: enter.");
 
 	try
 	{	
@@ -131,14 +148,14 @@ void* proc_router(void* param)
 		exit(2);
 	}
 
-	Tools::debug("Main: proc_router: leave.");
+	Logger::debug("Main: proc_router: leave.");
 	return NULL;
 }
 
 
 void* proc_listener(void* param)
 {
-	Tools::debug("Main: proc_listener: enter.");
+	Logger::debug("Main: proc_listener: enter.");
 
 	try
 	{	
@@ -150,13 +167,13 @@ void* proc_listener(void* param)
 		exit(2);
 	}
 
-	Tools::debug("Main: proc_listener: leave.");
+	Logger::debug("Main: proc_listener: leave.");
 	return NULL;
 }
 
 void* proc_keyboard(void* param)
 {
-	Tools::debug("Main: proc_keyboard: enter.");
+	Logger::debug("Main: proc_keyboard: enter.");
 
 	try
 	{	
@@ -168,7 +185,7 @@ void* proc_keyboard(void* param)
 		exit(2);
 	}
 
-	Tools::debug("Main: proc_keyboard: leave.");
+	Logger::debug("Main: proc_keyboard: leave.");
 	return NULL;
 }
 
