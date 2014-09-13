@@ -12,6 +12,7 @@
 
 #include "socket_util.h"
 #include "types.h"
+#include "logger.h"
 #include "tools.h"
 
 /*
@@ -39,7 +40,7 @@ int SocketUtil::cliente_abrir_conexion_tcp (const char *serverIP, int serverPort
 	if (connect(sock, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0)
 	{
 		sprintf(logBuffer, "SocketUtil: No se pudo conectar a la ip [%s] con puerto %d", serverIP, serverPort);
-		Tools::warn(logBuffer);	
+		Logger::warn(logBuffer);	
 		
 		close (sock);
 		//exit(1);
@@ -53,14 +54,14 @@ char *SocketUtil::recibir_mensaje(int socket)
 {
 	char *echoBuffer = new char[BUFFER_SIZE];		// Buffer for echo string	
 	int bytesRcvd;						// Bytes read in single recv()
-	
+	char *logBuffer = new char[BUFFER_SIZE];
+
 	memset(echoBuffer, 0, sizeof(echoBuffer));
 	if ((bytesRcvd = recv(socket, echoBuffer, BUFFER_SIZE, 0)) < 0)
 	{
-		Tools::error("SocketUtil: recv() failed or connection closed prematurely");
+		Logger::error("SocketUtil: recv() failed or connection closed prematurely");
 		raise(SIGTERM);
 	}
-	
 	return echoBuffer;
 }
 
@@ -73,10 +74,10 @@ int SocketUtil::enviar_mensaje(int socket, std::string mensaje)
 	if ((size_enviado = send(socket, mensaje.c_str(), size, 0)) != size)
 	{
 		sprintf(logBuffer, "SocketUtil: enviar_mensaje:  send() sent a different number of bytes than expected. Se esperaba enviar %d y se envio %d. Socket: %d. Mensaje: [%s]", size, size_enviado, socket, mensaje.c_str());
-		Tools::warn(logBuffer);		
+		Logger::warn(logBuffer);		
 		if (size_enviado == -1)
 		{
-			Tools::debug("Se cerro el socket mientras se tomaba da decision de enviarle un mensaje");
+			Logger::debug("Se cerro el socket mientras se tomaba da decision de enviarle un mensaje");
 			socket = SOCK_ERRONEO;
 		}
 		else 
@@ -100,7 +101,7 @@ int SocketUtil::cliente_abrir_conexion_udp (struct sockaddr_in *localAddr)
 
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 	{
-		Tools::error("SocketUtil: socket() failed");
+		Logger::error("SocketUtil: socket() failed");
 	}
 
 	memset(localAddr, 0, sizeof(struct sockaddr_in));
@@ -127,7 +128,7 @@ int SocketUtil::servidor_aceptar_conexion_cliente(int sock)
 	clienteLen = sizeof (remoteaddr);
 	if ((sockCliente = accept (sock, &remoteaddr, &clienteLen)) < 0)
 	{
-		Tools::error("SocketUtil: accept() failed");
+		Logger::error("SocketUtil: accept() failed");
 		//exit(1);
 	}
 
@@ -140,7 +141,7 @@ int SocketUtil::servidor_aceptar_conexion_cliente(int sock)
 */
 int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
 {
-	//Tools::debug_label_value ("SocketUtil: servidor_abrir_conexion_tcp: listenerPort", listenerPort);
+	//Logger::debug_label_value ("SocketUtil: servidor_abrir_conexion_tcp: listenerPort", listenerPort);
     struct sockaddr_in myaddr;     // server address
     //struct sockaddr_in remoteaddr; // client address
     int yes=1;        // for setsockopt() SO_REUSEADDR, below
@@ -149,14 +150,14 @@ int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
 
     // get the servSock
     if ((servSock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-        Tools::error("SocketUtil: socket");
+        Logger::error("SocketUtil: socket");
         exit(1);
     }
 
     // lose the pesky "address already in use" error message
     if (setsockopt(servSock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 		close (servSock);
-		Tools::error("SocketUtil: setsockopt");
+		Logger::error("SocketUtil: setsockopt");
         exit(1);
     }
 
@@ -168,14 +169,14 @@ int SocketUtil::servidor_abrir_conexion_tcp(int listenerPort)
     memset(&(myaddr.sin_zero), '\0', 8);
     if (bind(servSock, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
 		close (servSock);
-		Tools::error("SocketUtil: bind");
+		Logger::error("SocketUtil: bind");
         exit(1);
     }
 
     // listen
     if (listen(servSock, 10) == -1) {
 		close (servSock);
-		Tools::error("SocketUtil: listen");
+		Logger::error("SocketUtil: listen");
         exit(1);
     }
 
@@ -193,7 +194,7 @@ int SocketUtil::servidor_abrir_conexion_udp(struct sockaddr_in *localAddr)
 
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        Tools::error("SocketUtil: socket() failed");
+        Logger::error("SocketUtil: socket() failed");
 		exit(1);
     }
 
@@ -205,7 +206,7 @@ int SocketUtil::servidor_abrir_conexion_udp(struct sockaddr_in *localAddr)
     if (bind(sock, (struct sockaddr *) localAddr, sizeof(struct sockaddr_in)) < 0)
     {
 		close (sock);
-		Tools::error("SocketUtil: bind() failed");
+		Logger::error("SocketUtil: bind() failed");
 		exit(1);
     }
 	
@@ -225,7 +226,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	/* Acepta la conexión con el cliente, guardándola en el array */
 	if ((clientes[*nClientes] = servidor_aceptar_conexion_cliente(sockServidor)) < 0)
 	{
-		Tools::error ("SocketUtil: No se puede abrir socket de cliente");
+		Logger::error ("SocketUtil: No se puede abrir socket de cliente");
 		exit (-1);
 	}
 
@@ -235,7 +236,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 	 * se deja todo como estaba y se vuelve. */
 	if ((*nClientes) >= MAX_CONNECTED)
 	{
-		Tools::debug("SocketUtil: Se supero el tope de clientes. Se rechaza el pedido");
+		Logger::debug("SocketUtil: Se supero el tope de clientes. Se rechaza el pedido");
 		close (clientes[(*nClientes) -1]);
 		(*nClientes)--;
 		return;
@@ -246,7 +247,7 @@ void SocketUtil::servidor_nuevo_cliente(int sockServidor, int *clientes, int *nC
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
 	sprintf(logBuffer, "SocketUtil: Se acepto al cliente %d", *nClientes);
-	Tools::debug(logBuffer);			
+	Logger::debug(logBuffer);			
 	return;
 }
 

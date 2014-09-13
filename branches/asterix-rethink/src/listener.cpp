@@ -1,6 +1,7 @@
 
 
 #include "common/tools.h"
+#include "common/logger.h"
 #include "common/types.h"
 #include "common/socket_util.h"
 #include "listener.h"
@@ -52,52 +53,52 @@ void Listener::on_event(const Event& ev)
 	switch (ev.id)
 	{
 		case INIT:
-			Tools::debug("Listener: on_event: INIT:");
+			Logger::debug("Listener: on_event: INIT:");
 			prepare_connections();
 			break;
 			
 		case LOOP:
-			//Tools::debug("Listener: on_event: LOOP:");
+			//Logger::debug("Listener: on_event: LOOP:");
 			client_connections_admin();
 			break;			
 			
 		case LS_ADD_SOCKET:
-			Tools::debug("Listener: on_event: LS_ADD_SOCKET:");
+			Logger::debug("Listener: on_event: LS_ADD_SOCKET:");
 			socket = (char*)ev.tag;			
 			id_socket = atoi(socket.c_str());
 			add_socket(id_socket);
 			break;
 			
 		case LS_RM_SOCKET:
-			Tools::debug("Listener: on_event: LS_RM_SOCKET:");
+			Logger::debug("Listener: on_event: LS_RM_SOCKET:");
 			socket = (char*)ev.tag;			
 			id_socket = atoi(socket.c_str());
 			rm_socket(id_socket);
 			break;			
 			
 		case LS_ADD_SOCKET_P2P:
-			Tools::debug("Listener: on_event: LS_ADD_SOCKET_P2P:");
+			Logger::debug("Listener: on_event: LS_ADD_SOCKET_P2P:");
 			socket = (char*)ev.tag;			
 			id_socket = atoi(socket.c_str());
 			add_socket_p2p(id_socket);
 			break;			
 			
 		case LS_RM_SOCKET_P2P:
-			Tools::debug("Listener: on_event: LS_RM_SOCKET_P2P:");
+			Logger::debug("Listener: on_event: LS_RM_SOCKET_P2P:");
 			socket = (char*)ev.tag;			
 			id_socket = atoi(socket.c_str());			
 			rm_socket_p2p(id_socket);
 			break;						
 			
 		default:
-			Tools::debug("Listener: on event: *UNKNOWN*.");
+			Logger::debug("Listener: on event: *UNKNOWN*.");
 			break;
 	}
 }
 
 void Listener::prepare_connections()
 {    
-	Tools::debug("Listener: prepare_connections:");
+	Logger::debug("Listener: prepare_connections:");
     FD_ZERO(&master);    // clear the master and temp sets
     FD_ZERO(&read_fds);
 	
@@ -124,16 +125,16 @@ void Listener::client_connections_admin()
 	int retornoSelect;
 	if ((retornoSelect = select(fdmax+1, &read_fds, NULL, NULL, &timeout)) == -1) 
     {
-        Tools::error("Listener: client_connections_admin: select");
+        Logger::error("Listener: client_connections_admin: select");
         return;
     }
 	else if (retornoSelect == 0)
 	{   
-		//Tools::debug(nombre_nodo, "Listener: client_connections_admin: el select volvio por timeout");
+		//Logger::debug(nombre_nodo, "Listener: client_connections_admin: el select volvio por timeout");
 	}
 	else if (retornoSelect > 0) 
 	{
-		//Tools::debug(nombre_nodo, "Listener: client_connections_admin: el select volvio por escritura en los descriptores");
+		//Logger::debug(nombre_nodo, "Listener: client_connections_admin: el select volvio por escritura en los descriptores");
 
 
         // run through the existing connections looking for data to read
@@ -152,7 +153,7 @@ void Listener::client_connections_admin()
                     addrlen = sizeof(remoteaddr);
                     if ((newfd = accept(servSock, (struct sockaddr *)&remoteaddr, &addrlen)) == -1) 
                     { 
-                        Tools::error("Listener: accept");
+                        Logger::error("Listener: accept");
                     } 
                     else 
                     {
@@ -172,7 +173,7 @@ void Listener::client_connections_admin()
 						
 						memset(logBuffer, 0 , sizeof(logBuffer));
 						sprintf(logBuffer, "Listener: client_connections_admin: Nueva conexion de [%s] con el socket %d", inet_ntoa(remoteaddr.sin_addr), newfd);
-						Tools::debug(logBuffer);
+						Logger::debug(logBuffer);
 						
 						char *nombre_nodo_vecino = new char[BUFFER_SIZE];
 						// Recibo el nombre de nodo de mi vecino
@@ -186,11 +187,11 @@ void Listener::client_connections_admin()
 						if (strcmp(nombre_nodo_vecino, P2P_CONNECT) == 0)
 						{
 							sprintf(logBuffer, "Entro en el estado 'en operacion'");
-							Tools::info(logBuffer);							
+							Logger::info(logBuffer);							
 							en_operacion = true;
 							
 							sprintf(logBuffer, "Listener: client_connections_admin: La nueva conexion es un socket p2p");
-							Tools::debug(logBuffer);
+							Logger::debug(logBuffer);
 							
 							sock_p2p = newfd;
 							
@@ -223,8 +224,8 @@ void Listener::client_connections_admin()
                   }
 				  else 
 				  {
-					  Tools::error("Listener: client_connections_admin: Se llego al limite de conexiones aceptadas por el Listener");
-					  Tools::debug_label_value ("Listener: client_connections_admin: Maximo de clientes conectados", MAX_CONNECTED);
+					  Logger::error("Listener: client_connections_admin: Se llego al limite de conexiones aceptadas por el Listener");
+					  Logger::debug_label_value ("Listener: client_connections_admin: Maximo de clientes conectados", MAX_CONNECTED);
 				  }
                 } 
                 else 
@@ -240,17 +241,17 @@ void Listener::client_connections_admin()
                         {
 							memset(logBuffer, 0 , sizeof(logBuffer));
     		                sprintf(logBuffer, "Listener: client_connections_admin: Connection closed (socket %d)", i);
-							Tools::debug(logBuffer);
+							Logger::debug(logBuffer);
 							
 							if (!socket_ip_map[i].empty()) 
 							{
 								memset(logBuffer, 0 , sizeof(logBuffer));
 						        sprintf(logBuffer, "Listener: client_connections_admin: Removiendo la IP [%s]", socket_ip_map[i].c_str());
-								Tools::debug(logBuffer);
+								Logger::debug(logBuffer);
 								
 								memset(logBuffer, 0 , sizeof(logBuffer));
 						        sprintf(logBuffer, "Removiendo la IP [%s]", socket_ip_map[i].c_str());
-								Tools::debug(logBuffer);								
+								Logger::debug(logBuffer);								
 								
 								// Solo envio este evento al Router, si no es el socket p2p, el que se cierra
 								if (i != sock_p2p)
@@ -268,7 +269,7 @@ void Listener::client_connections_admin()
 							{
 								memset(logBuffer, 0 , sizeof(logBuffer));
 						        sprintf(logBuffer, "Listener: client_connections_admin: El socket [%d] no esta en el mapa interno, por lo que es un vecino el que se va", i);
-								Tools::debug(logBuffer);							
+								Logger::debug(logBuffer);							
 							}
 												
 							cant_clientes--;							                       					
@@ -277,7 +278,7 @@ void Listener::client_connections_admin()
                         {
 							memset(logBuffer, 0 , sizeof(logBuffer));
     		                sprintf(logBuffer, "Listener: client_connections_admin: recv (socket %d)", i);
-							Tools::error(logBuffer);							
+							Logger::error(logBuffer);							
                         }
 																		
                         close(i); // bye!
@@ -288,7 +289,7 @@ void Listener::client_connections_admin()
 						if (sock_p2p != SOCK_ERRONEO && i == sock_p2p)
 						{
     		                sprintf(logBuffer, "Se cerro la conexion directa");
-							Tools::info(logBuffer);	
+							Logger::info(logBuffer);	
 									
 							// Se le avisa al Router que borre el socket_p2p
 							Event evRouter;
@@ -299,7 +300,7 @@ void Listener::client_connections_admin()
 							sock_p2p = SOCK_ERRONEO;
 							
 							sprintf(logBuffer, "Salgo del estado 'en operacion'");
-							Tools::info(logBuffer);								
+							Logger::info(logBuffer);								
 							en_operacion = false;
 						}
                     } 
@@ -317,8 +318,8 @@ void Listener::client_connections_admin()
 						{
 							if (sock_p2p != SOCK_ERRONEO && i == sock_p2p)
 							{
-								sprintf(logBuffer, "Me encuentro 'en operacion', pero el mensaje proviene de la conexion directa, asi que lo tomo");
-								Tools::info(logBuffer);
+								sprintf(logBuffer, "Me encuentro 'en operacion', pero el mensaje proviene de la conexion directa, asi que lo tomo [%s]", echoBuffer);
+								Logger::debug(logBuffer);
 								
 								Event ev;
 								ev.id = CLIENT_MSG;
@@ -329,7 +330,7 @@ void Listener::client_connections_admin()
 							{
 								//sprintf(logBuffer, "Se recibio un mensaje y se descarto porque me encuentro en operacion. Mensaje [%s]", echoBuffer);
 								sprintf(logBuffer, "Me encuentro 'en operacion', se recibio un mensaje y no proviene de la conexion directa. Lo descarto");
-								Tools::info(logBuffer);
+								Logger::warn(logBuffer);
 							}
 						}																			
                     }
@@ -346,7 +347,7 @@ void Listener::add_socket(int id_socket)
 {
 	char logBuffer[BUFFER_SIZE];
 	sprintf(logBuffer, "Listener: Se agrega al conjunto de sockets de escucha, uno de los vecinos con el socket_id [%d]", id_socket);
-	Tools::debug(logBuffer);		
+	Logger::debug(logBuffer);		
 		
 	// add id_socket to the master set	
     FD_SET(id_socket, &master);
@@ -372,7 +373,7 @@ void Listener::add_socket_p2p(int id_socket)
 {
 	char logBuffer[BUFFER_SIZE];
 	sprintf(logBuffer, "Listener: add_socket_p2p: Se agrega al conjunto de sockets de escucha, el socket p2p [%d]", id_socket);
-	Tools::debug(logBuffer);		
+	Logger::debug(logBuffer);		
 		
 	// add id_socket to the master set	
     FD_SET(id_socket, &master);
@@ -391,7 +392,7 @@ void Listener::rm_socket_p2p(int id_socket)
 {		
 	char logBuffer[BUFFER_SIZE];
 	sprintf(logBuffer, "Listener: rm_socket_p2p: Se remueve del conjunto de sockets de escucha, el socket p2p");
-	Tools::debug(logBuffer);		
+	Logger::debug(logBuffer);		
 			
     FD_CLR(id_socket, &master);     // remove from master set
 	socket_ip_map.erase(id_socket); // Remuevo la ip del mapa de control interno	
@@ -403,11 +404,11 @@ void Listener::decode_handshake_msg(const char *msg)
 	if (msg != NULL)
 	{
 		sprintf(logBuffer, "Recibiendo handshake [%s]", msg);
-		Tools::debug(logBuffer);	
+		Logger::debug(logBuffer);	
 	}   
 	else
 	{
-		Tools::error("Listener: decode_handshake_msg: Mensaje NULL");
+		Logger::error("Listener: decode_handshake_msg: Mensaje NULL");
 	}	
 }
 
@@ -415,7 +416,7 @@ char *Listener::get_rta_handshake_msg()
 {
 	char logBuffer[BUFFER_SIZE];
 	sprintf(logBuffer, "Enviando respuesta handshake [%s]", nombre_nodo);
-	Tools::debug(logBuffer);			
+	Logger::debug(logBuffer);			
 	return nombre_nodo;	
 }
 

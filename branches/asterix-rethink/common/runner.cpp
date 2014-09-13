@@ -1,6 +1,7 @@
 //
 // Class: Runner
 //
+#include "logger.h"
 #include "runner.h"
 #include "tools.h"
 #include <stdexcept>
@@ -26,7 +27,7 @@ Runner::post_event
 */
 void Runner::post_event(const Event& ev, bool signal /*= false*/)
 {
-	//Tools::debug("Runner: post_event");
+	//Logger::debug("Runner: post_event");
 	if (!initialized)
 		initialize();
 	
@@ -44,7 +45,7 @@ void Runner::initialize()
 {
 	if (initialized)
 		return;
-	Tools::debug("Runner: initialize.");
+	Logger::debug("Runner: initialize.");
 	
 	//Locking:
 	pthread_cond_init(&ds.cond, NULL);
@@ -64,7 +65,7 @@ void Runner::release()
 {
 	if (!initialized)
 		return;
-	Tools::debug("Runner: release.");
+	Logger::debug("Runner: release.");
 	
 	pthread_cond_destroy(&ds.cond);
 	pthread_mutex_destroy(&ds.mutex);
@@ -126,7 +127,7 @@ Runner::signal
 */
 void Runner::signal()
 {
-	//Tools::debug("Runner: signal");
+	//Logger::debug("Runner: signal");
 	lock();
 	pthread_cond_broadcast(&ds.cond);
 	unlock();
@@ -138,7 +139,7 @@ Runner::signal
 int Runner::wait(unsigned int time /*= INFINITE */)
 {
 	char logBuffer[BUFFER_SIZE];
-	//Tools::debug("Runner: wait");
+	//Logger::debug("Runner: wait");
 	lock();
 	if (time == INFINITE)
 	{
@@ -155,7 +156,7 @@ int Runner::wait(unsigned int time /*= INFINITE */)
     	ti.tv_nsec %= 1000000000; 
 		
 		//sprintf(logBuffer, "Runner: wait: ti.tv_nsec %d, ti.tv_sec %d, time %d", ti.tv_nsec, ti.tv_sec, time);
-		//Tools::debug(logBuffer);		
+		//Logger::debug(logBuffer);		
 		
 		pthread_cond_timedwait(&ds.cond, &ds.mutex, &ti);
 		unlock();
