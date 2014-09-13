@@ -21,10 +21,7 @@
 #define DEFAULT_WAIT_SECONDS (5)
 #define DEFAULT_WAIT_MILISECONDS (0)
 
-#define DEBUG_LEVEL "DEBUG"
-#define INFO_LEVEL "INFO"
-#define WARN_LEVEL "WARN"
-#define ERROR_LEVEL "ERROR"
+#define DASH ("#")
 
 #define P2P_CONNECT "p2p_connect"
 

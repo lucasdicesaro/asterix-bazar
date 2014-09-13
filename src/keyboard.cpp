@@ -1,3 +1,4 @@
+#include "common/logger.h"
 #include "keyboard.h"
 #include "logic.h"
 #include "router.h"
@@ -34,16 +35,16 @@ void Keyboard::on_event(const Event& ev)
 	switch (ev.id)
 	{
 		case INIT:
-			Tools::debug("Keyboard: on_event: INIT:");
+			Logger::debug("Keyboard: on_event: INIT:");
 		  break;
 			
 		case KB_SHOW_MENU:
-			Tools::debug("Keyboard: on_event: KB_SHOW_MENU:");
+			Logger::debug("Keyboard: on_event: KB_SHOW_MENU:");
 		  	elegir_accion();
 		  break;			
 
 		default:
-			Tools::debug("Keyboard: on event: *UNKNOWN*.");
+			Logger::debug("Keyboard: on event: *UNKNOWN*.");
 			break;
 	}
 }
@@ -70,34 +71,34 @@ void Keyboard::elegir_accion()
 			switch(tecla)
 			{
 				case 1:
-					Tools::debug("Keyboard: elegir_accion: Tecla 1");
+					Logger::debug("Keyboard: elegir_accion: Tecla 1");
 					procesar_add_stock();
 					break;
 				case 2:
-					Tools::debug("Keyboard: elegir_accion: Tecla 2");			
+					Logger::debug("Keyboard: elegir_accion: Tecla 2");			
 					procesar_set_producto_compra();
 					break;
 				case 3:
-					Tools::debug("Keyboard: elegir_accion: Tecla 3");			
+					Logger::debug("Keyboard: elegir_accion: Tecla 3");			
 					procesar_set_producto_venta();
 					break;
 				case 4:
-					Tools::debug("Keyboard: elegir_accion: Tecla 4");			
+					Logger::debug("Keyboard: elegir_accion: Tecla 4");			
 					procesar_lanzar();
 					break;
 				case 5:
-					Tools::debug("Keyboard: elegir_accion: Tecla 5");			
+					Logger::debug("Keyboard: elegir_accion: Tecla 5");			
 					showstock();
 					break;					
 				case 6:
-					Tools::debug("Keyboard: elegir_accion: Tecla 6");			
+					Logger::debug("Keyboard: elegir_accion: Tecla 6");			
 					try_reconnect();
 					break;						
 			}
 		}
 		else
 		{
-			Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado");	
+			Logger::warn("El nodo esta en operacion. No se admite ingreso de teclado");	
 		}
 	} while (tecla != 8);
 
@@ -107,7 +108,7 @@ void Keyboard::elegir_accion()
 
 void Keyboard::procesar_add_stock()
 {
-	Tools::debug("Keyboard: procesar_add_stock:");	
+	Logger::debug("Keyboard: procesar_add_stock:");	
 	char *logBuffer = new char[BUFFER_SIZE];		
 	char *buffer = new char[BUFFER_SIZE];	
 	memset(buffer, 0, BUFFER_SIZE);
@@ -116,7 +117,7 @@ void Keyboard::procesar_add_stock()
 	
 	if (en_operacion)
 	{
-		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		Logger::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
 		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
 	}
 	
@@ -125,19 +126,19 @@ void Keyboard::procesar_add_stock()
 	switch(tecla)
 	{
 		case 1:
-			Tools::debug("Keyboard: procesar_add_stock: Tecla 1");
+			Logger::debug("Keyboard: procesar_add_stock: Tecla 1");
 			ev.id = SET_STOCK_SAL; 
 			product_name = PRODUCTO_SAL;
 			break;
 
 		case 2:
-			Tools::debug("Keyboard: procesar_add_stock: Tecla 2");
+			Logger::debug("Keyboard: procesar_add_stock: Tecla 2");
 			ev.id = SET_STOCK_PESCADO; 
 			product_name = PRODUCTO_PESCADO;
 			break;
 			
 		case 3:
-			Tools::debug("Keyboard: procesar_add_stock: Tecla 3");
+			Logger::debug("Keyboard: procesar_add_stock: Tecla 3");
 			ev.id = SET_STOCK_VERDURA; 
 			product_name = PRODUCTO_VERDURA;
 			break;
@@ -147,12 +148,12 @@ void Keyboard::procesar_add_stock()
 	strcpy(buffer, obtener_cadena(logBuffer));
 	if (en_operacion)
 	{
-		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		Logger::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
 		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
 	}
 	
 	sprintf(logBuffer, "Keyboard: procesar_add_stock: Se apreto [%s]", buffer);	
-   	Tools::debug(logBuffer);
+   	Logger::debug(logBuffer);
 	ev.tag = Tools::instance ()->duplicate(buffer);
 	Logic::instance()->post_event(ev, true);
 }
@@ -162,7 +163,7 @@ void Keyboard::procesar_add_stock()
 
 void Keyboard::procesar_set_producto_compra()
 {
-	Tools::debug("Keyboard: procesar_set_producto_compra:");	
+	Logger::debug("Keyboard: procesar_set_producto_compra:");	
 	char *logBuffer = new char[BUFFER_SIZE];		
 	char *buffer = new char[BUFFER_SIZE];	
 	memset(buffer, 0, BUFFER_SIZE);
@@ -171,7 +172,7 @@ void Keyboard::procesar_set_producto_compra()
 	
 	if (en_operacion)
 	{
-		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		Logger::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
 		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
 	}
 	
@@ -180,24 +181,24 @@ void Keyboard::procesar_set_producto_compra()
 	switch(tecla)
 	{
 		case 1:
-			Tools::debug("Keyboard: procesar_set_producto_compra: Tecla 1");
+			Logger::debug("Keyboard: procesar_set_producto_compra: Tecla 1");
 			ev.id = SET_CUR_PROD_COMPRA; 
 			product_name = PRODUCTO_SAL;
 			break;
 		case 2:
-			Tools::debug("Keyboard: procesar_set_producto_compra: Tecla 2");
+			Logger::debug("Keyboard: procesar_set_producto_compra: Tecla 2");
 			ev.id = SET_CUR_PROD_COMPRA; 
 			product_name = PRODUCTO_PESCADO;
 			break;
 		case 3:
-			Tools::debug("Keyboard: procesar_set_producto_compra: Tecla 3");
+			Logger::debug("Keyboard: procesar_set_producto_compra: Tecla 3");
 			ev.id = SET_CUR_PROD_COMPRA; 
 			product_name = PRODUCTO_VERDURA;
 			break;
 	}
 	
 	sprintf(logBuffer, "Keyboard: procesar_set_producto_compra: Se eligio [%s]", product_name.c_str());	
-   	Tools::debug(logBuffer);
+   	Logger::debug(logBuffer);
 	ev.tag = Tools::instance ()->duplicate(product_name);
 	Logic::instance()->post_event(ev, true);
 	
@@ -205,7 +206,7 @@ void Keyboard::procesar_set_producto_compra()
 
 void Keyboard::procesar_set_producto_venta()
 {
-	Tools::debug("Keyboard: procesar_set_producto_venta:");	
+	Logger::debug("Keyboard: procesar_set_producto_venta:");	
 	char *logBuffer = new char[BUFFER_SIZE];		
 	char *buffer = new char[BUFFER_SIZE];	
 	memset(buffer, 0, BUFFER_SIZE);
@@ -214,7 +215,7 @@ void Keyboard::procesar_set_producto_venta()
 	
 	if (en_operacion)
 	{
-		Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+		Logger::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
 		return; // Si el nodo entro en operacion, fuerzo a la salida del metodo
 	}
 	
@@ -223,24 +224,24 @@ void Keyboard::procesar_set_producto_venta()
 	switch(tecla)
 	{
 		case 1:
-			Tools::debug("Keyboard: procesar_set_producto_venta: Tecla 1");
+			Logger::debug("Keyboard: procesar_set_producto_venta: Tecla 1");
 			ev.id = SET_CUR_PROD_VENTA; 
 			product_name = PRODUCTO_SAL;
 			break;
 		case 2:
-			Tools::debug("Keyboard: procesar_set_producto_venta: Tecla 2");
+			Logger::debug("Keyboard: procesar_set_producto_venta: Tecla 2");
 			ev.id = SET_CUR_PROD_VENTA; 
 			product_name = PRODUCTO_PESCADO;
 			break;
 		case 3:
-			Tools::debug("Keyboard: procesar_set_producto_venta: Tecla 3");
+			Logger::debug("Keyboard: procesar_set_producto_venta: Tecla 3");
 			ev.id = SET_CUR_PROD_VENTA; 
 			product_name = PRODUCTO_VERDURA;
 			break;
 	}
 	
 	sprintf(logBuffer, "Keyboard: procesar_set_producto_venta: Se eligio [%s]", product_name.c_str());	
-   	Tools::debug(logBuffer);
+   	Logger::debug(logBuffer);
 	ev.tag = Tools::instance ()->duplicate(product_name);
 	Logic::instance()->post_event(ev, true);	
 }
@@ -255,7 +256,7 @@ void Keyboard::procesar_lanzar()
 
 	Event ev;	
 	sprintf(logBuffer, "Keyboard: procesar_lanzar: Se apreto [%s]", buffer);	
-   	Tools::debug(logBuffer);
+   	Logger::debug(logBuffer);
 	ev.id = DO_LOOKUP;	
 	ev.tag = Tools::instance ()->duplicate(buffer);		
 	Logic::instance()->post_event(ev, true);
@@ -276,7 +277,7 @@ int Keyboard::elegir_producto()
 		
 		if (en_operacion)
 		{
-			Tools::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
+			Logger::warn("El nodo esta en operacion. No se admite ingreso de teclado. Volviendo el menu");	
 			return -1;
 		}
 
@@ -297,7 +298,10 @@ char *Keyboard::obtener_cadena(const char*mensaje_prompt)
 	
 	cout << mensaje_prompt << endl;
 	
-	fgets(buffer, BUFFER_SIZE, stdin);	
+	if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) {
+		// No se pudo capturar el ingreso por teclado
+		return NULL;
+	}
 }
 
 int Keyboard::obtener_tecla()
