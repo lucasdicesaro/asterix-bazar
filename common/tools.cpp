@@ -26,60 +26,6 @@ Tools* Tools::instance()
 	return single_instance;
 }
 
-/**
-Debug
-*/
-void Tools::debug(const char* msg)
-{
-	if (Tools::instance()->debug_level)
-		printf("%s %s\n", DEBUG_LEVEL, msg);
-}
-
-void Tools::debug(std::string msg)
-{
-	if (Tools::instance()->debug_level)	
-		printf("%s %s\n", DEBUG_LEVEL, msg.c_str());	
-}
-
-void Tools::debug(const char* nombre_nodo, const char* msg)
-{
-	if (Tools::instance()->debug_level)	
-		printf("%s - %s %s\n", nombre_nodo, DEBUG_LEVEL, msg);
-}
-
-
-void Tools::info(std::string msg)
-{
-	if (Tools::instance()->info_level)	
-		printf("%s %s\n", INFO_LEVEL, msg.c_str());	
-}
-
-void Tools::warn(std::string msg)
-{
-	if (Tools::instance()->warn_level)	
-		printf("%s %s\n", WARN_LEVEL, msg.c_str());	
-}
-
-void Tools::error(std::string msg)
-{
-	if (Tools::instance()->error_level)	
-	{
-		printf("%s %s\n", ERROR_LEVEL, msg.c_str());
-		//perror(msg.c_str());	
-	}
-}
-
-void Tools::debug_label_value(std::string label, int value)
-{
-	if (Tools::instance()->debug_level)
-		std::cout << DEBUG_LEVEL << " " << label.c_str() << ": " << value << std::endl;
-}
-
-void Tools::info_label_value(std::string label, int value)
-{
-	if (Tools::instance()->info_level)	
-		std::cout << INFO_LEVEL << " " << label.c_str() << ": " << value << std::endl;
-}
 
 /**
 DieWithError
@@ -115,143 +61,6 @@ std::string Tools::get_attr_value(xmlpp::Element* el, const char* attr_name)
 }
 
 
-/**
-Config_Parser
-*/
-#define BUFFER_STR 128
-int Tools::Config_Parser (const char* FileName)
-{
-	FILE *CONFIG_FILE;	ConfigDS conf;	
-	char Line[BUFFER_STR];
-	char* Param;
-	char* Value;
-	char* nombre;
-	char* ip_port;
-	char* ip;
-	int port;
-	char* vecino1;	
-	char* vecino2;
-	reconnectParams = new ReconnectParamsDS();
-	currentStock = new CurrentStockDS();	
-
-
-	/* abro archivo 
-	*/
-	if ((CONFIG_FILE = fopen(FileName, "r")) == NULL) {
-		DieWithError("No se pudo abrir archivo de configuracion");
-		return NULL; 
-	}
-
-	/* Leo la primera linea 
-    */
-	fgets(Line, sizeof(Line),  CONFIG_FILE);
-
-
-	/* Reemplazo el '\n' al final del registro por '\0'
-    */
-	Line[strlen(Line)-1] = '\0';
-
-
-	/* Valido que el archivo  no este vacio
-	*/
-	if (feof(CONFIG_FILE)) {
-		DieWithError("El archivo de configuracion esta vacio");
-		return NULL; 
-	}
-
-	/* Recorro y parseo los registros
-    */
-	while (!feof(CONFIG_FILE))
-	{
-		Param = strtok(Line, "=");
-		//printf ("Line: %s\n", Line);
-		Value  = strtok(NULL , "=");
-		
-		//printf ("Param: %s - Value: %s\n", Param, Value);
-		
-		if (strcmp(Param, "nombre_nodo") == 0)
-		{
-			nombre_nodo = new char[NOMBRE_NODO_SIZE];
-			memset(nombre_nodo, 0, NOMBRE_NODO_SIZE);
-			strcpy(nombre_nodo,  Value);
-		}
-		
-		if (strcmp(Param, "producto_compra") == 0)
-		{
-			currentStock->producto_compra = Value;
-		}
-		if (strcmp(Param, "producto_venta") == 0)
-		{
-			currentStock->producto_venta = Value;
-		}
-			
-		if  (strcmp(Param, "intentos_reconexion") == 0)
-		{
-			reconnectParams->intentos_reconexion = atoi(Value);
-		}
-		if  (strcmp(Param, "delay_reconexion") == 0)
-		{
-			reconnectParams->delay_reconexion = atoi(Value);
-		}
-		if  (strcmp(Param, "hopcount") == 0)
-		{
-			reconnectParams->hopcount = atoi(Value);
-		}		
-		
-		if  (strcmp(Param, "participante") == 0) {
-			nombre = strtok(Value, ",");
-			ip_port = strtok(NULL , ",");						
-			vecino1 = strtok(NULL , ",");
-			vecino2 = strtok(NULL , ",");
-
-			ip = strtok(ip_port, ":");
-			port = atoi(strtok(NULL , ":"));
-			//printf ("ip: %s - port: %d\n", ip, port);
-			
-			// Guardo el listener_port, si el nodo que estoy parseando soy yo
-			if (strcmp(nombre, nombre_nodo) == 0)
-			{
-				listener_port = port;
-			}
-			
-			strcpy(conf.nombre, nombre);
-			strcpy(conf.ip, ip);			
-			conf.port = port;
-			strcpy(conf.vecino1, vecino1);
-			strcpy(conf.vecino2, vecino2);
-			listaConfig.push_back(conf);			
-		}
-		
-		if  (strcmp(Param, DEBUG_LEVEL) == 0)
-		{
-			debug_level = atoi(Value);
-		}		
-		if  (strcmp(Param, INFO_LEVEL) == 0)
-		{
-			info_level = atoi(Value);
-		}				
-		if  (strcmp(Param, WARN_LEVEL) == 0)
-		{
-			warn_level = atoi(Value);
-		}
-		if  (strcmp(Param, ERROR_LEVEL) == 0)
-		{
-			error_level = atoi(Value);
-		}
-		
-
-		/*	Leo la siguiente linea 
-    	*/
-		fgets(Line, sizeof(Line), CONFIG_FILE);
-		Line[strlen(Line)-1] = '\0';
-	}
-
-	/* Cierro el archivo 
-	*/
-	fclose(CONFIG_FILE);	
-	
-	return NULL; 
-}
 
 char *Tools::get_IP_De_Participante(const char *nombre) {
 	
@@ -289,20 +98,18 @@ ConfigDS *Tools::get_info_nodo(const char *nombre) {
 }
 
 
-
-char *Tools::get_nombre_nodo() 
+void Tools::set_lista_config(std::list<ConfigDS> listaConfig) 
 {
-	return nombre_nodo;
-}
-
-int Tools::get_listener_port()
-{
-	return listener_port;
+	this->listaConfig = listaConfig;
 }
 
 ReconnectParamsDS *Tools::get_reconnect_params()
 {
 	return reconnectParams;
+}
+void Tools::set_reconnect_params(ReconnectParamsDS *reconnectParams) 
+{
+	this->reconnectParams = reconnectParams;
 }
 
 CurrentStockDS *Tools::get_current_stock()
@@ -310,6 +117,10 @@ CurrentStockDS *Tools::get_current_stock()
 	return currentStock;
 }
 
+void Tools::set_current_stock(CurrentStockDS *currentStock) 
+{
+	this->currentStock = currentStock;
+}
 
 
 

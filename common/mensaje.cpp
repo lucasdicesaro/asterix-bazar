@@ -2,6 +2,7 @@
 // Class: Mensaje
 //
 #include "mensaje.h"
+#include "logger.h"
 #include "tools.h"
 #include <stdlib.h>
 #include <assert.h>
@@ -14,8 +15,8 @@ Mensaje::Mensaje()
 {
     gettimeofday(&tv, NULL);
 
-	//Tools::debug_label_value ("Mensaje: Mensaje: tv.tv_sec", tv.tv_sec);		
-	//Tools::debug_label_value ("Mensaje: Mensaje: tv.tv_usec", tv.tv_usec);		
+	//Logger::debug_label_value ("Mensaje: Mensaje: tv.tv_sec", tv.tv_sec);		
+	//Logger::debug_label_value ("Mensaje: Mensaje: tv.tv_usec", tv.tv_usec);		
 
 	timestamp_seconds = tv.tv_sec;
 	timestamp_microseconds = tv.tv_usec;
@@ -97,7 +98,7 @@ void Mensaje::load_nodo(xmlpp::Element* el)
 	Nodo* nodo = new Nodo;
 	nodo->load(el);
 	nodos.push_back(nodo);
-	Tools::debug("Mensaje: load_nodo.");
+	Logger::debug("Mensaje: load_nodo.");
 }
 
 /**
@@ -122,7 +123,7 @@ bool Mensaje::load(std::string content)
 		return load(doc);
 	} catch (...)
 	{
-		Tools::debug("Mensaje: load: exception on load.");
+		Logger::debug("Mensaje: load: exception on load.");
 		return false;
 	}
 }
@@ -133,7 +134,7 @@ bool Mensaje::load(xmlpp::Document* doc)
 	
 	using namespace xmlpp;
 	release();
-	Tools::debug("Mensaje: load.");
+	Logger::debug("Mensaje: load.");
 
 	Element* root = doc->get_root_node();
 	assert(root);
@@ -154,7 +155,7 @@ bool Mensaje::load(xmlpp::Document* doc)
 
 		//memset(logBuffer, 0 , sizeof(logBuffer));
 		//sprintf(logBuffer, "Mensaje: node_name: [%s]", node_name.c_str());
-		//Tools::debug(logBuffer);
+		//Logger::debug(logBuffer);
 		
 		if (node_name == "body")
 		{
@@ -194,23 +195,23 @@ bool Mensaje::load(xmlpp::Document* doc)
 			memset(buffer, 0, BUFFER_SIZE);
 			
 			sprintf(logBuffer, "Se recibio el timestamp (text) %s", text);				
-			Tools::debug(logBuffer);
+			Logger::debug(logBuffer);
 			
 			strcpy(buffer, text);		
 			//sprintf(logBuffer, "Se copio el timestamp (buffer) %s", buffer);				
-			//Tools::debug(logBuffer);
+			//Logger::debug(logBuffer);
 			
 			timestamp_seconds = atoi(strtok(buffer, SEPARADOR));			
 			//sprintf(logBuffer, "timestamp_seconds %d", timestamp_seconds);				
-			//Tools::debug(logBuffer);
+			//Logger::debug(logBuffer);
 			
 			timestamp_microseconds  = atoi(strtok(NULL , SEPARADOR));							
 			//sprintf(logBuffer, "timestamp_microseconds %d", timestamp_microseconds);				
-			//Tools::debug(logBuffer);
+			//Logger::debug(logBuffer);
 		}				
 	}
 	
-	Tools::debug("Mapa: load complete.");
+	Logger::debug("Mapa: load complete.");
 }
 void Mensaje::release()
 {
@@ -265,16 +266,16 @@ std::string Mensaje::get_next_node_name()
 		{
 			node_name = Tools::duplicate(nodo->name);
 			sprintf(logBuffer, "Mensaje: get_next_node_name: nombre de nodo a retornar [%s]", node_name.c_str());
-			Tools::debug(logBuffer);			
+			Logger::debug(logBuffer);			
 		}
 		else
 		{
-			Tools::debug("Mensaje: get_next_node_name: nodo es NULL");
+			Logger::debug("Mensaje: get_next_node_name: nodo es NULL");
 		}		
 	}
 	else
 	{
-		Tools::debug("Mensaje: get_next_node_name: mensaje->get_nodos() esta vacia");
+		Logger::debug("Mensaje: get_next_node_name: mensaje->get_nodos() esta vacia");
 	}
 	return node_name;
 }
@@ -292,16 +293,16 @@ std::string Mensaje::get_creator_node_name()
 		{
 			node_name = Tools::duplicate(nodo->name);
 			sprintf(logBuffer, "Mensaje: get_creator_node_name: nombre de nodo a retornar [%s]", node_name.c_str());
-			Tools::debug(logBuffer);			
+			Logger::debug(logBuffer);			
 		}
 		else
 		{
-			Tools::debug("Mensaje: get_creator_node_name: nodo es NULL");
+			Logger::debug("Mensaje: get_creator_node_name: nodo es NULL");
 		}		
 	}
 	else
 	{
-		Tools::debug("Mensaje: get_creator_node_name: mensaje->get_nodos() esta vacia");
+		Logger::debug("Mensaje: get_creator_node_name: mensaje->get_nodos() esta vacia");
 	}
 	return node_name;
 }

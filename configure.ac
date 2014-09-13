@@ -6,7 +6,7 @@ AC_INIT(asterix_bazar, 0.1)
 zsxc=jghj
 AC_SUBST(zsxc)
 
-AM_INIT_AUTOMAKE(asterix_bazar, 0.1)
+AM_INIT_AUTOMAKE()
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
@@ -25,7 +25,7 @@ AC_PROG_RANLIB=libasterix_bazar.a
 
 
 
-PKG_CHECK_MODULES(PACKAGE, libxml-2.0 libxml++-2.6 glibmm-2.4)
+PKG_CHECK_MODULES(PACKAGE, libxml-2.0 libxml++-2.6 glibmm-2.4 glib-2.0)
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
 

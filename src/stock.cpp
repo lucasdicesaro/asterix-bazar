@@ -1,4 +1,5 @@
 #include "stock.h"
+#include "common/logger.h"
 #include "common/tools.h"
 #include <iostream>
 
@@ -50,7 +51,7 @@ bool Stock::decrement_stock(const char* product_name, int cantidad)
 		{
 			sprintf(logBuffer, "Stock: decrement_stock: No se puede decrementar el %s en %d unidades, sabiendo que tengo %d unidades", product_name, cantidad, mapa_stock[product_name]);
 		}
-		Tools::warn(logBuffer);
+		Logger::warn(logBuffer);
 	}
 	return operacion_exitosa;
 }
@@ -67,7 +68,7 @@ bool Stock::increment_stock(const char* product_name, int cantidad)
 	else
 	{
 		sprintf(logBuffer, "Stock: decrement_stock: El producto %s no existe dentro de los productos posibles", product_name);
-		Tools::warn(logBuffer);
+		Logger::warn(logBuffer);
 	}
 	return operacion_exitosa;
 }
@@ -81,7 +82,7 @@ int Stock::get_stock(std::string product_name)
 	else 
 	{
 		sprintf(logBuffer, "Stock: get_stock: El producto [%s] no existe en el mapa de stock!", product_name.c_str());
-		Tools::warn(logBuffer);
+		Logger::warn(logBuffer);
 		cantidad_producto = -1;
 	}	
 	return cantidad_producto;
