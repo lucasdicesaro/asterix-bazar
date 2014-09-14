@@ -89,6 +89,11 @@ void Listener::on_event(const Event& ev)
 			id_socket = atoi(socket.c_str());			
 			rm_socket_p2p(id_socket);
 			break;						
+
+		case QUIT:
+			Logger::debug("Listener: on_event QUIT");
+			close_TCP_connections();
+			break;
 			
 		default:
 			Logger::debug("Listener: on event: *UNKNOWN*.");
@@ -423,5 +428,6 @@ char *Listener::get_rta_handshake_msg()
 void Listener::close_TCP_connections() 
 {
 	close(servSock);
+	Logger::debug("Listener: conexiones cerradas");
 }
 

@@ -95,26 +95,32 @@ char *AsterixConfigData::get_IP_De_Participante(const char *nombre) {
 			elementoConfig = &tmp;
 		}
 	}
+	if (elementoConfig == NULL) {
+		return NULL;
+	}
 	return Tools::duplicate (elementoConfig->ip);
 }
 
 ConfigDS *AsterixConfigData::get_info_nodo(const char *nombre) {
 
-	char *key = Tools::duplicate(nombre);
-
 	ConfigDS* elementoConfig = NULL;
-	for (ListaConfig::iterator it = listaConfig.begin(); it != listaConfig.end() && elementoConfig == NULL; it++)
-	{
-		ConfigDS tmp = *it;
-		if (strcmp(tmp.nombre, key) == 0) {
-			elementoConfig = new ConfigDS();
-			strcpy(elementoConfig->nombre, tmp.nombre);
-			strcpy(elementoConfig->ip, tmp.ip);
-			elementoConfig->port = tmp.port;
-			strcpy(elementoConfig->vecino1, tmp.vecino1);
-			strcpy(elementoConfig->vecino2, tmp.vecino2);
-		}
-	}
+	if (nombre != NULL) {
+		char *key = Tools::duplicate(nombre);
 
+		for (ListaConfig::iterator it = listaConfig.begin(); it != listaConfig.end() && elementoConfig == NULL; it++)
+		{
+			ConfigDS tmp = *it;
+			if (strcmp(tmp.nombre, key) == 0) {
+				elementoConfig = new ConfigDS();
+				strcpy(elementoConfig->nombre, tmp.nombre);
+				strcpy(elementoConfig->ip, tmp.ip);
+				elementoConfig->port = tmp.port;
+				strcpy(elementoConfig->vecino1, tmp.vecino1);
+				strcpy(elementoConfig->vecino2, tmp.vecino2);
+			}
+		}
+	} else {
+		Logger::error("AsterixConfigData: get_info_nodo: Nombre de nodo no definido");
+	}
 	return elementoConfig;
 }

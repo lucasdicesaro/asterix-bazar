@@ -77,11 +77,12 @@ int SocketUtil::enviar_mensaje(int socket, std::string mensaje)
 		Logger::warn(logBuffer);		
 		if (size_enviado == -1)
 		{
-			Logger::debug("Se cerro el socket mientras se tomaba da decision de enviarle un mensaje");
+			Logger::debug("SocketUtil: enviar_mensaje: Se cerro el socket mientras se tomaba la decision de enviarle un mensaje");
 			socket = SOCK_ERRONEO;
 		}
 		else 
 		{
+			Logger::debug("SocketUtil: enviar_mensaje: matamos todo");
 			raise(SIGTERM);
 		}		
 	}

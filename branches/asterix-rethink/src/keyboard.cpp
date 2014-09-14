@@ -41,7 +41,11 @@ void Keyboard::on_event(const Event& ev)
 		case KB_SHOW_MENU:
 			Logger::debug("Keyboard: on_event: KB_SHOW_MENU:");
 		  	elegir_accion();
-		  break;			
+		  break;
+
+		case QUIT:
+			Logger::debug("Keyboard: on_event QUIT");
+			break;
 
 		default:
 			Logger::debug("Keyboard: on event: *UNKNOWN*.");
