@@ -128,6 +128,10 @@ void Logic::on_event(const Event& ev)
 			Logger::debug("Logic: on_event: KB_SHOW_STOCK");
 		  	Stock::instance()->to_string();
 		  	break;			
+
+		case QUIT:
+			Logger::debug("Logic: on_event QUIT");
+			break;
 		  
 		default:
 			Logger::debug("Logic: on event: *UNKNOWN*.");

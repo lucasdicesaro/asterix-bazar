@@ -148,14 +148,19 @@ void Router::on_event(const Event& ev)
 			id_socket = atoi(nodo_socket);
 			
 			nombre_nodo = find_in_client_sockets_nodo_nombre(id_socket);
-			sprintf(logBuffer, "Router: start_connections: nombre_nodo [%s], retornado por find_nodo_nombre_from_id_socket", nombre_nodo.c_str());
+			sprintf(logBuffer, "Router: on_event RT_RM_NODO_CLIENTE: nombre_nodo [%s], retornado por find_nodo_nombre_from_id_socket", nombre_nodo.c_str());
 			Logger::debug(logBuffer);			
 
 			rm_nodo_socket_from_client_map(nombre_nodo);
-			break;				
+			break;
+
+		case QUIT:
+			Logger::debug("Router: on_event QUIT");
+			close_TCP_connections();
+			break;
 			
 		default:
-			Logger::debug("Router: on event: *UNKNOWN*.");
+			Logger::warn("Router: on event: *UNKNOWN*.");
 			break;
 	}
 }
@@ -168,7 +173,15 @@ void Router::start_connections()
 	char *echoBuffer = new char[BUFFER_SIZE];
 	
 	ConfigDS* my_config = AsterixConfigData::instance()->get_info_nodo(nombre_nodo);
-	
+	if (my_config == NULL)
+	{
+		sprintf(logBuffer, "Router: start_connections: No se pudo obtener la informacion del nodo del archivo de configuracion");
+		Logger::error(logBuffer);
+		raise(SIGTERM);
+		sleep(2);
+		//exit(1);
+	}
+
 	if (sock_vecino1 == SOCK_ERRONEO)
 	{
 		sock_vecino1 = try_connection(my_config->vecino1);
@@ -196,7 +209,7 @@ void Router::start_connections()
 	else
 	{
 		sprintf(logBuffer, "Ya estoy conectado con el vecino [%s]", my_config->vecino2);
-		Logger::debug(logBuffer);
+		Logger::info(logBuffer);
 	}
 	
 	bool conexiones_incompletas = sock_vecino1 == SOCK_ERRONEO || sock_vecino2 == SOCK_ERRONEO;
@@ -260,9 +273,11 @@ int Router::try_connection(const char *nombre_nodo, bool socket_p2p)
 	ConfigDS* vecino_config = AsterixConfigData::instance()->get_info_nodo(nombre_nodo);
 	if (vecino_config == NULL) 
 	{
-		sprintf(logBuffer, "Router: try_connection: El nombre de nodo %s, no existe en el archivo de configuracion", nombre_nodo);
+		sprintf(logBuffer, "Router: start_connections: No se pudo obtener la informacion del nodo del archivo de configuracion");
 		Logger::error(logBuffer);
-		exit(1);
+		raise(SIGTERM);
+		sleep(2);
+		//exit(1);
 	}
 
 	socket = SocketUtil::cliente_abrir_conexion_tcp (vecino_config->ip, vecino_config->port);
@@ -686,6 +701,7 @@ void Router::close_TCP_connections()
 	// Inicia la rutina de salida
 	close(sock_vecino1);
 	close(sock_vecino2);
+	Logger::debug("Router: conexiones cerradas");
 }
 
 

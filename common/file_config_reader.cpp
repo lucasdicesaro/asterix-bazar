@@ -27,66 +27,37 @@ int FileConfigReader::parseConfigFile (FileConfigParser *fileConfigParser)
 	using namespace std;
 
 	char logBuffer[BUFFER_SIZE];
-	FILE *CONFIG_FILE;	char Line[BUFFER_STR];
-	char* Param;
-	char* Value;
+	FILE *CONFIG_FILE;	std::string param;
+	std::string value;
+	std::string::size_type n;
+	std::string line;
 
-	/* abro archivo 
-	*/
-	if ((CONFIG_FILE = fopen(fileConfigParser->getFileName(), "r")) == NULL) {
+	std::ifstream infile(fileConfigParser->getFileName());
+
+	if (infile) {
+		while (getline(infile, line)) {
+			if (line[0] == DASH_CHAR) {
+				// Si comienza con '#' es un comentario. Se ignora.
+				continue;
+			}
+			n = line.find(EQUAL);
+			if (n == std::string::npos) {
+				// No existe '=' en esta linea
+			} else {
+				param = line.substr(0, n);
+				value = line.substr(n+1, line.length());
+
+				//printf ("Param: %s - Value: %s\n", Param, Value);
+				fileConfigParser->parse((char *) param.c_str(), (char *) value.c_str());
+			}
+		}
+	} else {
 		sprintf(logBuffer, "No se pudo abrir archivo de configuracion %s", fileConfigParser->getFileName());
 		perror(logBuffer);
 		exit(-1);
 	}
-
-	/* Leo la primera linea 
-    */
-	if (fgets(Line, sizeof(Line),  CONFIG_FILE) == NULL) {
-		/* Ignoro el Null, si es fin de archivo se controla con feof */
-	}
-
-	/* Reemplazo el '\n' al final del registro por '\0'
-    */
-	Line[strlen(Line)-1] = '\0';
+	infile.close();
 
 
-	/* Valido que el archivo  no este vacio
-	*/
-	if (feof(CONFIG_FILE)) {
-		sprintf(logBuffer, "El archivo de configuracion %s esta vacio", fileConfigParser->getFileName());
-		perror(logBuffer);
-		exit(-1);
-	}
-
-	/* Recorro y parseo los registros
-    */
-	while (!feof(CONFIG_FILE))
-	{
-		const char initChar = Line[0];
-		if (strcmp(&initChar, DASH) == 0) {
-			// Si comienza con '#' es un comentario. Se ignora.
-			continue;
-		}
-
-		Param = strtok(Line, "=");
-		//printf ("Line: %s\n", Line);
-		Value  = strtok(NULL , "=");
-
-		//printf ("Param: %s - Value: %s\n", Param, Value);
-		fileConfigParser->parse(Param, Value);
-
-		/*	Leo la siguiente linea 
-    	*/
-		if (fgets(Line, sizeof(Line), CONFIG_FILE) == NULL) {
-			/* Ignoro el Null, si es fin de archivo se controla con feof */
-		}
-
-		Line[strlen(Line)-1] = '\0';
-	}
-
-	/* Cierro el archivo 
-	*/
-	fclose(CONFIG_FILE);	
-	
 	return 0; 
 }

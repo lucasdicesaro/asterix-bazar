@@ -29,10 +29,6 @@ int main(int argc, const char *argv[])
 	signal(SIGINT, sig_handler);
 	
 	char logBuffer[BUFFER_SIZE];
-
-	//==========Levantando configuracion
-	AsterixConfigData::instance()->parseConfigFile();
-
 	//==========Levantando configuracion de log
 	Logger::instance()->parseConfigFile();
 	/*
@@ -41,6 +37,10 @@ int main(int argc, const char *argv[])
 	Logger::warn("Main: probando warn");
 	Logger::error("Main: probando error");
 	*/
+
+	//==========Levantando configuracion
+	AsterixConfigData::instance()->parseConfigFile();
+
 
 	// inicializa productos a comprar y vender segun parametros
 	//if (argc > 2) 
@@ -56,7 +56,6 @@ int main(int argc, const char *argv[])
 	//	exit(1);
 	//}	
 
-	nombre_nodo = new char[NOMBRE_NODO_SIZE];
 	nombre_nodo = AsterixConfigData::instance()->get_nombre_nodo();
 	std::string nombre_nodo_str = nombre_nodo;
 	Logger::info("Main: nombre_nodo [" + nombre_nodo_str + "]");	
@@ -97,9 +96,6 @@ void sig_handler(int id)
 		Logger::debug("Main: sig_handler: Se recibio la señal SIGTERM");
 	}
 	
-	Listener::instance()->close_TCP_connections();
-	Router::instance()->close_TCP_connections();
-	
 	Event ev;
 	ev.id = QUIT;
 	Router::instance()->post_event(ev, true);
@@ -119,7 +115,7 @@ void* proc_logic(void* param)
 		logic->run(); // Cada n se pide una compra
 	} catch (...)
 	{
-		printf("Main: Exception on logic\n");
+		Logger::error("Main: Exception on logic\n");
 		exit(2);
 	}
 
@@ -138,7 +134,7 @@ void* proc_router(void* param)
 		router->run();
 	} catch (...)
 	{
-		printf("Main: Exception on router\n");
+		Logger::error("Main: Exception on router\n");
 		exit(2);
 	}
 
@@ -157,7 +153,7 @@ void* proc_listener(void* param)
 		listener->run();
 	} catch (...)
 	{
-		printf("Main: Exception on listener\n");
+		Logger::error("Main: Exception on listener\n");
 		exit(2);
 	}
 
@@ -175,7 +171,7 @@ void* proc_keyboard(void* param)
 		keyboard->run();
 	} catch (...)
 	{
-		printf("Main: Exception on keyboard\n");
+		Logger::error("Main: Exception on keyboard\n");
 		exit(2);
 	}
 

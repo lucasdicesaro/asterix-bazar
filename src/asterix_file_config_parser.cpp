@@ -26,6 +26,9 @@ AsterixFileConfigParser::AsterixFileConfigParser()
 {
 	reconnectParams = new ReconnectParamsDS();
 	currentStock = new CurrentStockDS();
+	nombre_nodo = new char[NOMBRE_NODO_SIZE];
+	memset(nombre_nodo, 0, NOMBRE_NODO_SIZE);
+	listener_port = -1;
 }
 
 AsterixFileConfigParser::~AsterixFileConfigParser()
@@ -42,8 +45,6 @@ void AsterixFileConfigParser::parse(char* Param, char* Value)
 
 	if (strcmp(Param, "nombre_nodo") == 0)
 	{
-		nombre_nodo = new char[NOMBRE_NODO_SIZE];
-		memset(nombre_nodo, 0, NOMBRE_NODO_SIZE);
 		strcpy(nombre_nodo,  Value);
 	}
 	

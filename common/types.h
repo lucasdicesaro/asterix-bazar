@@ -22,6 +22,8 @@
 #define DEFAULT_WAIT_MILISECONDS (0)
 
 #define DASH ("#")
+#define DASH_CHAR ('#')
+#define EQUAL ("=")
 
 #define P2P_CONNECT "p2p_connect"
 

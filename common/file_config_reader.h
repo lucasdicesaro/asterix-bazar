@@ -21,10 +21,13 @@
 #define _FILE_CONFIG_READER_H_
 
 #include "file_config_parser.h"
+#include "logger.h"
 #include "types.h"
-#include <stdio.h>      /* printf, fgets */
 #include <string.h>     /* strlen, strcmp, strtok */
 #include <stdlib.h>     /* exit, EXIT_FAILURE */
+#include <fstream>
+#include <string>
+#include <iostream>
 
 class FileConfigReader
 {
